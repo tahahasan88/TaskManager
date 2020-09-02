@@ -1,0 +1,77 @@
+﻿@model TaskManager.Web.Models.TaskViewModel
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>Task</h4>
+<hr />
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-4">
+            <form asp-action="Edit">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="@Model.Task.Id" />
+                <input type="hidden" asp-for="@Model.Task.CreatedAt" />
+                <div class="form-group">
+                    <label asp-for="@Model.Task.TaskProgress" class="control-label"></label>
+                    <input asp-for="@Model.Task.TaskProgress" class="form-control" />
+                    <span asp-validation-for="@Model.Task.TaskProgress" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="@Model.Task.Title" class="control-label"></label>
+                    <input asp-for="@Model.Task.Title" class="form-control" />
+                    <span asp-validation-for="@Model.Task.Title" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="@Model.Task.Description" class="control-label"></label>
+                    <input asp-for="@Model.Task.Description" class="form-control" />
+                    <span asp-validation-for="@Model.Task.Description" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="@Model.Task.Target" class="control-label"></label>
+                    <input asp-for="@Model.Task.Target" class="form-control" />
+                    <span asp-validation-for="@Model.Task.Target" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <b><label class="control-label">Priority</label></b>
+                    @Html.DropDownListFor(x => x.PriorityId,
+                            Model.PriorityList,
+                            new
+                                            {
+                                                @class = "chosen-select form-control input-form",
+                                            })
+                </div>
+                <div class="form-group">
+                    <b><label class="control-label">Assignee</label></b>
+                    @Html.DropDownListFor(x => x.AssigneeCode,
+                            Model.EmployeeList,
+                            new
+                                            {
+                                                @class = "chosen-select form-control input-form",
+                                            })
+                </div>
+
+                <div class="form-group">
+                    <input type="submit" value="Save" class="btn btn-primary" name="command" />
+                    <input type="submit" value="Delete" class="btn btn-primary" name="command" />
+                </div>
+            </form>
+                @*<form asp-action="Delete">
+                <input type="hidden" asp-for="@Model.Task.Id" />
+                <div class="form-group">
+                    <input type="submit" value="Delete" class="btn btn-primary" />
+                </div>
+            </form>*@
+        </div>
+    </div>
+
+    <div>
+        <a asp-action="Index">Back to List</a>
+    </div>
+</div>
+    @*@section Scripts {
+            @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+        }*@
