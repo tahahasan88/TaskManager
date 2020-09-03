@@ -1,0 +1,46 @@
+﻿@model IEnumerable<TaskManager.Web.Models.TaskEmployeeViewModel>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+@*<p>
+    <a asp-action="Create">Create New</a>
+</p>*@
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Username
+            </th>
+            <th>
+                TaskCapacity
+            </th>
+            <th>
+                Task Id
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.TaskEmployee.UserName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TaskEmployee.TaskCapacity.Capacity)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TaskEmployee.Task.Id)
+            </td>
+            <td>
+                <a asp-action="Details" asp-route-id="@item.TaskEmployee.Id">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.TaskEmployee.Id">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

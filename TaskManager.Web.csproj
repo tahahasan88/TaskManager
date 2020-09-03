@@ -1973,7 +1973,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ClassLibrary1\TaskManager.Common.csproj" />
+    <ProjectReference Include="..\Common\TaskManager.Common.csproj" />
     <ProjectReference Include="..\TaskManager.Data\TaskManager.Data.csproj" />
   </ItemGroup>
 

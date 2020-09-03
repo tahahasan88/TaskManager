@@ -11,15 +11,14 @@ using TaskManager.Web.Models;
 
 namespace TaskManager.Web.Controllers
 {
-    public class TasksController : Controller
+    public class TasksController : BaseController
     {
-        private readonly TaskManagerContext _context;
         private string currentUserName;
+        private int currentTask = 4;
 
-        public TasksController(TaskManagerContext context)
+        public TasksController(TaskManagerContext context) : base(context)
         {
-            _context = context;
-            currentUserName = "tahahasan";
+            currentUserName = "Hasan";
         }
 
         // GET: Tasks
@@ -111,6 +110,23 @@ namespace TaskManager.Web.Controllers
                 taskCreator.UserName = currentUserName;
                 _context.Add(taskCreator);
 
+                //Audit this task creation..
+                TaskAudit progressAudit = new TaskAudit();
+                progressAudit.ActionDate = DateTime.Now;
+                progressAudit.ActionBy = currentUserName;
+                progressAudit.Description = "Task created. Progess is 0%";
+                progressAudit.Task = Thistask;
+                progressAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.Progress).SingleOrDefault();
+                _context.Add(progressAudit);
+
+                TaskAudit assignmentAudit = new TaskAudit();
+                assignmentAudit.ActionDate = DateTime.Now;
+                assignmentAudit.ActionBy = currentUserName;
+                assignmentAudit.Description = "Task created. Assigned to " + taskVM.AssigneeCode;
+                assignmentAudit.Task = Thistask;
+                assignmentAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.Assignment).SingleOrDefault();
+                _context.Add(assignmentAudit);
+
                 await _context.SaveChangesAsync();
 
                 return RedirectToAction(nameof(Index));
@@ -139,8 +155,10 @@ namespace TaskManager.Web.Controllers
             taskVM.Task = task;
             popuLateTaskViewDropDowns(taskVM, new EmployeeList());
             taskVM.PriorityId = task.TaskPriority.Id;
-            taskVM.AssigneeCode = task.LastUpdatedBy;
+            TaskEmployee currentEmployee = _context.TaskEmployees.Where(x => x.Task.Id == id
+                && x.TaskCapacity.Id == (int)Common.Common.TaskCapacity.Assignee).FirstOrDefault();
 
+            taskVM.AssigneeCode = currentEmployee.UserName;
             return View(taskVM);
         }
 
@@ -164,14 +182,54 @@ namespace TaskManager.Web.Controllers
             {
                 try
                 {
-                    TaskEmployee currentEmployee = _context.TaskEmployees
+                    List<TaskEmployee> taskEmployees = await _context.TaskEmployees
                         .Include(x => x.TaskCapacity)
+                        .Where(x => x.Task.Id == id).ToListAsync();
+
+                    TaskEmployee existingEmployee= taskEmployees.Where(x => x.TaskCapacity.Id ==
+                        (int)Common.Common.TaskCapacity.Assignee).SingleOrDefault();
+
+                    if (taskVM.AssigneeCode != existingEmployee.UserName)
+                    {
+                        int exTaskAssigneeCapacity = (int)TaskManager.Common.Common.TaskCapacity.ExTaskAssignee;
+                        existingEmployee.TaskCapacity = _context.TaskCapacities.Where(x => x.Id == exTaskAssigneeCapacity).SingleOrDefault();
+                        _context.Update(existingEmployee);
+
+                        TaskEmployee newEmployee = taskEmployees.Where(x => x.UserName ==
+                            taskVM.AssigneeCode).SingleOrDefault();
+                        TaskManager.Data.Task Thistask = _context.Tasks.Where(x => x.Id == id).SingleOrDefault();
+
+                        int taskAssigneeCapacity = (int)TaskManager.Common.Common.TaskCapacity.Assignee;
+                        if (newEmployee != null)
+                        {
+                            newEmployee.TaskCapacity = _context.TaskCapacities.Where(x => x.Id ==taskAssigneeCapacity).SingleOrDefault();
+                            _context.Update(newEmployee);
+                        }
+                        else
+                        {
+                            newEmployee = new TaskEmployee();
+                            newEmployee.UserName = taskVM.AssigneeCode;
+                            newEmployee.TaskCapacity = _context.TaskCapacities.Where(x => x.Id == taskAssigneeCapacity).SingleOrDefault();
+                            newEmployee.Task = Thistask;
+                            newEmployee.IsActive = true;
+                            _context.Add(newEmployee);
+                        }
+
+                        TaskAudit progressAudit = new TaskAudit();
+                        progressAudit.ActionDate = DateTime.Now;
+                        progressAudit.ActionBy = currentUserName;
+                        progressAudit.Description = "Assigned changed from " + existingEmployee.UserName + " to " + taskVM.AssigneeCode;
+                        progressAudit.Task = Thistask;
+                        progressAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.Progress).SingleOrDefault();
+                        _context.Add(progressAudit);
+                    }
+
+                    TaskEmployee currentEmployee = taskEmployees
                         .Where(x => x.UserName == currentUserName).SingleOrDefault();
                     if (TaskPermissions.IsAllowed(Common.Common.TaskAction.TaskEdit, (Common.Common.TaskCapacity)currentEmployee.TaskCapacity.Id))
                     {
                         taskVM.Task.LastUpdatedAt = DateTime.Now;
                         taskVM.Task.LastUpdatedBy = currentUserName;
-
                         _context.Update(taskVM.Task);
                         await _context.SaveChangesAsync();
                     }
@@ -195,6 +253,124 @@ namespace TaskManager.Web.Controllers
             }
             return View(taskVM);
         }
+
+        private void populateUpdateProgressVMDropDowns(UpdateProgressViewModel updateProgressVM)
+        {
+            List<SelectListItem> statusDrpDwnList = new List<SelectListItem>();
+            var taskStatusEnumsList = Enum.GetValues(typeof(Common.Common.TaskPriority));
+            foreach (Common.Common.TaskStatus taskStatus in taskStatusEnumsList)
+            {
+                statusDrpDwnList.Add(new SelectListItem() { Text = taskStatus.ToString(), Value = ((int)taskStatus).ToString() });
+            }
+            updateProgressVM.StatusList = statusDrpDwnList;
+        }
+
+        public async Task<IActionResult> UpdateProgress(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var task = await _context.Tasks
+                .Include(x => x.TaskStatus)
+                .Where(x => x.Id == id).SingleOrDefaultAsync();
+
+            if (task == null)
+            {
+                return NotFound();
+            }
+            UpdateProgressViewModel updateProgressVM = new UpdateProgressViewModel();
+            updateProgressVM.Task = task;
+            populateUpdateProgressVMDropDowns(updateProgressVM);
+            return View(updateProgressVM);
+        }
+
+
+        // POST: Tasks/Edit/5
+        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
+        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost, ActionName("UpdateProgress")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateProgress(int id, UpdateProgressViewModel updateVM)
+        {
+            if (id != updateVM.Task.Id)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    TaskEmployee currentEmployee = _context.TaskEmployees
+                        .Include(x => x.TaskCapacity)
+                        .Where(x => x.UserName == currentUserName).FirstOrDefault();
+                    if (TaskPermissions.IsAllowed(Common.Common.TaskAction.ProgressUpdate, (Common.Common.TaskCapacity)currentEmployee.TaskCapacity.Id))
+                    {
+                        TaskManager.Data.Task thisTask = _context.Tasks.Where(x => x.Id == id).SingleOrDefault();
+                        string previousProgress = thisTask.TaskProgress;
+                        string taskProgress = updateVM.Task.TaskProgress;
+                        updateVM.Task = thisTask;
+                        updateVM.Task.LastUpdatedAt = DateTime.Now;
+                        updateVM.Task.LastUpdatedBy = currentUserName;
+                        updateVM.Task.TaskProgress = taskProgress;
+                        updateVM.Task.TaskStatus = _context.TaskStatus.Where(x => x.Id == updateVM.SelectedStatus).SingleOrDefault();
+                        _context.Update(updateVM.Task);
+                        
+                        TaskFollowUpResponse taskFollowUpResponse = new TaskFollowUpResponse();
+                        taskFollowUpResponse.RespondedBy= currentUserName;
+                        taskFollowUpResponse.LastUpdatedAt = DateTime.Now;
+                        taskFollowUpResponse.CreatedAt = DateTime.Now;
+                        taskFollowUpResponse.TaskResponse = taskProgress;
+                        taskFollowUpResponse.Task = updateVM.Task;
+                        _context.Add(taskFollowUpResponse);
+
+                        TaskAudit followUpResponseAudit = new TaskAudit();
+                        followUpResponseAudit.ActionDate = DateTime.Now;
+                        followUpResponseAudit.ActionBy = currentUserName;
+                        followUpResponseAudit.Description = "Follow up taken";
+                        followUpResponseAudit.Task = thisTask;
+                        followUpResponseAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.FollowUpResponse).SingleOrDefault();
+                        _context.Add(followUpResponseAudit);
+
+                        if (previousProgress != taskProgress)
+                        {
+                            //Audit this update task..
+                            TaskAudit progressAudit = new TaskAudit();
+                            progressAudit.ActionDate = DateTime.Now;
+                            progressAudit.ActionBy = currentUserName;
+                            progressAudit.Description = "Progress updated to " + taskProgress;
+                            progressAudit.Task = thisTask;
+                            progressAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.Assignment).SingleOrDefault();
+                            _context.Add(progressAudit);
+                        }
+
+                        await _context.SaveChangesAsync();
+                        List<string> employeeList = GetTaskEmployeeEmailAddresses(currentTask, currentUserName);
+                        await MailSystem.SendEmail(MailSystem.FollowUpResponseEmailTemplate, employeeList);
+                    }
+                    else
+                    {
+                        return NotFound();
+                    }
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!TaskExists(updateVM.Task.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction(nameof(Index));
+            }
+            return View(updateVM);
+        }
+
 
         // GET: Tasks/Delete/5
         public async Task<IActionResult> Delete(int? id)
@@ -243,5 +419,30 @@ namespace TaskManager.Web.Controllers
         {
             return _context.Tasks.Any(e => e.Id == id);
         }
+
+        /// <summary>
+        /// Gets the task history of a particular Task
+        /// </summary>
+        /// <returns>Task history View Model</returns>
+        public async Task<IActionResult> TaskHistory()
+        {
+            TaskHistoryViewModel taskHistoryVM = new TaskHistoryViewModel();
+            taskHistoryVM.AssignmentHistory = new List<TaskAudit>();
+            taskHistoryVM.FollowUpHistory = new List<TaskAudit>();
+            taskHistoryVM.FollowUpResponseHistory = new List<TaskAudit>();
+            taskHistoryVM.ProgressHistory = new List<TaskAudit>();
+            taskHistoryVM.SubTasksHistory = new List<TaskAudit>();
+
+            List<TaskAudit> taskAuditList = await _context.TaskAudit.Where(x => x.Id == currentTask).ToListAsync();
+            taskHistoryVM.ProgressHistory = taskAuditList.Where(x => x.Type.Id == (int)Common.Common.AuditType.Progress).ToList();
+            taskHistoryVM.FollowUpHistory = taskAuditList.Where(x => x.Type.Id == (int)Common.Common.AuditType.FollowUp).ToList();
+            taskHistoryVM.FollowUpResponseHistory = taskAuditList.Where(x => x.Type.Id == (int)Common.Common.AuditType.FollowUpResponse).ToList();
+            taskHistoryVM.AssignmentHistory = taskAuditList.Where(x => x.Type.Id == (int)Common.Common.AuditType.Assignment).ToList();
+            taskHistoryVM.SubTasksHistory = taskAuditList.Where(x => x.Type.Id == (int)Common.Common.AuditType.SubTasks).ToList();
+
+            return View(taskHistoryVM);
+        }
+
+
     }
 }

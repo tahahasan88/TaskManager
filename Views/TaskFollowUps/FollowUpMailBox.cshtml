@@ -1,0 +1,96 @@
+﻿@model TaskManager.Web.Models.TaskFollowUpMailBoxViewModel
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="#">Inbox</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Follow Up From
+            </th>
+            <th>
+                Date
+            </th>
+            <th>
+                Remarks
+            </th>
+            <th>
+                Task
+            </th>
+            <th>
+                Status
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.InBoxFollowUpList)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.FollowUpFrom)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.UpdatedDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Remarks)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TaskInfo)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Status)
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<br />
+<br />
+<p>
+    <a asp-action="#">Outbox</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Date
+            </th>
+            <th>
+                Remarks
+            </th>
+            <th>
+                Task
+            </th>
+            <th>
+                Status
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.OutBoxFollowUpList)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.FollowUpDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Remarks)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TaskInfo)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Status)
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

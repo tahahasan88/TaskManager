@@ -1,0 +1,59 @@
+﻿@model IEnumerable<TaskManager.Web.Models.SubTaskViewModel>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Description
+            </th>
+            <th>
+                Assignee Employee
+            </th>
+            <th>
+                SubTask status
+            </th>
+            <th>
+                Is Completed
+            </th>
+            <th>
+                Is deleted
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.SubTask.Description)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.SubTask.SubTaskAssigneeUserName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.SubTask.TaskStatus.Status)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.IsCompleted)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.SubTask.IsDeleted)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.SubTask.Id">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.SubTask.Id">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.SubTask.Id">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

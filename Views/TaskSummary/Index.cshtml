@@ -1,0 +1,47 @@
+﻿@model TaskManager.Web.Models.TaskSummaryViewModel
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Task Summary</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Pending Tasks
+            </th>
+            <th>
+                OverDue Tasks
+            </th>
+            <th>
+                Resolved Today
+            </th>
+            <th>
+                Follow Ups
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => modelItem.PendingTasksCount)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => modelItem.OverDueTasksCount)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => modelItem.ResolvedTodayCount)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => modelItem.FollowUpsCount)
+            </td>
+        </tr>
+    </tbody>
+</table>
+

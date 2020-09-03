@@ -1,0 +1,216 @@
+﻿@model TaskManager.Web.Models.TaskHistoryViewModel
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="#">Progress Task History</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Date
+            </th>
+            <th>
+                Type
+            </th>
+            <th>
+                Description
+            </th>
+            <th>
+                ActionBy
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.ProgressHistory)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ActionDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Type)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Description)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ActionBy)
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<br />
+<br />
+<p>
+    <a asp-action="#">Assignment Task History</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Date
+            </th>
+            <th>
+                Type
+            </th>
+            <th>
+                Description
+            </th>
+            <th>
+                ActionBy
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.AssignmentHistory)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ActionDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Type)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Description)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ActionBy)
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<br />
+<br />
+<p>
+    <a asp-action="#">FollowUp Task History</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Date
+            </th>
+            <th>
+                Type
+            </th>
+            <th>
+                Description
+            </th>
+            <th>
+                ActionBy
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.FollowUpHistory)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ActionDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Type)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Description)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ActionBy)
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<br />
+<br />
+<p>
+    <a asp-action="#">FollowUp Response History</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Date
+            </th>
+            <th>
+                Type
+            </th>
+            <th>
+                Description
+            </th>
+            <th>
+                ActionBy
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.FollowUpResponseHistory)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ActionDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Type)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Description)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ActionBy)
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<br />
+<br />
+<p>
+    <a asp-action="#">SubTasks History</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Date
+            </th>
+            <th>
+                Type
+            </th>
+            <th>
+                Description
+            </th>
+            <th>
+                ActionBy
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.SubTasksHistory)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ActionDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Type)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Description)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ActionBy)
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

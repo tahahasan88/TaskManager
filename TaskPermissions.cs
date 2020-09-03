@@ -27,7 +27,7 @@ namespace TaskManager.Web
             {
                 isAllowed = true;
             }
-            else if (taskAction == TaskAction.SubTaskEdit && capacity == TaskCapacity.SubTaskAssignee)
+            else if (taskAction == TaskAction.ProgressUpdate && capacity == TaskCapacity.Assignee)
             {
                 isAllowed = true;
             }

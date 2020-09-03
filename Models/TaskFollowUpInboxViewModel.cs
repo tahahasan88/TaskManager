@@ -1,0 +1,16 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace TaskManager.Web.Models
+{
+    public class TaskFollowUpInboxViewModel
+    {
+        public DateTime UpdatedDate { get; set; }
+        public string Remarks { get; set; }
+        public string TaskInfo { get; set; }
+        public string Status { get; set; }
+        public string FollowUpFrom { get; set; }
+    }
+}
