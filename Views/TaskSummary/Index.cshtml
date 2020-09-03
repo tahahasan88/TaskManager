@@ -16,13 +16,13 @@
                 Pending Tasks
             </th>
             <th>
-                OverDue Tasks
+                Completed Tasks
             </th>
             <th>
-                Resolved Today
+                OnHold Tasks
             </th>
             <th>
-                Follow Ups
+                Total
             </th>
             <th></th>
         </tr>
@@ -33,13 +33,13 @@
                 @Html.DisplayFor(modelItem => modelItem.PendingTasksCount)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => modelItem.OverDueTasksCount)
+                @Html.DisplayFor(modelItem => modelItem.CompletedTasksCount)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => modelItem.ResolvedTodayCount)
+                @Html.DisplayFor(modelItem => modelItem.OnHoldTasksCount)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => modelItem.FollowUpsCount)
+                @Html.DisplayFor(modelItem => modelItem.TotalTasksCount)
             </td>
         </tr>
     </tbody>

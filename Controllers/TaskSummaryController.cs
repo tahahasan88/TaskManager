@@ -23,17 +23,13 @@ namespace TaskManager.Web.Controllers
                 != (int)TaskManager.Common.Common.TaskStatus.Completed
                 && x.Target <= DateTime.Now).Count();
 
-            taskSummaryVM.OverDueTasksCount = _context.Tasks.Where(x => x.TaskStatus.Id
-                != (int)TaskManager.Common.Common.TaskStatus.Completed
-                && DateTime.Now > x.Target).Count();
+            taskSummaryVM.CompletedTasksCount = _context.Tasks.Where(x => x.TaskStatus.Id
+               == (int)TaskManager.Common.Common.TaskStatus.Completed).Count();
 
-            taskSummaryVM.ResolvedTodayCount = _context.Tasks.Where(x => x.TaskStatus.Id
-                == (int)TaskManager.Common.Common.TaskStatus.Completed
-                && x.LastUpdatedAt.Date == DateTime.Now.Date).Count();
+            taskSummaryVM.OnHoldTasksCount = _context.Tasks.Where(x => x.TaskStatus.Id
+               == (int)TaskManager.Common.Common.TaskStatus.OnHold).Count();
 
-            taskSummaryVM.FollowUpsCount = _context.TaskFollowUps.Where(x => x.Task.TaskStatus.Id
-                != (int)TaskManager.Common.Common.TaskStatus.Completed).Count();
-
+            taskSummaryVM.TotalTasksCount = _context.Tasks.Count();
 
             return View(taskSummaryVM);
         }

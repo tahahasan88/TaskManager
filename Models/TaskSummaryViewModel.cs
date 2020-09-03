@@ -11,5 +11,9 @@ namespace TaskManager.Web.Models
         public int OverDueTasksCount { get; set; }
         public int ResolvedTodayCount { get; set; }
         public int FollowUpsCount { get; set; }
+        public int TotalTasksCount { get; set; }
+        public int CompletedTasksCount { get; set; }
+        public int OnHoldTasksCount { get; set; }
+
     }
 }
