@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.Principal;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -27,6 +28,10 @@ namespace TaskManager.Controllers
 
         public IActionResult Index()
         {
+            //string identity = User.Identity.Name;
+            //var user = System.Net.CredentialCache.DefaultCredentials;
+            //Console.WriteLine(Environment.UserName);
+
             TaskSummaryViewModel taskSummaryVM = new TaskSummaryViewModel();
             taskSummaryVM.PendingTasksCount = _context.Tasks.Where(x => x.TaskStatus.Id
                 != (int)TaskManager.Common.Common.TaskStatus.Completed

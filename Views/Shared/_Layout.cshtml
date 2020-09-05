@@ -26,6 +26,9 @@
     <link rel="stylesheet" href="~/plugins/daterangepicker/daterangepicker.css">
     <!-- summernote -->
     <link rel="stylesheet" href="~/plugins/summernote/summernote-bs4.min.css">
+    <section class="InitialScripts">
+        @RenderSection("InitialScripts", required:false)
+    </section>
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
     <div class="wrapper">
@@ -777,6 +780,11 @@
     <!-- jQuery UI 1.11.4 -->
     <script src="~/plugins/jquery-ui/jquery-ui.min.js"></script>
     <!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
+
+    <section class="Downscripts">
+        @RenderSection("DownScripts", required:false)
+    </section>
+
     <script>
         $.widget.bridge('uibutton', $.ui.button)
     </script>

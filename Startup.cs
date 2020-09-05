@@ -29,6 +29,11 @@ namespace TaskManager
             services.AddDbContext<TaskManagerContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddScoped<ITaskRepository, TaskRepository>();
             services.AddControllersWithViews();
+
+            services.Configure<IISServerOptions>(options =>
+            {
+                options.AutomaticAuthentication = false;
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
