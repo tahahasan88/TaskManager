@@ -249,39 +249,47 @@
             var progressUpdatePlaceHolder = $("#modal-update-placeholder");
             var subTaskPlaceHolder = $("#subTaskPlaceHolder");
             var historyList = [];
-            var progressList = [];
-            var assignmentList = [];
-            var followUpList = [];
-            var followUpResponseList = [];
-            var subTasksList = [];
+            var historyTypeList = [];
+            var employeeList = [];
 
-            $('.historyType').click(function () {
+            function initializeHistoryTable() {
+                historyTypeList = [];
                 $.each($("input[class='historyType']:checked"), function () {
-                    historyList.push($(this).val());
+                    historyTypeList.push($(this).val());
                 });
 
-                updateHistoryTable(historyList);
+                updateHistoryTable(historyTypeList);
+            }
+
+
+            $('.historyType').click(function () {
+                historyTypeList = [];
+                $.each($("input[class='historyType']:checked"), function () {
+                    historyTypeList.push($(this).val());
+                });
+
+                updateHistoryTable(historyTypeList);
             });
 
-            $("#updateTaskBtnId").click(function () {  
-                var $buttonClicked = $(this);  
-                //var id = $buttonClicked.attr('data-id');  
-                var options = { "backdrop": "static", keyboard: true };  
+            $("#updateTaskBtnId").click(function () {
+                var $buttonClicked = $(this);
+                //var id = $buttonClicked.attr('data-id');
+                var options = { "backdrop": "static", keyboard: true };
                 $.ajax({
                     type: "GET",
                     url: baseUrl.replace("/Edit", "") + "/UpdateTaskProgress",
                     contentType: "application/json; charset=utf-8",
                     data: {id : @Model.Task.Id },
-                    datatype: "json",  
-                    success: function (data) {  
-                        progressUpdatePlaceHolder.html(data);  
-                        progressUpdatePlaceHolder.find('.modal').modal(options); 
-                        progressUpdatePlaceHolder.find('.modal').modal('show');   
-                    },  
-                    error: function () {  
-                        alert("Dynamic content load failed.");  
-                    }  
-                });  
+                    datatype: "json",
+                    success: function (data) {
+                        progressUpdatePlaceHolder.html(data);
+                        progressUpdatePlaceHolder.find('.modal').modal(options);
+                        progressUpdatePlaceHolder.find('.modal').modal('show');
+                    },
+                    error: function () {
+                        alert("Dynamic content load failed.");
+                    }
+                });
             });
 
             progressUpdatePlaceHolder.on('click', '[data-save="modal"]', function (event) {
@@ -303,6 +311,28 @@
             });
 
 
+            function getHistoryList() {
+
+                 $.ajax({
+                        type: "GET",
+                        url: baseUrl.replace("tasks/Edit", "") + "history/list?taskId=" + @Model.Task.Id,
+                        contentType: "application/json; charset=utf-8",
+                        data: null,
+                        datatype: "json",
+                        success: function (data) {
+                            $.each(data, function (i, val) {
+                                tmpData = data[i];
+                                $.each(tmpData, function (i, val) {
+                                    historyList.push(tmpData[i]);
+                                });
+                            });
+                            initializeHistoryTable();
+                        },
+                        error: function () {
+                            alert("Dynamic content load failed.");
+                        }
+                    });
+            }
 
             function getSubTasksList() {
 
@@ -314,7 +344,7 @@
                 var subTaskBody = "<div class=\"row\">" +
                         "<div class=\"col-1\">" +
                         "<div class=\"color-palette-set\" style=\"margin:5px\">" +
-                            "<input class=\"form-check-input\" id=\"checkboxtaskid\" ischecked name=\"completecheck\" "+disableThis+"  type=\"checkbox\">" + 
+                            "<input class=\"form-check-input\" id=\"checkboxtaskid\" ischecked name=\"completecheck\" "+disableThis+"  type=\"checkbox\">" +
                             "</div>" +
                         "</div>" +
                         "<div class=\"col-6\">" +
@@ -348,8 +378,8 @@
                 url: baseUrl.replace("tasks/Edit", "") + "subtasks/SubTaskList",
                 contentType: "application/json; charset=utf-8",
                 data: {id : @Model.Task.Id },
-                datatype: "json",  
-                    success: function (data) {  
+                datatype: "json",
+                    success: function (data) {
                         $.each(data, function (i, val) {
                             tmpData = data[i];
                             $.each(tmpData, function (i, val) {
@@ -411,7 +441,6 @@
                                 var taskId = "@Model.Task.Id";
                                 updateSubTask(subTaskId, taskId, description, assignee, isCompleted);
                             });
-
                         }
                         else {
                              newBody += addSubTaskButtonHtml;
@@ -430,17 +459,17 @@
                                 addSubTask(taskId, description, isCompleted, assignee);
                         });
 
-                },  
-                error: function () {  
-                    alert("Dynamic content load failed.");  
-                }  
-                });  
+                },
+                error: function () {
+                    alert("Dynamic content load failed.");
+                }
+                });
             }
 
             function updateSubTask(subtaskId, taskId, description, assignee, isCompleted) {
 
                 $.post(baseUrl.replace("tasks/Edit", "") + "subtasks/Update",
-                    { id: subtaskId, description: description, taskId: taskId, assignee: assignee, isCompleted : isCompleted}, 
+                    { id: subtaskId, description: description, taskId: taskId, assignee: assignee, isCompleted : isCompleted},
                     function (returnedData) {
                         if (returnedData.subTaskExist == true) {
                             alert('sub task already exists');
@@ -456,7 +485,7 @@
             function addSubTask(taskId, description, isCompleted, assignee) {
 
                 $.post(baseUrl.replace("tasks/Edit", "") + "subtasks/Create",
-                    { description: description, taskId: taskId, isCompleted : isCompleted, assignee: assignee}, 
+                    { description: description, taskId: taskId, isCompleted : isCompleted, assignee: assignee},
                     function (returnedData) {
                         if (returnedData.subTaskExist == true) {
                             alert('sub task with same title already exists');
@@ -474,39 +503,87 @@
 
             function appendEmployeeList() {
 
-                var list = ['Taha Hasan', 'Dawar'];
-                var cardBody = "<div class=\"card-body\">" +
-                    "<i class='far fa-user-circle' style='font-size:24px'></i>&nbsp;userName&nbsp;" +
-                    "<i class=\"fas fa-wifi\"></i>" +
-                    "<span class=\"float-right text-md\">userType</span>" +
-                    "</div>";
-                var newCardBody = "";
-                $.each(list, function (i, val) {
-                    tmpData = list[i];
-                    var tempBody = cardBody;
-                    tempBody = tempBody.replace("userName", tmpData);
-                    tempBody = tempBody.replace("userType", "Creator");
-                    newCardBody += tempBody;
-                });
+                //var list = ['Taha Hasan', 'Dawar'];
+                //var cardBody = "<div class=\"card-body\">" +
+                //    "<i class='far fa-user-circle' style='font-size:24px'></i>&nbsp;userName&nbsp;" +
+                //    "<i class=\"fas fa-wifi\"></i>" +
+                //    "<span class=\"float-right text-md\">userType</span>" +
+                //    "</div>";
+                //var newCardBody = "";
+                //$.each(list, function (i, val) {
+                //    tmpData = list[i];
+                //    var tempBody = cardBody;
+                //    tempBody = tempBody.replace("userName", tmpData);
+                //    tempBody = tempBody.replace("userType", "Creator");
+                //    newCardBody += tempBody;
+                //});
+
+                 $.ajax({
+                        type: "GET",
+                        url: baseUrl.replace("tasks/Edit", "") + "TaskEmployees/list?taskId=" + @Model.Task.Id,
+                        contentType: "application/json; charset=utf-8",
+                        data: null,
+                        datatype: "json",
+                        success: function (data) {
+                            $.each(data, function (i, val) {
+                                tmpData = data[i];
+                                $.each(tmpData, function (i, val) {
+                                    employeeList.push(tmpData[i]);
+                                });
+                            });
+                        },
+                        error: function () {
+                            alert("Dynamic content load failed.");
+                        }
+                    });
 
                 //$("#people-placeholder").html(newCardBody);
                 //$("#people-placeholder").append(newCardBody);
             }
 
-            function updateHistoryTable(historyList) {
+            function getHistoryType(historyType) {
+                var historyTypeId = 0;
+                if (historyType == "progress") {
+                    historyTypeId = "@((int)TaskManager.Common.Common.AuditType.Progress)";
+                }
+                else if (historyType == "assignment") {
+                    historyTypeId = "@((int)TaskManager.Common.Common.AuditType.Assignment)";
+                }
+                if (historyType == "followup") {
+                    historyTypeId = "@((int)TaskManager.Common.Common.AuditType.FollowUp)";
+                }
+                else if (historyType == "followupresponse") {
+                    historyTypeId = "@((int)TaskManager.Common.Common.AuditType.FollowUpResponse)";
+                }
+                else if (historyType == "subtasks") {
+                    historyTypeId = "@((int)TaskManager.Common.Common.AuditType.SubTasks)";
+                }
+                return historyTypeId;
+            }
 
+
+            function updateHistoryTable(typeList) {
                 table.rows().remove().draw();
-                table.rows.add([{
-                    "Date": "Tiger Nixon",
-                    "Type": "System Architect",
-                    "Description": "$3,120",
-                    "Action By": "2011/04/25"
-                }]).draw();
+                var filteredHistory = [];
+                for (var i = 0; i < typeList.length; i++) {
+                        filteredHistory =  historyList.filter(function(history) {
+                            return history.type == getHistoryType(typeList[i]);
+                        });
+                }
 
+                for (var i = 0; i < filteredHistory.length; i++) {
+                        table.rows.add([{
+                            "Date": filteredHistory[i].historyDate,
+                            "Type": filteredHistory[i].type,
+                            "Description": filteredHistory[i].description,
+                            "Action By": filteredHistory[i].actionBy
+                        }]).draw();
+                }
             }
 
             appendEmployeeList();
             getSubTasksList();
+            getHistoryList();
         });
 
     </script>

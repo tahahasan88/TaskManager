@@ -37,6 +37,26 @@ namespace TaskManager.Web.Controllers
             return View(taskEmployeeVm);
         }
 
+        public async Task<IActionResult> List(int taskId)
+        {
+            List<TaskEmployeeListViewModel> emmployeeVMList = new List<TaskEmployeeListViewModel>();
+            List<TaskEmployee> employeeList = await _context.TaskEmployees
+                .Include(x => x.Task)
+                .Where(x => x.Task.Id == taskId)
+                .ToListAsync();
+
+            foreach (TaskEmployee employee in employeeList)
+            {
+                emmployeeVMList.Add(new TaskEmployeeListViewModel()
+                {
+                    UserName = employee.UserName,
+                    CapacityId = employee.TaskCapacity.Id,
+                    IsActive = employee.IsActive
+                });
+            }
+            return new JsonResult(new { records = emmployeeVMList });
+        }
+
         // GET: TaskEmployees/Details/5
         public async Task<IActionResult> Details(int? id)
         {

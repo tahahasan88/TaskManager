@@ -8,8 +8,9 @@ namespace TaskManager.Web.Models
 {
     public class HistoryViewModel
     { 
-        List<TaskFollowUp> FollowUpList { get; set; }
-        List<SubTask> SubTaskList { get; set; }
-        List<TaskFollowUpResponse> FollowUpResponseList { get; set; }
+        public DateTime HistoryDate { get; set; }
+        public int Type { get; set; }
+        public string Description { get; set; }
+        public string ActionBy { get; set; }
     }
 }

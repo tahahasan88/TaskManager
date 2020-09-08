@@ -23,9 +23,27 @@ namespace TaskManager.Web.Controllers
             currentUserName = "tahahasan";
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> List(int taskId)
         {
-            return null;
+            List<HistoryViewModel> auditVMList = new List<HistoryViewModel>();
+            List<TaskAudit> auditList = await _context.TaskAudit
+                .Include(x => x.Task)
+                .Include(x => x.Type)
+                .Where(x => x.Task.Id == taskId)
+                .OrderByDescending(x => x.ActionDate)
+                .ToListAsync();
+
+            foreach (TaskAudit auditTask in auditList)
+            {
+                auditVMList.Add(new HistoryViewModel()
+                {
+                    HistoryDate = auditTask.ActionDate,
+                    ActionBy = auditTask.ActionBy,
+                    Description = auditTask.Description,
+                    Type = auditTask.Type.Id
+                });
+            }
+            return new JsonResult(new { records = auditVMList });
         }
     }
 }

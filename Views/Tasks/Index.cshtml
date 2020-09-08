@@ -83,23 +83,23 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-6 col-md-3 text-center">
-                            <input type="text" class="knob" value="30" data-width="120" data-height="120"
+                            <input id="pendingTasksId" type="text" class="knob" value="30" data-width="120" data-height="120"
                                    data-fgColor="#f56954">
 
                             <div class="knob-label">PENDING</div>
                         </div>
                         <div class="col-6 col-md-3 text-center">
-                            <input type="text" class="knob" value="30" data-width="120" data-height="120"
+                            <input id="completedTasksId" type="text" class="knob" value="30" data-width="120" data-height="120"
                                    data-fgColor="#f56954">
                             <div class="knob-label">COMPLETED</div>
                         </div>
                         <div class="col-6 col-md-3 text-center">
-                            <input type="text" class="knob" value="30" data-width="120" data-height="120"
+                            <input id="onHoldTaskId" type="text" class="knob" value="30" data-width="120" data-height="120"
                                    data-fgColor="#f56954">
                             <div class="knob-label">ONHOLD</div>
                         </div>
                         <div class="col-6 col-md-3 text-center">
-                            <input type="text" class="knob" value="30" data-width="120" data-height="120"
+                            <input id="totalTasksId" type="text" class="knob" value="30" data-width="120" data-height="120"
                                    data-fgColor="#f56954">
                             <div class="knob-label">TOTAL</div>
                         </div>
@@ -252,11 +252,28 @@
             });
 
 
+            function getSummaryInfo() {
 
-            var array = [];
-            array.push('sadsad');
-
-
+                $.ajax({
+                    type: "GET",
+                    url: baseUrl.replace("tasks", "") + "TaskSummary/list",
+                    contentType: "application/json; charset=utf-8",
+                    data: null,
+                    datatype: "json",
+                    success: function (data) {
+                        $.each(data, function (i, val) {
+                            tmpData = data[i];
+                            $("#pendingTasksId").val(tmpData.pendingTasksCount);
+                            $("#completedTasksId").val(tmpData.completedTasksCount);
+                            $("#onHoldTaskId").val(tmpData.onHoldTasksCount);
+                            $("#totalTasksId").val(tmpData.totalTasksCount);
+                        });
+                    },
+                    error: function () {
+                        alert("Dynamic content load failed.");
+                    }
+                });
+            }
 
             taskFollowUpPlaceHolder.on('click', '[data-save="modal"]', function (event) {
                 event.preventDefault();
@@ -343,6 +360,8 @@
                     }
                 });
             });
+
+            getSummaryInfo();
 
         });
         </script>
