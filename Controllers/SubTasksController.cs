@@ -45,6 +45,121 @@ namespace TaskManager.Web.Controllers
             return View(subTaskVMList);
         }
 
+        public async Task<IActionResult> SubTaskList(int id)
+        {
+            List<SbTaskViewModel> subTaskVMList = new List<SbTaskViewModel>();
+            List<SubTask> subTasks = await _context.SubTasks
+                .Include(x => x.TaskStatus)
+                .Include(x => x.Task)
+                .Where(x => x.IsDeleted == false && x.Task.Id == id)
+                .ToListAsync();
+
+            foreach (SubTask subTask in subTasks)
+            {
+                subTaskVMList.Add(new SbTaskViewModel()
+                {
+                    TaskId = subTask.Id,
+                    Description = subTask.Description,
+                    SubTaskAssignee = subTask.SubTaskAssigneeUserName,
+                    IsCompleted = IsSubTaskCompleted(subTask.TaskStatus.Id)
+                });
+            }
+            return new JsonResult(new { records = subTaskVMList });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(string description, int taskId, bool isCompleted, string assignee)
+        {
+            bool subTaskExist = false;
+            bool subTaskAdded = false;
+            SubTask existingSubTask = _context.SubTasks.Where(x => x.Task.Id == taskId && x.Description == description && x.IsDeleted == false).SingleOrDefault();
+            if (existingSubTask == null)
+            {
+
+                Data.Task thisTask = _context.Tasks.Where(X => X.Id == currentTaskId).SingleOrDefault();
+                SubTask subTask = new SubTask();
+                subTask.Description = description;
+                subTask.Task = _context.Tasks.Where(X => X.Id == currentTaskId).SingleOrDefault();
+                if (isCompleted)
+                {
+                    subTask.TaskStatus = _context.TaskStatus.Where(x => x.Id == (int)TaskManager.Common.Common.TaskStatus.Completed).SingleOrDefault();
+                }
+                else
+                {
+                    subTask.TaskStatus = _context.TaskStatus.Where(x => x.Id == (int)TaskManager.Common.Common.TaskStatus.NotStarted).SingleOrDefault();
+                }
+                subTask.LastUpdatedAt = DateTime.Now;
+                subTask.LastUpdatedBy = currentUserName;
+                if (assignee.Equals(string.Empty))
+                {
+                    TaskEmployee taskEmployee = _context.TaskEmployees.Where(x => x.TaskCapacity.Id == (int)Common.Common.TaskCapacity.Assignee).FirstOrDefault();
+                    subTask.SubTaskAssigneeUserName = taskEmployee.UserName;
+                }
+                else
+                {
+                    subTask.SubTaskAssigneeUserName = assignee;
+                }
+
+                TaskAudit progressAudit = new TaskAudit();
+                progressAudit.ActionDate = DateTime.Now;
+                progressAudit.ActionBy = currentUserName;
+                progressAudit.Description = "Sub task assigned to " + subTask.SubTaskAssigneeUserName;
+                progressAudit.Task = thisTask;
+                progressAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.SubTasks).SingleOrDefault();
+                _context.Add(progressAudit);
+
+                _context.Add(subTask);
+                await _context.SaveChangesAsync();
+                subTaskAdded = true;
+            }
+            else
+            {
+                subTaskExist = true;
+            }
+
+            return new JsonResult(new { subTaskExist = subTaskExist, subTaskAdded = subTaskAdded });
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Update(int id, string description, int taskId, string assignee, bool isCompleted)
+        {
+            bool subTaskExist = false;
+            bool subTaskUpdated = false;
+            try
+            {
+                SubTask existingSubTask = _context.SubTasks.Where(x => x.Task.Id != taskId && x.Description == description && x.IsDeleted == false).SingleOrDefault();
+                if (existingSubTask == null)
+                {
+                    SubTask subTask = _context.SubTasks.Where(X => X.Id == id).SingleOrDefault();
+                    if (isCompleted)
+                    {
+                        subTask.TaskStatus = _context.TaskStatus.Where(x => x.Id == (int)TaskManager.Common.Common.TaskStatus.Completed).SingleOrDefault();
+                    }
+
+                    subTask.LastUpdatedAt = DateTime.Now;
+                    subTask.LastUpdatedBy = currentUserName;
+                    subTask.SubTaskAssigneeUserName = assignee;
+                    _context.Update(subTask);
+                    await _context.SaveChangesAsync();
+                    subTaskUpdated = true; 
+                }
+                else
+                {
+                    subTaskExist = true;
+                }
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                throw;
+            }
+            return new JsonResult(new { subTaskExist = subTaskExist, subTaskUpdated = subTaskUpdated });
+        }
+
+
+
         // GET: SubTasks/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -232,6 +347,31 @@ namespace TaskManager.Web.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
+
+        public IActionResult IsSubTaskAlreadyExist(string subTaskDescription)
+        {
+            bool isSubTaskAlreadyAdded = false;
+            Data.SubTask existingSubTask = _context.SubTasks.Where(x => x.Description == subTaskDescription).SingleOrDefault();
+            isSubTaskAlreadyAdded = existingSubTask != null ? true : false;
+            return new JsonResult(new { isSubTaskAlreadyAdded = isSubTaskAlreadyAdded });
+        }
+
+        public IActionResult DeleteSubTask(int subTaskId)
+        {
+            bool isSubTaskDeleted = false;
+            Data.SubTask existingSubTask = _context.SubTasks.Where(x => x.Id == subTaskId).SingleOrDefault();
+            if (existingSubTask != null)
+            {
+                existingSubTask.IsDeleted = true;
+                //_context.SubTasks.Remove(subTask);
+                _context.SubTasks.Attach(existingSubTask);
+                _context.Entry(existingSubTask).State = EntityState.Modified;
+                _context.SaveChangesAsync();
+                isSubTaskDeleted = true;
+            }
+            return new JsonResult(new { isSubTaskAlreadyAdded = isSubTaskDeleted });
+        }
+
 
         private bool SubTaskExists(int id)
         {

@@ -1,0 +1,37 @@
+﻿@model TaskManager.Web.Models.TaskMultipleCreateViewModel
+
+<div class="modal fade" id="modal-createMultipletask">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Add Task</h4>
+                <button type="button" class="close" id="task-closePopup-icon" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form asp-action="CreateMultiple">
+                    <input name="IsValid" type="hidden" value="@ViewData.ModelState.IsValid.ToString()" />
+                    <div class="form-group">
+                        <label asp-for="@Model.ListOfTaskTitles" class="control-label">Task Titles</label>
+                        <textarea asp-for="@Model.ListOfTaskTitles" class="form-control" rows="3" cols="15" placeholder="Enter ..."></textarea>
+                        <span asp-validation-for="@Model.ListOfTaskTitles" class="text-danger"></span>
+                    </div>
+                    <input asp-for="@Model.TaskProgress" type="hidden" />
+                    <input asp-for="@Model.Description" type="hidden" />
+                    <input asp-for="@Model.Target" type="hidden" />
+                    <input asp-for="@Model.PriorityId" type="hidden" />
+                    <input asp-for="@Model.AssigneeCode" type="hidden" />
+                    <span asp-validation-for="@Model.Target" class="text-danger"></span>
+                </form>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" id="task-submit-btnId" data-save="modal" class="btn btn-primary">Add Multiple</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>

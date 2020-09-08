@@ -2,76 +2,368 @@
 
 @{
     ViewData["Title"] = "Edit";
+    ViewData["Heading"] = "Task Details";
 }
 
-<h1>Edit</h1>
 
-<h4>Task</h4>
-<hr />
+@section HeaderScripts {
+    <script src='https://kit.fontawesome.com/a076d05399.js'></script>
+    <link rel="stylesheet" href="../../plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="../../plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
+    <link rel="stylesheet" href="../../plugins/datatables-select/css/select.bootstrap4.min.css">
+}
+
+
 <div class="container-fluid">
     <div class="row">
-        <div class="col-md-4">
-            <form asp-action="Edit">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                <input type="hidden" asp-for="@Model.Task.Id" />
-                <input type="hidden" asp-for="@Model.Task.CreatedAt" />
-                <div class="form-group">
-                    <label asp-for="@Model.Task.TaskProgress" class="control-label"></label>
-                    <input asp-for="@Model.Task.TaskProgress" class="form-control" />
-                    <span asp-validation-for="@Model.Task.TaskProgress" class="text-danger"></span>
+        <div class="col-sm-4 col-md-2">
+            <div class="color-palette-set">
+                <button type="button" class="btn btn-block btn-primary btn-sm">Return</button>
+            </div>
+        </div>
+        <div class="col-sm-4 col-md-2">
+            <div class="color-palette-set">
+                <button type="button" class="btn btn-block btn-primary btn-sm">Edit</button>
+            </div>
+        </div>
+        <div class="col-sm-4 col-md-2">
+            <div class="color-palette-set">
+                <button type="button" class="btn btn-block btn-danger btn-sm">Delete</button>
+            </div>
+        </div>
+    </div>
+    </br>
+    <div class="row">
+        <div class="col-5">
+            <!-- Default box -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Progress Update</h3>
+                    <div class="card-tools">
+                        <button type="button" id="updateTaskBtnId" class="btn btn-tool btn-primary btn-sm">New</button>
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label asp-for="@Model.Task.Title" class="control-label"></label>
-                    <input asp-for="@Model.Task.Title" class="form-control" />
-                    <span asp-validation-for="@Model.Task.Title" class="text-danger"></span>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">Status</dt>
+                        <dd class="col-sm-8"><span class="badge bg-primary">In Progress</span></dd>
+                        <dt class="col-sm-4">Progress</dt>
+                        <dd class="col-sm-8"><input type="text" class="knob" value="30%" data-width="90" data-height="90" data-fgColor="#3c8dbc"></dd>
+                        <dt class="col-sm-4">Remarks</dt>
+                        <dd class="col-sm-8">A description list is perfect for defining terms.</dd>
+                    </dl>
                 </div>
-                <div class="form-group">
-                    <label asp-for="@Model.Task.Description" class="control-label"></label>
-                    <input asp-for="@Model.Task.Description" class="form-control" />
-                    <span asp-validation-for="@Model.Task.Description" class="text-danger"></span>
+            </div>
+            <!-- /.card -->
+        </div>
+        <div class="col-5">
+            <!-- Default box -->
+            <div id="people-placeholder" class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class='fas fa-user-alt'></i>&nbsp;People</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label asp-for="@Model.Task.Target" class="control-label"></label>
-                    <input asp-for="@Model.Task.Target" class="form-control" />
-                    <span asp-validation-for="@Model.Task.Target" class="text-danger"></span>
+                <div class="card-body">
+                    <i class="far fa-user-circle" style="font-size:24px" aria-hidden="true">
+                    </i>&nbsp;Taha Hasan&nbsp;<i class="fas fa-wifi" aria-hidden="true"></i>
+                    <span class="float-right text-md">Creator</span>
+                    <br />
+                    <br />
+                    <i class="far fa-user-circle" style="font-size:24px" aria-hidden="true">
+                    </i>&nbsp;Taha Hasan&nbsp;<i class="fas fa-wifi" aria-hidden="true"></i>
+                    <span class="float-right text-md">Creator</span>
                 </div>
-                <div class="form-group">
-                    <b><label class="control-label">Priority</label></b>
-                    @Html.DropDownListFor(x => x.PriorityId,
-                            Model.PriorityList,
-                            new
-                                            {
-                                                @class = "chosen-select form-control input-form",
-                                            })
-                </div>
-                <div class="form-group">
-                    <b><label class="control-label">Assignee</label></b>
-                    @Html.DropDownListFor(x => x.AssigneeCode,
-                            Model.EmployeeList,
-                            new
-                                            {
-                                                @class = "chosen-select form-control input-form",
-                                            })
-                </div>
+            </div>
+            <!-- /.card -->
+        </div>
+    </div>
+    <div id="modal-update-placeholder">
+    </div>
 
-                <div class="form-group">
-                    <input type="submit" value="Save" class="btn btn-primary" name="command" />
-                    <input type="submit" value="Delete" class="btn btn-primary" name="command" />
+    <div class="row">
+        <div class="col-5">
+            <!-- Default box -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Sub Tasks</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                    </div>
                 </div>
-            </form>
-                @*<form asp-action="Delete">
-                <input type="hidden" asp-for="@Model.Task.Id" />
-                <div class="form-group">
-                    <input type="submit" value="Delete" class="btn btn-primary" />
+                <div class="card-body" id="subTaskPlaceHolder">
+                    <div class="row">
+                        <div class="col-1">
+                            <div class="color-palette-set" style="margin:5px">
+                                <input class="form-check-input" type="checkbox">
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="color-palette-set">
+                                <input value="Create a report" disabled />
+                            </div>
+                        </div>
+                        <div class="col-1">
+                            <i class="far fa-user-circle" style="font-size:24px" aria-hidden="true">
+                            </i>
+                        </div>
+                        <div class="col-3">
+                            Taha Hasan
+                        </div>
+                        <div class="col-1">
+                            <i name="delete" id="24" class="fas fa-trash-alt"></i>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row">
+                        <div class="col-1">
+                            <div class="color-palette-set" style="margin:5px">
+                                <input class="form-check-input" type="checkbox">
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="color-palette-set">
+                                <input value="Create a report" disabled />
+                            </div>
+                        </div>
+                        <div class="col-1">
+                            <i class="far fa-user-circle" style="font-size:24px" aria-hidden="true">
+                            </i>
+                        </div>
+                        <div class="col-3">
+                            Taha Hasan
+                        </div>
+                        <div class="col-1">
+                            <i name="delete" id="23" class="fas fa-trash-alt"></i>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row">
+                        <div class="input-group mb-2">
+                            <input type="text" class="form-control">
+                            <span class="input-group-append">
+                                <button type="button" class="btn btn-info btn-flat">Add Task</button>
+                            </span>
+                        </div>
+                    </div>
                 </div>
-            </form>*@
+            </div>
         </div>
     </div>
 
-    <div>
-        <a asp-action="Index">Back to List</a>
+    <div class="row">
+        <div class="col-10">
+            <!-- Default box -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">History</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                    <label class="btn btn-primary active">
+                        <input type="checkbox" class="historyType" value="progress" checked autocomplete="off"> Progress
+                    </label>
+                    <label class="btn btn-primary">
+                        <input type="checkbox" class="historyType" value="assignment" autocomplete="off"> Assignment
+                    </label>
+                    <label class="btn btn-primary">
+                        <input type="checkbox" class="historyType" value="followup" autocomplete="off"> Follow Up
+                    </label>
+                    <label class="btn btn-primary">
+                        <input type="checkbox" class="historyType" value="followupresponse" autocomplete="off"> Follow Up Response
+                    </label>
+                    <label class="btn btn-primary">
+                        <input type="checkbox" class="historyType" value="subtasks" autocomplete="off"> SubTasks
+                    </label>
+                </div>
+                <div class="card-body">
+                    <table id="historyTable" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                                <th>Action By</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <div class="row">
+        <div class="col-10">
+            <!-- Default box -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Follow Ups</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
-    @*@section Scripts {
-            @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-        }*@
+
+
+@section BodyScripts {
+
+    <script src="../../plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="../../plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+    <script src="../../plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+    <script src="../../plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+    <script src="../../plugins/datatables-select/js/select.bootstrap4.min.js"></script>
+    <script src="../../plugins/datatables-select/js/dataTables.select.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+
+            var table = $('#historyTable').DataTable({
+              columns: [
+                {data: "Date"},
+                {data: "Type"},
+                {data: "Description"},
+                {data: "Action By"}
+              ]
+            });
+
+            var baseUrl = "@Html.Raw(this.Context.Request.Scheme + "://" + this.Context.Request.Host + this.Context.Request.Path)";
+            var progressUpdatePlaceHolder = $("#modal-update-placeholder");
+            var subTaskPlaceHolder = $("#subTaskPlaceHolder");
+            var historyList = [];
+            var progressList = [];
+            var assignmentList = [];
+            var followUpList = [];
+            var followUpResponseList = [];
+            var subTasksList = [];
+
+            $('.historyType').click(function () {
+                $.each($("input[class='historyType']:checked"), function () {
+                    historyList.push($(this).val());
+                });
+
+                updateHistoryTable(historyList);
+            });
+
+            $("#updateTaskBtnId").click(function () {  
+                var $buttonClicked = $(this);  
+                //var id = $buttonClicked.attr('data-id');  
+                var options = { "backdrop": "static", keyboard: true };  
+                $.ajax({
+                    type: "GET",
+                    url: baseUrl.replace("/Edit", "") + "/UpdateTaskProgress",
+                    contentType: "application/json; charset=utf-8",
+                    data: {id : @Model.Task.Id },
+                    datatype: "json",  
+                    success: function (data) {  
+                        progressUpdatePlaceHolder.html(data);  
+                        progressUpdatePlaceHolder.find('.modal').modal(options); 
+                        progressUpdatePlaceHolder.find('.modal').modal('show');   
+                    },  
+                    error: function () {  
+                        alert("Dynamic content load failed.");  
+                    }  
+                });  
+            });
+
+            progressUpdatePlaceHolder.on('click', '[data-save="modal"]', function (event) {
+                event.preventDefault();
+
+                var form = $(this).parents('.modal').find('form');
+                var actionUrl = form.attr('action');
+                var dataToSend = form.serialize();
+
+                $.post(actionUrl, dataToSend).done(function (data) {
+                    var newBody = $('.modal-body', data);
+                    progressUpdatePlaceHolder.find('.modal-body').replaceWith(newBody);
+                    var isValid = newBody.find('[name="IsValid"]').val() == 'True';
+                    if (isValid) {
+                        progressUpdatePlaceHolder.find('.modal').modal('hide');
+                        tasksTable.ajax.reload();
+                    }
+                });
+            });
+
+            $('i[name ="delete"]').click(function () {
+                var result = confirm("Are you sure you want to delete this subtask?");
+                if (result) {
+                    alert($(this).attr('id'));
+                }
+            });
+
+            function getSubTasksList() {
+
+                  $.ajax({
+                    type: "GET",
+                    url: baseUrl.replace("tasks/Edit", "") + "subtasks/SubTaskList",
+                    contentType: "application/json; charset=utf-8",
+                    data: {id : @Model.Task.Id },
+                    datatype: "json",  
+                      success: function (data) {  
+                        alert()
+                        //subTaskPlaceHolder.html(data);  
+                        //subTaskPlaceHolder.find('.modal').modal(options); 
+                        //subTaskPlaceHolder.find('.modal').modal('show');   
+                    },  
+                    error: function () {  
+                        alert("Dynamic content load failed.");  
+                    }  
+                });  
+            }
+
+            function appendEmployeeList() {
+
+                var list = ['Taha Hasan', 'Dawar'];
+                var cardBody = "<div class=\"card-body\">" +
+                    "<i class='far fa-user-circle' style='font-size:24px'></i>&nbsp;userName&nbsp;" +
+                    "<i class=\"fas fa-wifi\"></i>" +
+                    "<span class=\"float-right text-md\">userType</span>" +
+                    "</div>";
+                var newCardBody = "";
+                $.each(list, function (i, val) {
+                    tmpData = list[i];
+                    var tempBody = cardBody;
+                    tempBody = tempBody.replace("userName", tmpData);
+                    tempBody = tempBody.replace("userType", "Creator");
+                    newCardBody += tempBody;
+                });
+
+                //$("#people-placeholder").html(newCardBody);
+                //$("#people-placeholder").append(newCardBody);
+            }
+
+            function updateHistoryTable(historyList) {
+
+                table.rows().remove().draw();
+                table.rows.add([{
+                    "Date": "Tiger Nixon",
+                    "Type": "System Architect",
+                    "Description": "$3,120",
+                    "Action By": "2011/04/25"
+                }]).draw();
+
+            }
+
+            appendEmployeeList();
+            getSubTasksList();
+        });
+
+    </script>
+}

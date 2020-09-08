@@ -1,19 +1,20 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
-using TaskManager.Data;
 
 namespace TaskManager.Web.Models
 {
-    public class TaskFollowUpViewModel
+    public class TaskUpdateProgressViewModel
     {
-        public TaskFollowUp TaskFollowUp { get; set; }
         public int Id { get; set; }
+        public string Status { get; set; }
         [Required]
         public string Remarks { get; set; }
-        public string FollowerUserName { get; set; }
-        public string ListofTasks { get; set; }
+        public string TaskProgress { get; set; }
+
+        public List<SelectListItem> StatusList { get; set; }
     }
 }

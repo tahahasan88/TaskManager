@@ -1,0 +1,62 @@
+﻿@model TaskManager.Web.Models.TaskCreateViewModel
+
+<div class="modal fade" id="modal-task">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Add Task</h4>
+                <a id="addMultipleCreationLink" class="modal-title float-right" href="#">Add Multiple</a>
+
+                <button type="button" class="close" id="task-closePopup-icon" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form asp-action="Create">
+                    <input name="IsValid" type="hidden" value="@ViewData.ModelState.IsValid.ToString()" />
+                    <div class="form-group">
+                        <label asp-for="@Model.Title" class="control-label"></label>
+                        <input asp-for="@Model.Title" class="form-control" />
+                        <span asp-validation-for="@Model.Title" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="@Model.Description" class="control-label"></label>
+                        <input asp-for="@Model.Description" class="form-control" />
+                        <span asp-validation-for="@Model.Description" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <b><label class="control-label">Assignee</label></b>
+                        @Html.DropDownListFor(x => x.AssigneeCode,
+                                Model.EmployeeList,
+                                new
+                                                {
+                                                    @class = "chosen-select form-control input-form",
+                                                })
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="@Model.Target" class="control-label"></label>
+                        <input asp-for="@Model.Target" class="form-control" />
+                        <span asp-validation-for="@Model.Target" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <b><label class="control-label">Priority</label></b>
+                        @Html.DropDownListFor(x => x.PriorityId,
+                                Model.PriorityList,
+                                new
+                                                {
+                                                    @class = "chosen-select form-control input-form",
+                                                })
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" id="task-submit-btnId" data-save="modal" class="btn btn-primary">Add Task</button>
+                <button type="button" id="task-reuse-btnId" data-save="modal" class="btn btn-primary">Add Task & Re-use Inputs</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>

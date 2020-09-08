@@ -1,53 +1,170 @@
-﻿@model IEnumerable<TaskManager.Data.TaskFollowUp>
-
+﻿
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Tasks";
+    ViewData["Heading"] = "Follow Ups";
 }
 
-<h1>Index</h1>
-
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Remarks)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.FollowerUserName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.LastUpdatedAt)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreatedAt)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Remarks)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.FollowerUserName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.LastUpdatedAt)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreatedAt)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
+@section HeaderScripts {
+    <link rel="stylesheet" href="../../plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="../../plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
+    <link rel="stylesheet" href="../../plugins/datatables-select/css/select.bootstrap4.min.css">
 }
-    </tbody>
-</table>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Inbox</h3>
+                </div>
+                <!-- /.card-header -->
+                <div class="card-body">
+                    <table id="inboxTable" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Follow Up From</th>
+                                <th>Date</th>
+                                <th>Remarks</th>
+                                <th>Tasks</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+                <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+            <!-- /.card -->
+        </div>
+        <!-- /.col -->
+    </div>
+    <!-- /.row -->
+</div>
+<!-- /.container-fluid -->
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Outbox</h3>
+                </div>
+                <!-- /.card-header -->
+                <div class="card-body">
+                    <table id="outboxTable" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Remarks</th>
+                                <th>Tasks</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+                <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+            <!-- /.card -->
+        </div>
+        <!-- /.col -->
+    </div>
+    <!-- /.row -->
+</div>
+
+
+@section BodyScripts {
+    <script src="../../plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="../../plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+    <script src="../../plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+    <script src="../../plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+    <script src="../../plugins/datatables-select/js/select.bootstrap4.min.js"></script>
+    <script src="../../plugins/datatables-select/js/dataTables.select.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            //$('#example2').DataTable({
+            //    "paging": true,
+            //    "lengthChange": false,
+            //    "searching": false,
+            //    "ordering": true,
+            //    "info": true,
+            //    "autoWidth": false,
+            //    "responsive": true,
+            //});
+
+
+             var baseUrl = "@Html.Raw(this.Context.Request.Scheme + "://" + this.Context.Request.Host + this.Context.Request.Path)";
+             var inboxTable = $('#inboxTable').DataTable( {
+                //scrollY:        300,
+                //scrollX:        true,
+                //scrollCollapse: true,
+                paging:         true,
+                //fixedColumns:   {
+                //    leftColumns: 2
+                //},
+
+                columnDefs: [ {
+                    orderable: false,
+                    className: 'select-checkbox',
+                    targets:   0
+                } ],
+                select: {
+                    //style:    'os',
+                    style:    'multiple',
+                    selector: 'td:first-child'
+                 },
+                 ajax: {
+                    "url": baseUrl + "/LoadTaskInBoxData",
+                    "type": "POST",
+                    "datatype": "json"
+                 },
+                 columns: [
+                    { "data" : "followUpFrom", "name": "Follow Up From", "autoWidth": true, "visible" : false},
+                    { "data": "updatedDate", "name": "Date", "autoWidth": true },
+                    { "data": "remarks", "name": "Remarks", "autoWidth": true },
+                    { "data": "taskInfo", "name": "Tasks", "autoWidth": true },
+                    { "data": "status", "name": "Status", "autoWidth": true }
+                ],
+                order: [[ 1, 'desc' ]]
+             });
+
+
+            
+                var outboxTable = $('#outboxTable').DataTable( {
+                //scrollY:        300,
+                //scrollX:        true,
+                //scrollCollapse: true,
+                paging:         true,
+                //fixedColumns:   {
+                //    leftColumns: 2
+                //},
+
+                columnDefs: [ {
+                    orderable: false,
+                    className: 'select-checkbox',
+                    targets:   0
+                } ],
+                select: {
+                    //style:    'os',
+                    style:    'multiple',
+                    selector: 'td:first-child'
+                 },
+                 ajax: {
+                    "url": baseUrl + "/LoadTaskOutBoxData",
+                    "type": "POST",
+                    "datatype": "json"
+                 },
+                 columns: [
+                    { "data" : "followUpDate", "name": "Date", "autoWidth": true, "visible" : false},
+                    { "data": "remarks", "name": "Remarks", "autoWidth": true },
+                    { "data": "taskInfo", "name": "Tasks", "autoWidth": true },
+                    { "data": "status", "name": "Status", "autoWidth": true }
+                ],
+                order: [[ 1, 'desc' ]]
+             });
+
+
+        });
+    </script>
+}

@@ -22,10 +22,16 @@ namespace TaskManager.Web.Controllers
         }
 
         // GET: TaskFollowUps
+        public async Task<IActionResult> Index1()
+        {
+            return View(await _context.TaskFollowUps.ToListAsync());
+        }
+
         public async Task<IActionResult> Index()
         {
             return View(await _context.TaskFollowUps.ToListAsync());
         }
+
 
         // GET: TaskFollowUps/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -97,6 +103,92 @@ namespace TaskManager.Web.Controllers
             return View(taskFollowUpMailBoxVM);
         }
 
+        public IActionResult LoadTaskInBoxData()
+        {
+            try
+            {
+                var filteredTaskInbox = (from c in _context.TaskFollowUps
+                                         join o in _context.TaskEmployees
+                                         .Where(x => x.UserName == currentUserName)
+                                         on c.Task.Id equals o.Task.Id
+                                         select new
+                                         {
+                                             c.FollowerUserName,
+                                             c.LastUpdatedAt,
+                                             c.Remarks,
+                                             c.Task.Id,
+                                             c.Task.TaskStatus.Status
+                                         })
+                                 .Where(x => x.FollowerUserName != currentUserName)
+                                 .OrderByDescending(m => m.LastUpdatedAt);
+
+                int recordsTotal = filteredTaskInbox.Count();
+
+                List<TaskFollowUpInboxViewModel> taskFollowUpInboxVMList = new List<TaskFollowUpInboxViewModel>();
+
+                foreach (var inbox in filteredTaskInbox)
+                {
+                    taskFollowUpInboxVMList.Add(
+                        new TaskFollowUpInboxViewModel()
+                        {
+                            Remarks = inbox.Remarks,
+                            UpdatedDate = inbox.LastUpdatedAt,
+                            TaskInfo = inbox.Id.ToString(),
+                            FollowUpFrom = inbox.FollowerUserName,
+                            Status = inbox.Status
+                        });
+                }
+
+                //Returning Json Data
+                return Json(new { draw = "1", recordsFiltered = recordsTotal, recordsTotal = recordsTotal, data = taskFollowUpInboxVMList });
+
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+
+        }
+
+        public IActionResult LoadTaskOutBoxData()
+        {
+            try
+            {
+                var filteredTaskOutbox =  _context.TaskFollowUps
+                .Include(x => x.Task)
+                .Include(x => x.Task.TaskStatus)
+                .Where(x => x.FollowerUserName == currentUserName).ToList();
+
+                int recordsTotal = filteredTaskOutbox.Count();
+
+                List<TaskFollowUpOutboxViewModel> taskFollowUpOutBoxVMList = new List<TaskFollowUpOutboxViewModel>();
+
+                foreach (var outbox in filteredTaskOutbox)
+                {
+                    taskFollowUpOutBoxVMList.Add(
+                        new TaskFollowUpOutboxViewModel()
+                        {
+                            FollowUpDate = outbox.LastUpdatedAt,
+                            Remarks = outbox.Remarks,
+                            TaskInfo = outbox.Task.Id.ToString(),
+                            Status = outbox.Task.TaskStatus.Status
+                        }
+                    );
+                }
+
+                //Returning Json Data
+                return Json(new { draw = "1", recordsFiltered = recordsTotal, recordsTotal = recordsTotal, data = taskFollowUpOutBoxVMList });
+
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+
+        }
+
+
+
         public bool IsUserAlreadyFollowing(string userName, int taskId)
         {
             var followUp = _context.TaskFollowUps.Where(x => x.FollowerUserName == userName && x.Task.Id == taskId).FirstOrDefault();
@@ -112,7 +204,7 @@ namespace TaskManager.Web.Controllers
         public IActionResult Create()
         {
             TaskFollowUpViewModel taskFollowUpVm = new TaskFollowUpViewModel();
-            return View(taskFollowUpVm);
+            return PartialView("_Create", taskFollowUpVm);
         }
 
         // POST: TaskFollowUps/Create
@@ -125,40 +217,53 @@ namespace TaskManager.Web.Controllers
             string currentUserName = "tahahasan";
             if (ModelState.IsValid)
             {
-                TaskManager.Data.Task Thistask = _context.Tasks.Where(x => x.Id == currentTask).SingleOrDefault();
-                taskFollowUpVM.TaskFollowUp.LastUpdatedAt = DateTime.Now;
-                taskFollowUpVM.TaskFollowUp.CreatedAt = DateTime.Now;
-                taskFollowUpVM.TaskFollowUp.FollowerUserName = currentUserName;
-                taskFollowUpVM.TaskFollowUp.Task = Thistask;
-                _context.Add(taskFollowUpVM.TaskFollowUp);
+                string [] listOfTaskIds = taskFollowUpVM.ListofTasks.Split(",");
+                Dictionary<int, List<string>> taskEmployeeDictionary = new Dictionary<int, List<string>>();
 
-                if (!IsUserAlreadyFollowing(currentUserName, currentTask))
+                foreach (string taskId in listOfTaskIds)
                 {
-                    TaskEmployee taskCreator = new TaskEmployee();
-                    taskCreator.Task = Thistask;
-                    
-                    int taskFollowerCapacity = (int)Common.Common.TaskCapacity.Follower;
-                    taskCreator.IsActive = true;
-                    taskCreator.TaskCapacity = _context.TaskCapacities.Where(x => x.Id == taskFollowerCapacity).SingleOrDefault();
-                    taskCreator.UserName = currentUserName;
-                    _context.Add(taskCreator);
+                    int thisTaskId = Convert.ToInt32(taskId);
+                    TaskManager.Data.Task Thistask = _context.Tasks.Where(x => x.Id == thisTaskId).SingleOrDefault();
+                    TaskFollowUp followUp = new TaskFollowUp();
+
+                    followUp.LastUpdatedAt = DateTime.Now;
+                    followUp.CreatedAt = DateTime.Now;
+                    followUp.FollowerUserName = currentUserName;
+                    followUp.Task = Thistask;
+                    _context.Add(followUp);
+
+                    if (!IsUserAlreadyFollowing(currentUserName, thisTaskId))
+                    {
+                        TaskEmployee taskCreator = new TaskEmployee();
+                        taskCreator.Task = Thistask;
+
+                        int taskFollowerCapacity = (int)Common.Common.TaskCapacity.Follower;
+                        taskCreator.IsActive = true;
+                        taskCreator.TaskCapacity = _context.TaskCapacities.Where(x => x.Id == taskFollowerCapacity).SingleOrDefault();
+                        taskCreator.UserName = currentUserName;
+                        _context.Add(taskCreator);
+                    }
+
+                    TaskAudit followUpAudit = new TaskAudit();
+                    followUpAudit.ActionDate = DateTime.Now;
+                    followUpAudit.ActionBy = currentUserName;
+                    followUpAudit.Description = "Follow up requested";
+                    followUpAudit.Task = Thistask;
+                    followUpAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.FollowUp).SingleOrDefault();
+                    _context.Add(followUpAudit);
+
+                    List<string> employeeList = GetTaskEmployeeEmailAddresses(thisTaskId, currentUserName);
+                    taskEmployeeDictionary.Add(thisTaskId, employeeList);
+                }
+                await _context.SaveChangesAsync();
+                foreach (KeyValuePair<int, List<string>> keyValuePair in taskEmployeeDictionary)
+                {
+                    await MailSystem.SendEmail(MailSystem.RequestFollowUpEmailTemplate, keyValuePair.Value);
                 }
 
-                TaskAudit followUpAudit = new TaskAudit();
-                followUpAudit.ActionDate = DateTime.Now;
-                followUpAudit.ActionBy = currentUserName;
-                followUpAudit.Description = "Follow up requested";
-                followUpAudit.Task = Thistask;
-                followUpAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.FollowUp).SingleOrDefault();
-                _context.Add(followUpAudit);
-
-                List<string> employeeList = GetTaskEmployeeEmailAddresses(currentTask, currentUserName);
-                await MailSystem.SendEmail(MailSystem.RequestFollowUpEmailTemplate, employeeList);
-
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                //return RedirectToAction(nameof(Index));
             }
-            return View(taskFollowUpVM);
+            return PartialView("_Create", taskFollowUpVM);
         }
 
         // GET: TaskFollowUps/Edit/5
