@@ -58,7 +58,8 @@ namespace TaskManager.Web.Controllers
             {
                 subTaskVMList.Add(new SbTaskViewModel()
                 {
-                    TaskId = subTask.Id,
+                    TaskId = subTask.Task.Id,
+                    SubTaskId = subTask.Id,
                     Description = subTask.Description,
                     SubTaskAssignee = subTask.SubTaskAssigneeUserName,
                     IsCompleted = IsSubTaskCompleted(subTask.TaskStatus.Id)
@@ -68,7 +69,6 @@ namespace TaskManager.Web.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(string description, int taskId, bool isCompleted, string assignee)
         {
             bool subTaskExist = false;
@@ -76,11 +76,10 @@ namespace TaskManager.Web.Controllers
             SubTask existingSubTask = _context.SubTasks.Where(x => x.Task.Id == taskId && x.Description == description && x.IsDeleted == false).SingleOrDefault();
             if (existingSubTask == null)
             {
-
-                Data.Task thisTask = _context.Tasks.Where(X => X.Id == currentTaskId).SingleOrDefault();
+                Data.Task thisTask = _context.Tasks.Where(X => X.Id == taskId).SingleOrDefault();
                 SubTask subTask = new SubTask();
                 subTask.Description = description;
-                subTask.Task = _context.Tasks.Where(X => X.Id == currentTaskId).SingleOrDefault();
+                subTask.Task = thisTask;
                 if (isCompleted)
                 {
                     subTask.TaskStatus = _context.TaskStatus.Where(x => x.Id == (int)TaskManager.Common.Common.TaskStatus.Completed).SingleOrDefault();
@@ -91,9 +90,10 @@ namespace TaskManager.Web.Controllers
                 }
                 subTask.LastUpdatedAt = DateTime.Now;
                 subTask.LastUpdatedBy = currentUserName;
-                if (assignee.Equals(string.Empty))
+                if (assignee == null || assignee == "")
                 {
-                    TaskEmployee taskEmployee = _context.TaskEmployees.Where(x => x.TaskCapacity.Id == (int)Common.Common.TaskCapacity.Assignee).FirstOrDefault();
+                    TaskEmployee taskEmployee = _context.TaskEmployees.Where(x => x.TaskCapacity.Id == (int)Common.Common.TaskCapacity.Assignee
+                    && x.Task.Id == taskId).FirstOrDefault();
                     subTask.SubTaskAssigneeUserName = taskEmployee.UserName;
                 }
                 else
@@ -122,15 +122,14 @@ namespace TaskManager.Web.Controllers
         }
 
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Update(int id, string description, int taskId, string assignee, bool isCompleted)
+        [HttpPost, ActionName("Update")]
+        public IActionResult Update(int id, string description, int taskId, string assignee, bool isCompleted)
         {
             bool subTaskExist = false;
             bool subTaskUpdated = false;
             try
             {
-                SubTask existingSubTask = _context.SubTasks.Where(x => x.Task.Id != taskId && x.Description == description && x.IsDeleted == false).SingleOrDefault();
+                SubTask existingSubTask = _context.SubTasks.Where(x => x.Task.Id == taskId && x.Id != id && x.Description == description && x.IsDeleted == false).SingleOrDefault();
                 if (existingSubTask == null)
                 {
                     SubTask subTask = _context.SubTasks.Where(X => X.Id == id).SingleOrDefault();
@@ -138,12 +137,16 @@ namespace TaskManager.Web.Controllers
                     {
                         subTask.TaskStatus = _context.TaskStatus.Where(x => x.Id == (int)TaskManager.Common.Common.TaskStatus.Completed).SingleOrDefault();
                     }
-
+                    else
+                    {
+                        subTask.TaskStatus = _context.TaskStatus.Where(x => x.Id == (int)TaskManager.Common.Common.TaskStatus.NotStarted).SingleOrDefault();
+                    }
+                    subTask.Description = description;
                     subTask.LastUpdatedAt = DateTime.Now;
                     subTask.LastUpdatedBy = currentUserName;
                     subTask.SubTaskAssigneeUserName = assignee;
                     _context.Update(subTask);
-                    await _context.SaveChangesAsync();
+                    _context.SaveChanges();
                     subTaskUpdated = true; 
                 }
                 else
@@ -212,7 +215,7 @@ namespace TaskManager.Web.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(SubTaskViewModel subTaskVM)
+        public async Task<IActionResult> Create2(SubTaskViewModel subTaskVM)
         {
             if (ModelState.IsValid)
             {
@@ -356,6 +359,7 @@ namespace TaskManager.Web.Controllers
             return new JsonResult(new { isSubTaskAlreadyAdded = isSubTaskAlreadyAdded });
         }
 
+        [HttpPost, ActionName("DeleteSubTask")]
         public IActionResult DeleteSubTask(int subTaskId)
         {
             bool isSubTaskDeleted = false;
@@ -363,13 +367,15 @@ namespace TaskManager.Web.Controllers
             if (existingSubTask != null)
             {
                 existingSubTask.IsDeleted = true;
+                existingSubTask.LastUpdatedAt = DateTime.Now;
+                existingSubTask.LastUpdatedBy = currentUserName;
                 //_context.SubTasks.Remove(subTask);
                 _context.SubTasks.Attach(existingSubTask);
                 _context.Entry(existingSubTask).State = EntityState.Modified;
-                _context.SaveChangesAsync();
+                _context.SaveChanges();
                 isSubTaskDeleted = true;
             }
-            return new JsonResult(new { isSubTaskAlreadyAdded = isSubTaskDeleted });
+            return new JsonResult(new { isSubTaskDeleted = isSubTaskDeleted });
         }
 
 

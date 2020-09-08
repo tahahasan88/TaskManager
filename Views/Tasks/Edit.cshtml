@@ -100,7 +100,7 @@
                     </div>
                 </div>
                 <div class="card-body" id="subTaskPlaceHolder">
-                    <div class="row">
+                    @*<div class="row">
                         <div class="col-1">
                             <div class="color-palette-set" style="margin:5px">
                                 <input class="form-check-input" type="checkbox">
@@ -153,7 +153,7 @@
                                 <button type="button" class="btn btn-info btn-flat">Add Task</button>
                             </span>
                         </div>
-                    </div>
+                    </div>*@
                 </div>
             </div>
         </div>
@@ -243,6 +243,7 @@
                 {data: "Action By"}
               ]
             });
+            var disabled = false;
 
             var baseUrl = "@Html.Raw(this.Context.Request.Scheme + "://" + this.Context.Request.Host + this.Context.Request.Path)";
             var progressUpdatePlaceHolder = $("#modal-update-placeholder");
@@ -301,31 +302,174 @@
                 });
             });
 
-            $('i[name ="delete"]').click(function () {
-                var result = confirm("Are you sure you want to delete this subtask?");
-                if (result) {
-                    alert($(this).attr('id'));
-                }
-            });
+
 
             function getSubTasksList() {
 
-                  $.ajax({
-                    type: "GET",
-                    url: baseUrl.replace("tasks/Edit", "") + "subtasks/SubTaskList",
-                    contentType: "application/json; charset=utf-8",
-                    data: {id : @Model.Task.Id },
-                    datatype: "json",  
-                      success: function (data) {  
-                        alert()
-                        //subTaskPlaceHolder.html(data);  
-                        //subTaskPlaceHolder.find('.modal').modal(options); 
-                        //subTaskPlaceHolder.find('.modal').modal('show');   
-                    },  
-                    error: function () {  
-                        alert("Dynamic content load failed.");  
-                    }  
+                var disableThis = "";
+                if (disabled == true) {
+                    disableThis = "disabled"
+                }
+
+                var subTaskBody = "<div class=\"row\">" +
+                        "<div class=\"col-1\">" +
+                        "<div class=\"color-palette-set\" style=\"margin:5px\">" +
+                            "<input class=\"form-check-input\" id=\"checkboxtaskid\" ischecked name=\"completecheck\" "+disableThis+"  type=\"checkbox\">" + 
+                            "</div>" +
+                        "</div>" +
+                        "<div class=\"col-6\">" +
+                            "<div class=\"color-palette-set\">" +
+                                "<input name = \"subTaskInput\" id=\"inputtaskid\" value=\"tasktitle\" " +disableThis+" />" +
+                            "</div>" +
+                        "</div>" +
+                        "<div class=\"col-1\">"+
+                            "<i class=\"far fa-user-circle\" style=\"font-size:24px\" aria-hidden=\"true\">"+
+                            "</i>"+
+                        "</div>" +
+                        "<div class=\"col-3\" name=\"subTaskassignee\" >" +
+                            "assigneeName"+
+                        "</div>"+
+                        "<div class=\"col-1\">"+
+                            "<i name=\"delete\" id=\"deletetaskid\"  " +disableThis+" class=\"fas fa-trash-alt\"></i>"+
+                        "</div>"+
+                    "</div>";
+                var addSubTaskButtonHtml = "<div class=\"row\">" +
+                        "<div class=\"input-group mb-2\">" +
+                            "<input type=\"text\" id=\"newTaskInputId\" class=\"form-control\">" +
+                            "<span class=\"input-group-append\">" +
+                                "<button id=\"addSubtaskBtnId\" type=\"button\" class=\"btn btn-info btn-flat\">Add Sub Task</button>" +
+                            "</span>" +
+                        "</div>" +
+                    "</div>";
+
+                var newBody = "";
+                $.ajax({
+                type: "GET",
+                url: baseUrl.replace("tasks/Edit", "") + "subtasks/SubTaskList",
+                contentType: "application/json; charset=utf-8",
+                data: {id : @Model.Task.Id },
+                datatype: "json",  
+                    success: function (data) {  
+                        $.each(data, function (i, val) {
+                            tmpData = data[i];
+                            $.each(tmpData, function (i, val) {
+                                newBody += subTaskBody;
+                                var isSubTaskCompleted = "";
+                                if (tmpData[i].isCompleted == true) {
+                                    isSubTaskCompleted = "checked";
+                                }
+                                newBody = newBody.replace("checkboxtaskid", tmpData[i].subTaskId);
+                                newBody = newBody.replace("inputtaskid", tmpData[i].subTaskId);
+                                newBody = newBody.replace("deletetaskid", tmpData[i].subTaskId);
+                                newBody = newBody.replace("tasktitle", tmpData[i].description);
+                                newBody = newBody.replace("assigneeName", tmpData[i].subTaskAssignee);
+                                newBody = newBody.replace("ischecked", isSubTaskCompleted);
+                                newBody += "<br/>"
+                            });
+                        });
+                        if (newBody.length > 0) {
+
+                            newBody += addSubTaskButtonHtml;
+                            subTaskPlaceHolder.html(newBody);
+
+                            $('i[name ="delete"]').click(function () {
+                                var result = confirm("Are you sure you want to delete this subtask?");
+                                if (result) {
+                                    $.ajax({
+                                        type: "POST",
+                                        url: baseUrl.replace("tasks/Edit", "") + "subtasks/DeleteSubTask?subTaskId=" + $(this).attr('id'),
+                                        contentType: "application/json; charset=utf-8",
+                                        data: null,
+                                        datatype: "json",
+                                        success: function (data) {
+                                            subTaskPlaceHolder.html('');
+                                            getSubTasksList();
+                                        },
+                                        error: function () {
+                                            alert("Dynamic content load failed.");
+                                        }
+                                    });
+                                }
+                            });
+
+                            $('input[name ="completecheck"]').click(function () {
+
+                                var description = $(this).closest('.row').find('input[name ="subTaskInput"]').val();
+                                var isCompleted = $(this).is(':checked');
+                                var subTaskId = $(this).attr('id');
+                                var assignee = $(this).closest('.row').find('[name="subTaskassignee"]').html()
+                                var taskId = "@Model.Task.Id";
+                                updateSubTask(subTaskId, taskId, description, assignee, isCompleted);
+                            });
+
+                            $('input[name ="subTaskInput"]').change(function () {
+
+                                var description = $(this).closest('.row').find('input[name ="subTaskInput"]').val();
+                                var isCompleted = $(this).is(':checked');
+                                var subTaskId = $(this).attr('id');
+                                var assignee = $(this).closest('.row').find('[name="subTaskassignee"]').html()
+                                var taskId = "@Model.Task.Id";
+                                updateSubTask(subTaskId, taskId, description, assignee, isCompleted);
+                            });
+
+                        }
+                        else {
+                             newBody += addSubTaskButtonHtml;
+                             subTaskPlaceHolder.html(newBody);
+                        }
+
+                        $("#addSubtaskBtnId").click(function () {
+                            var taskId = "@Model.Task.Id";
+                            var description = $("#newTaskInputId").val();
+                            var isCompleted = false;
+                            var assignee = "";
+                            if (description == "") {
+                                alert("please enter description");
+                            }
+                            else
+                                addSubTask(taskId, description, isCompleted, assignee);
+                        });
+
+                },  
+                error: function () {  
+                    alert("Dynamic content load failed.");  
+                }  
                 });  
+            }
+
+            function updateSubTask(subtaskId, taskId, description, assignee, isCompleted) {
+
+                $.post(baseUrl.replace("tasks/Edit", "") + "subtasks/Update",
+                    { id: subtaskId, description: description, taskId: taskId, assignee: assignee, isCompleted : isCompleted}, 
+                    function (returnedData) {
+                        if (returnedData.subTaskExist == true) {
+                            alert('sub task already exists');
+                        }
+                        else if (returnedData.subTaskUpdated == true) {
+                            alert("sub task updated");
+                        }
+                    }).fail(function(){
+                          console.log("error");
+                    });
+            }
+
+            function addSubTask(taskId, description, isCompleted, assignee) {
+
+                $.post(baseUrl.replace("tasks/Edit", "") + "subtasks/Create",
+                    { description: description, taskId: taskId, isCompleted : isCompleted, assignee: assignee}, 
+                    function (returnedData) {
+                        if (returnedData.subTaskExist == true) {
+                            alert('sub task with same title already exists');
+                        }
+                        else if (returnedData.subTaskAdded == true) {
+                            alert("sub task added");
+                            getSubTasksList();
+                        }
+
+                    }).fail(function(){
+                          console.log("error");
+                    });
+
             }
 
             function appendEmployeeList() {
