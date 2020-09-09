@@ -15,7 +15,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <button id="create-task-btnId" data-toggle="ajax-modal" data-target="#add-contact" data-url="@Url.Action("Create")">Create Task</button>
+                    <button id="create-task-btnId" class="btn btn-info" data-toggle="ajax-modal" data-target="#add-contact" data-url="@Url.Action("Create")">Create Task</button>
                 </div>
                 <div id="modal-default">
                 </div>
@@ -48,7 +48,7 @@
         <!-- /.col -->
     </div>
     <!-- /.row -->
-    <button id="take-followup-btnId" data-toggle="ajax-modal" data-target="#add-contact1" data-url="@Url.Action("Create", "TaskFollowUps")">Follow up!</button>
+    <button id="take-followup-btnId" class="btn btn-info" data-toggle="ajax-modal" data-target="#add-contact1" data-url="@Url.Action("Create", "TaskFollowUps")">Follow up!</button>
     <br />
     <br />
     <div class="row">
@@ -133,6 +133,14 @@
             //    "responsive": true,
             //});
 
+            var thisPage = '../tasks';
+            $(".nav-sidebar .nav-item .nav-link").each(function () {
+                $(this).removeClass("active");
+                var href = $(this).attr('href');
+                if (href == thisPage) {
+                    $(this).addClass('active');
+                }
+            });
 
              var baseUrl = "@Html.Raw(this.Context.Request.Scheme + "://" + this.Context.Request.Host + this.Context.Request.Path)";
              var tasksTable = $('#example2').DataTable( {

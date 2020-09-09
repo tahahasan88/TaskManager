@@ -17,6 +17,9 @@
                         <textarea asp-for="@Model.ListOfTaskTitles" class="form-control" rows="3" cols="15" placeholder="Enter ..."></textarea>
                         <span asp-validation-for="@Model.ListOfTaskTitles" class="text-danger"></span>
                     </div>
+                    <div class="form-group">
+                        <p>Please note : Titles must be separated by line break.</p>
+                    </div>
                     <input asp-for="@Model.TaskProgress" type="hidden" />
                     <input asp-for="@Model.Description" type="hidden" />
                     <input asp-for="@Model.Target" type="hidden" />

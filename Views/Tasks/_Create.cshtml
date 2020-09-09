@@ -5,11 +5,12 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title">Add Task</h4>
-                <a id="addMultipleCreationLink" class="modal-title float-right" href="#">Add Multiple</a>
-
-                <button type="button" class="close" id="task-closePopup-icon" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <div class="">
+                    <a id="addMultipleCreationLink" class="modal-title" href="#"><u>Add Multiple</u></a>
+                    <button type="button" class="close" id="task-closePopup-icon" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
             </div>
             <div class="modal-body">
                 <form asp-action="Create">

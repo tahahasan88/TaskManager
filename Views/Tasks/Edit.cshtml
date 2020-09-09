@@ -17,30 +17,30 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-sm-4 col-md-2">
-            <div class="color-palette-set">
+            <div class="color-palette-set mb-1">
                 <button type="button" class="btn btn-block btn-primary btn-sm">Return</button>
             </div>
         </div>
         <div class="col-sm-4 col-md-2">
-            <div class="color-palette-set">
+            <div class="color-palette-set mb-1">
                 <button type="button" class="btn btn-block btn-primary btn-sm">Edit</button>
             </div>
         </div>
         <div class="col-sm-4 col-md-2">
-            <div class="color-palette-set">
+            <div class="color-palette-set mb-1">
                 <button type="button" class="btn btn-block btn-danger btn-sm">Delete</button>
             </div>
         </div>
     </div>
     </br>
     <div class="row">
-        <div class="col-5">
+        <div class="col-sm-6">
             <!-- Default box -->
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-title">Progress Update</h3>
                     <div class="card-tools">
-                        <button type="button" id="updateTaskBtnId" class="btn btn-tool btn-primary btn-sm">New</button>
+                        <button type="button" id="updateTaskBtnId" class="btn  btn-primary btn-sm">New</button>
                         <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
                             <i class="fas fa-minus"></i>
                         </button>
@@ -59,7 +59,7 @@
             </div>
             <!-- /.card -->
         </div>
-        <div class="col-5">
+        <div class="col-sm-6">
             <!-- Default box -->
             <div id="people-placeholder" class="card">
                 <div class="card-header">
@@ -71,14 +71,24 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <i class="far fa-user-circle" style="font-size:24px" aria-hidden="true">
-                    </i>&nbsp;Taha Hasan&nbsp;<i class="fas fa-wifi" aria-hidden="true"></i>
-                    <span class="float-right text-md">Creator</span>
+                    <div class="d-flex justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <i class="far fa-user-circle" style="font-size:24px" aria-hidden="true">
+                            </i>&nbsp;Taha Hasan&nbsp;
+                            <i class="fas fa-wifi" aria-hidden="true"></i>
+                        </div>
+                        <span class="float-right text-md">Creator</span>
+                    </div>
                     <br />
                     <br />
-                    <i class="far fa-user-circle" style="font-size:24px" aria-hidden="true">
-                    </i>&nbsp;Taha Hasan&nbsp;<i class="fas fa-wifi" aria-hidden="true"></i>
-                    <span class="float-right text-md">Creator</span>
+                    <div class="d-flex justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <i class="far fa-user-circle" style="font-size:24px" aria-hidden="true">
+                            </i>&nbsp;Taha Hasan&nbsp;
+                            <i class="fas fa-wifi" aria-hidden="true"></i>
+                        </div>
+                        <span class="float-right text-md">Creator</span>
+                    </div>
                 </div>
             </div>
             <!-- /.card -->
@@ -88,7 +98,7 @@
     </div>
 
     <div class="row">
-        <div class="col-5">
+        <div class="col-sm-6">
             <!-- Default box -->
             <div class="card">
                 <div class="card-header">
@@ -100,47 +110,48 @@
                     </div>
                 </div>
                 <div class="card-body" id="subTaskPlaceHolder">
-                    @*<div class="row">
-                        <div class="col-1">
-                            <div class="color-palette-set" style="margin:5px">
-                                <input class="form-check-input" type="checkbox">
-                            </div>
+                    <div class="row">
+                        <div class="col-5 pl-0 d-flex align-items-center">
+                            <input class="mr-1" type="checkbox">
+                            <input value="Create a report" class="w-100" disabled />
                         </div>
-                        <div class="col-6">
-                            <div class="color-palette-set">
-                                <input value="Create a report" disabled />
-                            </div>
-                        </div>
-                        <div class="col-1">
-                            <i class="far fa-user-circle" style="font-size:24px" aria-hidden="true">
+                        <div class="col-6 d-flex align-items-center">
+                            <i class="far fa-user-circle mr-1" style="font-size:24px" aria-hidden="true">
                             </i>
+                            <a href="javascript:void(null);" name="employeeLink" rel="nofollow noreferrer"><u>Taha Hasan</u></a>
+                            <div class="form-group mb-0 w-100" name="employeeDrpDwndiv" style="display:none;">
+                                <select name="employeeDrpDwn" class="form-control" id="sel1">
+                                    <option>1</option>
+                                    <option>2</option>
+                                    <option>3</option>
+                                    <option>4</option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="col-3">
-                            Taha Hasan
-                        </div>
+                      
                         <div class="col-1">
                             <i name="delete" id="24" class="fas fa-trash-alt"></i>
                         </div>
                     </div>
                     <br />
                     <div class="row">
-                        <div class="col-1">
-                            <div class="color-palette-set" style="margin:5px">
-                                <input class="form-check-input" type="checkbox">
-                            </div>
+                        <div class="col-5 pl-0 d-flex align-items-center">
+                            <input class="mr-1" type="checkbox">
+                            <input value="Create a report" class="w-100" disabled />
                         </div>
-                        <div class="col-6">
-                            <div class="color-palette-set">
-                                <input value="Create a report" disabled />
-                            </div>
-                        </div>
-                        <div class="col-1">
-                            <i class="far fa-user-circle" style="font-size:24px" aria-hidden="true">
+                        <div class="col-6 d-flex align-items-center">
+                            <i class="far fa-user-circle mr-1" style="font-size:24px" aria-hidden="true">
                             </i>
+                            <div class="form-group mb-0 w-100">
+                                <select class="form-control" id="sel1">
+                                    <option>1</option>
+                                    <option>2</option>
+                                    <option>3</option>
+                                    <option>4</option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="col-3">
-                            Taha Hasan
-                        </div>
+                        
                         <div class="col-1">
                             <i name="delete" id="23" class="fas fa-trash-alt"></i>
                         </div>
@@ -153,14 +164,14 @@
                                 <button type="button" class="btn btn-info btn-flat">Add Task</button>
                             </span>
                         </div>
-                    </div>*@
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="row">
-        <div class="col-10">
+        <div class="col-sm-10">
             <!-- Default box -->
             <div class="card">
                 <div class="card-header">
@@ -171,41 +182,43 @@
                         </button>
                     </div>
                 </div>
-                <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                    <label class="btn btn-primary active">
+                <div class="btn-group-toggle flex-wrap mt-3 ml-3" data-toggle="buttons">
+                    <label class="btn btn-info active">
                         <input type="checkbox" class="historyType" value="progress" checked autocomplete="off"> Progress
                     </label>
-                    <label class="btn btn-primary">
+                    <label class="btn btn-info">
                         <input type="checkbox" class="historyType" value="assignment" autocomplete="off"> Assignment
                     </label>
-                    <label class="btn btn-primary">
+                    <label class="btn btn-info">
                         <input type="checkbox" class="historyType" value="followup" autocomplete="off"> Follow Up
                     </label>
-                    <label class="btn btn-primary">
+                    <label class="btn btn-info">
                         <input type="checkbox" class="historyType" value="followupresponse" autocomplete="off"> Follow Up Response
                     </label>
-                    <label class="btn btn-primary">
+                    <label class="btn btn-info">
                         <input type="checkbox" class="historyType" value="subtasks" autocomplete="off"> SubTasks
                     </label>
                 </div>
                 <div class="card-body">
-                    <table id="historyTable" class="table table-bordered table-hover">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Type</th>
-                                <th>Description</th>
-                                <th>Action By</th>
-                            </tr>
-                        </thead>
-                    </table>
+                       <div class="table-responsive">
+                        <table id="historyTable" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                    <th>Action By</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="row">
-        <div class="col-10">
+        <div class="col-sm-10">
             <!-- Default box -->
             <div class="card">
                 <div class="card-header">
@@ -234,6 +247,15 @@
 
     <script>
         $(document).ready(function () {
+
+            var thisPage = '../tasks';
+            $(".nav-sidebar .nav-item .nav-link").each(function () {
+                $(this).removeClass("active");
+                var href = $(this).attr('href');
+                if (href == thisPage) {
+                    $(this).addClass('active');
+                }
+            });
 
             var table = $('#historyTable').DataTable({
               columns: [
@@ -466,6 +488,19 @@
                 });
             }
 
+            $("select[name='employeeDrpDwn']").change(function () {
+                var end = this.value;
+                $(this).closest('.row').find('[name="employeeDrpDwndiv"]').hide();
+                $(this).closest('.row').find('[name="employeeLink"]').html(end);
+                $(this).closest('.row').find('[name="employeeLink"]').show();
+
+            });
+
+            $("a[name='employeeLink']").click(function () {
+                $(this).hide();
+                $(this).closest('.row').find('[name="employeeDrpDwndiv"]').show();
+            });
+
             function updateSubTask(subtaskId, taskId, description, assignee, isCompleted) {
 
                 $.post(baseUrl.replace("tasks/Edit", "") + "subtasks/Update",
@@ -582,7 +617,7 @@
             }
 
             appendEmployeeList();
-            getSubTasksList();
+            //getSubTasksList();
             getHistoryList();
         });
 

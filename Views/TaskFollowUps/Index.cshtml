@@ -93,6 +93,14 @@
             //    "responsive": true,
             //});
 
+            var thisPage = '../taskfollowups';
+            $(".nav-sidebar .nav-item .nav-link").each(function () {
+                $(this).removeClass("active");
+                var href = $(this).attr('href');
+                if (href == thisPage) {
+                    $(this).addClass('active');
+                }
+            });
 
              var baseUrl = "@Html.Raw(this.Context.Request.Scheme + "://" + this.Context.Request.Host + this.Context.Request.Path)";
              var inboxTable = $('#inboxTable').DataTable( {
