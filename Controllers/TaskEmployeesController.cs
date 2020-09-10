@@ -42,6 +42,7 @@ namespace TaskManager.Web.Controllers
             List<TaskEmployeeListViewModel> emmployeeVMList = new List<TaskEmployeeListViewModel>();
             List<TaskEmployee> employeeList = await _context.TaskEmployees
                 .Include(x => x.Task)
+                .Include(x => x.TaskCapacity)
                 .Where(x => x.Task.Id == taskId)
                 .ToListAsync();
 
@@ -55,6 +56,53 @@ namespace TaskManager.Web.Controllers
                 });
             }
             return new JsonResult(new { records = emmployeeVMList });
+        }
+
+        public IActionResult AllEmployees()
+        {
+            List<TaskEmployeeListViewModel> emmployeeVMList = new List<TaskEmployeeListViewModel>();
+            EmployeeList employeeList = new EmployeeList();
+
+            foreach (Employee employee in employeeList.Employees)
+            {
+                emmployeeVMList.Add(new TaskEmployeeListViewModel()
+                {
+                    UserName = employee.UserName,
+                    EmailAddress = employee.EmailAddress
+                });
+            }
+            return new JsonResult(new { records = emmployeeVMList });
+        }
+
+
+        public IActionResult IsActionPermissible(string userName,int taskId, int actionId)
+        {
+             TaskEmployee employeeProfile = _context.TaskEmployees
+                .Include(x => x.Task)
+                .Include(x => x.TaskCapacity)
+                .Where(x => x.Task.Id == taskId && x.UserName == userName)
+                .FirstOrDefault();
+
+            bool isAllowed = TaskPermissions.IsAllowed((Common.Common.TaskAction)actionId,(Common.Common.TaskCapacity)employeeProfile.TaskCapacity.Id);
+            return new JsonResult(new { isAllowed = isAllowed });
+        }
+
+        public IActionResult GetUserPermissions(string userName, int taskId)
+        {
+            TaskEmployee employeeProfile = _context.TaskEmployees
+               .Include(x => x.Task)
+               .Include(x => x.TaskCapacity)
+               .Where(x => x.Task.Id == taskId && x.UserName == userName)
+               .FirstOrDefault();
+            
+
+            bool isTaskDeletionAllowed = TaskPermissions.IsAllowed(Common.Common.TaskAction.TaskDelete, (Common.Common.TaskCapacity)employeeProfile.TaskCapacity.Id);
+            bool isSubTaskDeletionAllowed = TaskPermissions.IsAllowed(Common.Common.TaskAction.SubTaskDelete, (Common.Common.TaskCapacity)employeeProfile.TaskCapacity.Id);
+            bool isTaskEditAllowed = TaskPermissions.IsAllowed(Common.Common.TaskAction.TaskEdit, (Common.Common.TaskCapacity)employeeProfile.TaskCapacity.Id);
+            bool isSubTaskEditAllowed = TaskPermissions.IsAllowed(Common.Common.TaskAction.SubTaskEdit, (Common.Common.TaskCapacity)employeeProfile.TaskCapacity.Id);
+
+            return new JsonResult(new { isTaskDeletionAllowed = isTaskDeletionAllowed, isSubTaskDeletionAllowed  = isSubTaskDeletionAllowed , isTaskEditAllowed  = isTaskEditAllowed,
+                isSubTaskEditAllowed = isSubTaskEditAllowed });
         }
 
         // GET: TaskEmployees/Details/5

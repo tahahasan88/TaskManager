@@ -52,6 +52,27 @@ namespace TaskManager.Controllers
             return View(taskSummaryVM);
         }
 
+        public IActionResult List()
+        {
+            TaskSummaryViewModel taskSummaryVM = new TaskSummaryViewModel();
+            taskSummaryVM.PendingTasksCount = _context.Tasks.Where(x => x.TaskStatus.Id
+                != (int)TaskManager.Common.Common.TaskStatus.Completed
+                && x.Target <= DateTime.Now).Count();
+
+            taskSummaryVM.OverDueTasksCount = _context.Tasks.Where(x => x.TaskStatus.Id
+                != (int)TaskManager.Common.Common.TaskStatus.Completed
+                && DateTime.Now > x.Target).Count();
+
+            taskSummaryVM.ResolvedTodayCount = _context.Tasks.Where(x => x.TaskStatus.Id
+                == (int)TaskManager.Common.Common.TaskStatus.Completed
+                && x.LastUpdatedAt.Date == DateTime.Now.Date).Count();
+
+            taskSummaryVM.FollowUpsCount = _context.TaskFollowUps.Where(x => x.Task.TaskStatus.Id
+                != (int)TaskManager.Common.Common.TaskStatus.Completed).Count();
+
+            return new JsonResult(new { records = taskSummaryVM });
+        }
+
         public IActionResult Privacy()
         {
             return View();

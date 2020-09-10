@@ -13,6 +13,16 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
+
+            @{
+                if (ViewData["deletionMessage"] != null)
+                {
+                    <div class="alert alert-danger" role="alert">
+                        @ViewData["deletionMessage"]
+                    </div>
+                }
+            }
+
             <div class="card">
                 <div class="card-header">
                     <button id="create-task-btnId" class="btn btn-info" data-toggle="ajax-modal" data-target="#add-contact" data-url="@Url.Action("Create")">Create Task</button>
@@ -109,7 +119,6 @@
             <!-- /.card -->
         </div>
     </div>
-
 </div>
     <!-- /.container-fluid -->
 
@@ -177,7 +186,12 @@
                     { "data" : "taskId", "name": "TaskId", "autoWidth": true, "visible" : false},
                     { "data": "title", "name": "Title", "autoWidth": true },
                     { "data": "status", "name": "Status", "autoWidth": true },
-                    { "data": "progress", "name": "Progress", "autoWidth": true },
+                     { "data": "progress", "name": "Progress", "autoWidth": true },
+                    //{
+                    //    "render": function (data, type, full, meta)
+                    //    { return '<input type="text" class="knob" value='+full.progress+'% data-width="10" data-height="10" data-fgColor="#3c8dbc">'; }
+                    //},
+
                     { "data": "assignedTo", "name": "AssignedTo", "autoWidth": true },
                     { "data": "lastUpdated", "name": "LastUpdated", "autoWidth": true },
                     {
@@ -298,9 +312,11 @@
                 var form = $(this).parents('.modal').find('form');
                 var actionUrl = form.attr('action');
                 var dataToSend = form.serialize();
+                $("#spinnerFollowUpCreate").show();
 
                 $.post(actionUrl, dataToSend).done(function (data) {
                     var newBody = $('.modal-body', data);
+                    $("#spinnerFollowUpCreate").hide();
                     taskFollowUpPlaceHolder.find('.modal-body').replaceWith(newBody);
                     var isValid = newBody.find('[name="IsValid"]').val() == 'True';
                     if (isValid) {
@@ -353,10 +369,13 @@
                 var actionUrl = form.attr('action');
                 var dataToSend = form.serialize();
                 var buttonClickedId = $(this).attr('id');
+                $("#spinnerCreate").show();
+
                 $.post(actionUrl, dataToSend).done(function (data) {
                     var newbody = $('.modal-body', data);
                     taskCreationPlaceHolder.find('.modal-body').replaceWith(newbody);
                     var isValid = newbody.find('[name="IsValid"]').val() == 'True';
+                    $("#spinnerCreate").hide();
                     if (isValid) {
                         if (buttonClickedId == "task-submit-btnId") {
                             taskCreationPlaceHolder.find('.modal').modal('hide');

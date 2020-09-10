@@ -47,12 +47,25 @@ namespace TaskManager.Web.Controllers
 
         public async Task<IActionResult> SubTaskList(int id)
         {
+            SubTaskListViewModel subTaskListViewModel = new SubTaskListViewModel();
+            List<TaskEmployeeListViewModel> emmployeeVMList = new List<TaskEmployeeListViewModel>();
             List<SbTaskViewModel> subTaskVMList = new List<SbTaskViewModel>();
+
             List<SubTask> subTasks = await _context.SubTasks
                 .Include(x => x.TaskStatus)
                 .Include(x => x.Task)
                 .Where(x => x.IsDeleted == false && x.Task.Id == id)
                 .ToListAsync();
+
+            EmployeeList employeeList = new EmployeeList();
+            foreach (Employee employee in employeeList.Employees)
+            {
+                emmployeeVMList.Add(new TaskEmployeeListViewModel()
+                {
+                    UserName = employee.UserName,
+                    EmailAddress = employee.EmailAddress
+                });
+            }
 
             foreach (SubTask subTask in subTasks)
             {
@@ -65,7 +78,11 @@ namespace TaskManager.Web.Controllers
                     IsCompleted = IsSubTaskCompleted(subTask.TaskStatus.Id)
                 });
             }
-            return new JsonResult(new { records = subTaskVMList });
+
+            subTaskListViewModel.subTaskVMList = subTaskVMList;
+            subTaskListViewModel.employeeVMList = emmployeeVMList;
+
+            return new JsonResult(new { records = subTaskListViewModel });
         }
 
         [HttpPost]
@@ -109,6 +126,17 @@ namespace TaskManager.Web.Controllers
                 progressAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.SubTasks).SingleOrDefault();
                 _context.Add(progressAudit);
 
+                TaskEmployee employee = _context.TaskEmployees.Where(x => x.UserName == assignee && x.Task.Id == taskId).FirstOrDefault();
+                if (employee == null)
+                {
+                    TaskEmployee subTaskAssignee = new TaskEmployee();
+                    subTaskAssignee.Task = subTask.Task;
+                    int subTaskAssigneeCapacity = (int)TaskManager.Common.Common.TaskCapacity.SubTaskAssignee;
+                    subTaskAssignee.TaskCapacity = _context.TaskCapacities.Where(x => x.Id == subTaskAssigneeCapacity).SingleOrDefault();
+                    subTaskAssignee.UserName = assignee;
+                    _context.Add(subTaskAssignee);
+                }
+
                 _context.Add(subTask);
                 await _context.SaveChangesAsync();
                 subTaskAdded = true;
@@ -129,10 +157,18 @@ namespace TaskManager.Web.Controllers
             bool subTaskUpdated = false;
             try
             {
-                SubTask existingSubTask = _context.SubTasks.Where(x => x.Task.Id == taskId && x.Id != id && x.Description == description && x.IsDeleted == false).SingleOrDefault();
+                SubTask existingSubTask = _context.SubTasks
+                    .Include(x => x.Task)
+                    .Where(x => x.Task.Id == taskId && x.Id != id && x.Description == description && x.IsDeleted == false).SingleOrDefault();
                 if (existingSubTask == null)
                 {
-                    SubTask subTask = _context.SubTasks.Where(X => X.Id == id).SingleOrDefault();
+                    SubTask subTask = _context.SubTasks.Include(x => x.TaskStatus)
+                        .Include(x => x.Task)
+                        .Where(X => X.Id == id).SingleOrDefault();
+                    string previousDescription = subTask.Description;
+                    string previousAssignee = subTask.SubTaskAssigneeUserName;
+                    Common.Common.TaskStatus previousStatus = (Common.Common.TaskStatus)subTask.TaskStatus.Id;
+
                     if (isCompleted)
                     {
                         subTask.TaskStatus = _context.TaskStatus.Where(x => x.Id == (int)TaskManager.Common.Common.TaskStatus.Completed).SingleOrDefault();
@@ -146,6 +182,51 @@ namespace TaskManager.Web.Controllers
                     subTask.LastUpdatedBy = currentUserName;
                     subTask.SubTaskAssigneeUserName = assignee;
                     _context.Update(subTask);
+
+                    if (previousDescription != description)
+                    {
+                        TaskAudit descriptionAudit = new TaskAudit();
+                        descriptionAudit.ActionDate = DateTime.Now;
+                        descriptionAudit.ActionBy = currentUserName;
+                        descriptionAudit.Description = "Sub task remarks updated ";
+                        descriptionAudit.Task = subTask.Task;
+                        descriptionAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.SubTasks).SingleOrDefault();
+                        _context.Add(descriptionAudit);
+                    }
+                    if (previousAssignee != assignee)
+                    {
+                        TaskAudit assigneeAudit = new TaskAudit();
+                        assigneeAudit.ActionDate = DateTime.Now;
+                        assigneeAudit.ActionBy = currentUserName;
+                        assigneeAudit.Description = "Sub task assigned to " + subTask.SubTaskAssigneeUserName;
+                        assigneeAudit.Task = subTask.Task;
+                        assigneeAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.SubTasks).SingleOrDefault();
+                        _context.Add(assigneeAudit);
+                    }
+                    if ( (isCompleted && previousStatus != Common.Common.TaskStatus.Completed)
+                        || (!isCompleted && previousStatus == Common.Common.TaskStatus.Completed)
+                        )
+                    {
+                        TaskAudit progressAudit = new TaskAudit();
+                        progressAudit.ActionDate = DateTime.Now;
+                        progressAudit.ActionBy = currentUserName;
+                        progressAudit.Description = "Sub task status updated";
+                        progressAudit.Task = subTask.Task;
+                        progressAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.SubTasks).SingleOrDefault();
+                        _context.Add(progressAudit);
+                    }
+
+                    TaskEmployee employee = _context.TaskEmployees.Where(x => x.UserName == assignee && x.Task.Id == taskId).FirstOrDefault();
+                    if (employee == null)
+                    {
+                        TaskEmployee taskAssignee = new TaskEmployee();
+                        taskAssignee.Task = subTask.Task;
+                        int subTaskAssigneeCapacity = (int)TaskManager.Common.Common.TaskCapacity.SubTaskAssignee;
+                        taskAssignee.TaskCapacity = _context.TaskCapacities.Where(x => x.Id == subTaskAssigneeCapacity).SingleOrDefault();
+                        taskAssignee.UserName = assignee;
+                        _context.Add(taskAssignee);
+                    }
+
                     _context.SaveChanges();
                     subTaskUpdated = true; 
                 }

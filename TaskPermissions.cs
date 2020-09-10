@@ -23,7 +23,15 @@ namespace TaskManager.Web
             {
                 isAllowed = true;
             }
-            else if (taskAction == TaskAction.SubTaskCreate && ((capacity == TaskCapacity.Assignee) || (capacity == TaskCapacity.Creator)))
+            else if (taskAction == TaskAction.SubTaskCreate && ((capacity == TaskCapacity.Assignee) || (capacity == TaskCapacity.Creator) || (capacity == TaskCapacity.Follower)))
+            {
+                isAllowed = true;
+            }
+            else if (taskAction == TaskAction.SubTaskDelete && ((capacity == TaskCapacity.Assignee) || (capacity == TaskCapacity.Creator) || (capacity == TaskCapacity.Follower)))
+            {
+                isAllowed = true;
+            }
+            else if (taskAction == TaskAction.SubTaskEdit && ((capacity == TaskCapacity.Assignee) || (capacity == TaskCapacity.Creator) || (capacity == TaskCapacity.Follower)))
             {
                 isAllowed = true;
             }

@@ -25,6 +25,11 @@ namespace TaskManager.Web.Controllers
         // GET: Tasks
         public async Task<IActionResult> Index()
         {
+            if (TempData.ContainsKey("deletionId"))
+            {
+                TaskManager.Data.Task deletedTask = _context.Tasks.Where(x => x.Id == Convert.ToInt32(TempData["deletionId"])).SingleOrDefault();
+                ViewData["deletionMessage"] = "Task with ID => " + deletedTask.Id + " has been deleted";
+            }
             return View(await _context.Tasks.Where(x => x.IsDeleted != true).ToListAsync());
         }
 
@@ -79,7 +84,8 @@ namespace TaskManager.Web.Controllers
                     taskGridVM.LastUpdated = task.LastUpdatedAt.ToString();
                     taskGridVM.Status = task.TaskStatus.Status;
                     taskGridVM.Title = task.Title;
-                    TaskEmployee employee = _context.TaskEmployees.Where(x => x.TaskCapacity.Id == (int)Common.Common.TaskCapacity.Assignee).FirstOrDefault();
+                    TaskEmployee employee = _context.TaskEmployees.Where(x => x.TaskCapacity.Id == (int)Common.Common.TaskCapacity.Assignee
+                        && x.Task.Id == task.Id).FirstOrDefault();
                     taskGridVM.AssignedTo = employee.UserName;
                     tasksGridVMList.Add(taskGridVM);
                 }
@@ -489,6 +495,7 @@ namespace TaskManager.Web.Controllers
                 && x.TaskCapacity.Id == (int)Common.Common.TaskCapacity.Assignee).FirstOrDefault();
 
             taskVM.AssigneeCode = currentEmployee.UserName;
+            taskVM.CurrentUserName = currentUserName;
             return View(taskVM);
         }
 
@@ -650,9 +657,22 @@ namespace TaskManager.Web.Controllers
             updateProgressVM.Status = task.TaskStatus.Status;
             updateProgressVM.TaskProgress = task.TaskProgress;
             populateUpdateProgressVMDropDowns(updateProgressVM);
+            updateProgressVM.TaskEmployees = new List<string>();
+            var taskEmployees = await _context.TaskEmployees
+                .Where(x => x.Task.Id == id).ToListAsync();
+            foreach (TaskEmployee employee in taskEmployees)
+            {
+                updateProgressVM.TaskEmployees.Add(employee.UserName);
+            }
             return PartialView("_UpdateProgress", updateProgressVM);
         }
 
+
+        public IActionResult DeleteRedirect(int id)
+        {
+            TempData["deletionId"] = id;
+            return RedirectToAction("Index", "tasks");
+        }
 
         [HttpPost, ActionName("UpdateTaskProgress")]
         [ValidateAntiForgeryToken]
@@ -706,7 +726,7 @@ namespace TaskManager.Web.Controllers
                             progressAudit.ActionBy = currentUserName;
                             progressAudit.Description = "Progress updated to " + taskProgress;
                             progressAudit.Task = thisTask;
-                            progressAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.Assignment).SingleOrDefault();
+                            progressAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.Progress).SingleOrDefault();
                             _context.Add(progressAudit);
                         }
 
@@ -732,6 +752,13 @@ namespace TaskManager.Web.Controllers
                 }
             }
             populateUpdateProgressVMDropDowns(updateVM);
+            updateVM.TaskEmployees = new List<string>();
+            var taskEmployees = await _context.TaskEmployees
+                .Where(x => x.Task.Id == id).ToListAsync();
+            foreach (TaskEmployee employee in taskEmployees)
+            {
+                updateVM.TaskEmployees.Add(employee.UserName);
+            }
             return PartialView("_UpdateProgress", updateVM);
         }
 
@@ -838,6 +865,28 @@ namespace TaskManager.Web.Controllers
 
             return View(task);
         }
+
+        [HttpPost, ActionName("DeleteTask")]
+        public async Task<IActionResult> DeleteTask(int id)
+        {
+            bool isDeleted = false;
+            try
+            {
+                var task = await _context.Tasks.FindAsync(id);
+                task.IsDeleted = true;
+                _context.Tasks.Attach(task);
+                _context.Entry(task).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+                isDeleted = true;
+            }
+            catch(Exception ex)
+            {
+                
+            }
+
+            return new JsonResult(new { isDeleted = isDeleted });
+        }
+
 
         // POST: Tasks/Delete/5
         [HttpPost, ActionName("Delete")]

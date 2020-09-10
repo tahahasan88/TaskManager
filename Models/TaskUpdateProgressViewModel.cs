@@ -14,7 +14,7 @@ namespace TaskManager.Web.Models
         [Required]
         public string Remarks { get; set; }
         public string TaskProgress { get; set; }
-
+        public List<string> TaskEmployees { get; set; }
         public List<SelectListItem> StatusList { get; set; }
     }
 }

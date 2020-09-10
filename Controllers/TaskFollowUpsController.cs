@@ -230,6 +230,7 @@ namespace TaskManager.Web.Controllers
                     followUp.CreatedAt = DateTime.Now;
                     followUp.FollowerUserName = currentUserName;
                     followUp.Task = Thistask;
+                    followUp.Remarks = taskFollowUpVM.Remarks;
                     _context.Add(followUp);
 
                     if (!IsUserAlreadyFollowing(currentUserName, thisTaskId))
