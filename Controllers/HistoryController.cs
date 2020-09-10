@@ -15,12 +15,10 @@ namespace TaskManager.Web.Controllers
     public class HistoryController
     {
         private readonly TaskManagerContext _context;
-        private string currentUserName;
 
         public HistoryController(TaskManagerContext context)
         {
             _context = context;
-            currentUserName = "tahahasan";
         }
 
         public async Task<IActionResult> List(int taskId)

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using TaskManager.Data;
 using TaskManager.Web.Models;
 
@@ -14,12 +15,13 @@ namespace TaskManager.Web.Controllers
     {
         private readonly TaskManagerContext _context;
         public int currentTaskId = 4;
-        public string currentUserName = "tahahasan";
+        public string currentUserName = "";
 
 
-        public SubTasksController(TaskManagerContext context)
+        public SubTasksController(TaskManagerContext context, IConfiguration configuration)
         {
             _context = context;
+            currentUserName = configuration.GetSection("TaskManagerUserName").Value;
         }
 
 
@@ -126,15 +128,18 @@ namespace TaskManager.Web.Controllers
                 progressAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.SubTasks).SingleOrDefault();
                 _context.Add(progressAudit);
 
-                TaskEmployee employee = _context.TaskEmployees.Where(x => x.UserName == assignee && x.Task.Id == taskId).FirstOrDefault();
-                if (employee == null)
+                if (assignee != null && assignee != "")
                 {
-                    TaskEmployee subTaskAssignee = new TaskEmployee();
-                    subTaskAssignee.Task = subTask.Task;
-                    int subTaskAssigneeCapacity = (int)TaskManager.Common.Common.TaskCapacity.SubTaskAssignee;
-                    subTaskAssignee.TaskCapacity = _context.TaskCapacities.Where(x => x.Id == subTaskAssigneeCapacity).SingleOrDefault();
-                    subTaskAssignee.UserName = assignee;
-                    _context.Add(subTaskAssignee);
+                    TaskEmployee employee = _context.TaskEmployees.Where(x => x.UserName == assignee && x.Task.Id == taskId).FirstOrDefault();
+                    if (employee == null)
+                    {
+                        TaskEmployee subTaskAssignee = new TaskEmployee();
+                        subTaskAssignee.Task = subTask.Task;
+                        int subTaskAssigneeCapacity = (int)TaskManager.Common.Common.TaskCapacity.SubTaskAssignee;
+                        subTaskAssignee.TaskCapacity = _context.TaskCapacities.Where(x => x.Id == subTaskAssigneeCapacity).SingleOrDefault();
+                        subTaskAssignee.UserName = assignee;
+                        _context.Add(subTaskAssignee);
+                    }
                 }
 
                 _context.Add(subTask);
@@ -450,7 +455,6 @@ namespace TaskManager.Web.Controllers
                 existingSubTask.IsDeleted = true;
                 existingSubTask.LastUpdatedAt = DateTime.Now;
                 existingSubTask.LastUpdatedBy = currentUserName;
-                //_context.SubTasks.Remove(subTask);
                 _context.SubTasks.Attach(existingSubTask);
                 _context.Entry(existingSubTask).State = EntityState.Modified;
                 _context.SaveChanges();

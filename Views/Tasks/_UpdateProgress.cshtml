@@ -38,11 +38,10 @@
                         <textarea asp-for="@Model.Remarks" class="form-control" rows="3" cols="15" placeholder="Enter ..."></textarea>
                         <span asp-validation-for="@Model.Remarks" class="text-danger"></span>
                     </div>
-                    <div id="progressSpinner" style="display:none;" class="spinner-border text-primary" role="status">
-                        <span class="sr-only">Loading...</span>
-                    </div>
-
                 </form>
+                <div id="progressSpinner" style="display:none;" class="spinner-border text-primary" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
             </div>
            
                

@@ -13,7 +13,6 @@ namespace TaskManager.Web.Controllers
     public class TaskEmployeesController : Controller
     {
         private readonly TaskManagerContext _context;
-        int currentTaskId = 4;
 
         public TaskEmployeesController(TaskManagerContext context)
         {
@@ -27,7 +26,7 @@ namespace TaskManager.Web.Controllers
             List<TaskEmployee> employees =  await _context.TaskEmployees
                 .Include(x => x.TaskCapacity)
                 .Include(x => x.Task)
-                .Where(x => x.Task.Id == currentTaskId)
+                .Where(x => x.Task.Id == 4)
                 .ToListAsync();
             foreach (TaskEmployee employee in employees)
             {

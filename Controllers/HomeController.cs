@@ -57,18 +57,23 @@ namespace TaskManager.Controllers
             TaskSummaryViewModel taskSummaryVM = new TaskSummaryViewModel();
             taskSummaryVM.PendingTasksCount = _context.Tasks.Where(x => x.TaskStatus.Id
                 != (int)TaskManager.Common.Common.TaskStatus.Completed
-                && x.Target <= DateTime.Now).Count();
+                && x.IsDeleted != true
+                && x.Target >= DateTime.Now).Count();
 
             taskSummaryVM.OverDueTasksCount = _context.Tasks.Where(x => x.TaskStatus.Id
                 != (int)TaskManager.Common.Common.TaskStatus.Completed
+                && x.IsDeleted != true
                 && DateTime.Now > x.Target).Count();
 
             taskSummaryVM.ResolvedTodayCount = _context.Tasks.Where(x => x.TaskStatus.Id
                 == (int)TaskManager.Common.Common.TaskStatus.Completed
+                && x.IsDeleted != true
                 && x.LastUpdatedAt.Date == DateTime.Now.Date).Count();
 
             taskSummaryVM.FollowUpsCount = _context.TaskFollowUps.Where(x => x.Task.TaskStatus.Id
-                != (int)TaskManager.Common.Common.TaskStatus.Completed).Count();
+                != (int)TaskManager.Common.Common.TaskStatus.Completed
+                && x.Task.IsDeleted != true
+                ).Count();
 
             return new JsonResult(new { records = taskSummaryVM });
         }

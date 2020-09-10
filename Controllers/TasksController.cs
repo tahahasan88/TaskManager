@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using TaskManager.Common;
 using TaskManager.Data;
 using TaskManager.Web.Models;
@@ -14,11 +15,36 @@ namespace TaskManager.Web.Controllers
     public class TasksController : BaseController
     {
         private string currentUserName;
-        private int currentTask = 4;
 
-        public TasksController(TaskManagerContext context) : base(context)
+        public TasksController(TaskManagerContext context, IConfiguration configuration) : base(context)
         {
-            currentUserName = "Hasan";
+            currentUserName =configuration.GetSection("TaskManagerUserName").Value;
+        }
+
+        public IActionResult TasksSummary()
+        {
+            TaskSummaryViewModel taskSummaryVM = new TaskSummaryViewModel();
+            taskSummaryVM.PendingTasksCount = _context.Tasks.Where(x => x.TaskStatus.Id
+                != (int)TaskManager.Common.Common.TaskStatus.Completed
+                && x.IsDeleted != true
+                && x.Target >= DateTime.Now).Count();
+
+            taskSummaryVM.OverDueTasksCount = _context.Tasks.Where(x => x.TaskStatus.Id
+                != (int)TaskManager.Common.Common.TaskStatus.Completed
+                && x.IsDeleted != true
+                && DateTime.Now > x.Target).Count();
+
+            taskSummaryVM.ResolvedTodayCount = _context.Tasks.Where(x => x.TaskStatus.Id
+                == (int)TaskManager.Common.Common.TaskStatus.Completed
+                && x.IsDeleted != true
+                && x.LastUpdatedAt.Date == DateTime.Now.Date).Count();
+
+            taskSummaryVM.FollowUpsCount = _context.TaskFollowUps.Where(x => x.Task.TaskStatus.Id
+                != (int)TaskManager.Common.Common.TaskStatus.Completed
+                && x.Task.IsDeleted != true
+                ).Count();
+
+            return new JsonResult(new { records = taskSummaryVM });
         }
 
 
@@ -37,40 +63,9 @@ namespace TaskManager.Web.Controllers
         {
             try
             {
-                //var draw = HttpContext.Request.Form["draw"].FirstOrDefault();
                 var tasks = _context.Tasks
                             .Include(x => x.TaskStatus)
                             .Where(x => x.IsDeleted != true).OrderByDescending(x => x.LastUpdatedAt).ToList();
-                //// Skiping number of Rows count
-                //var start = Request.Form["start"].FirstOrDefault();
-                //// Paging Length 10,20
-                //var length = Request.Form["length"].FirstOrDefault();
-                //// Sort Column Name
-                //var sortColumn = Request.Form["columns[" + Request.Form["order[0][column]"].FirstOrDefault() + "][name]"].FirstOrDefault();
-                //// Sort Column Direction ( asc ,desc)
-                //var sortColumnDirection = Request.Form["order[0][dir]"].FirstOrDefault();
-                //// Search Value from (Search box)
-                //var searchValue = Request.Form["search[value]"].FirstOrDefault();
-
-                ////Paging Size (10,20,50,100)
-                //int pageSize = length != null ? Convert.ToInt32(length) : 0;
-                //int skip = start != null ? Convert.ToInt32(start) : 0;
-                //int recordsTotal = 0;
-
-                //// Getting all Customer data
-                //var customerData = (from tempcustomer in _context.CustomerTB
-                //                    select tempcustomer);
-
-                ////Sorting
-                //if (!(string.IsNullOrEmpty(sortColumn) && string.IsNullOrEmpty(sortColumnDirection)))
-                //{
-                //    customerData = customerData.OrderBy(sortColumn + " " + sortColumnDirection);
-                //}
-                ////Search
-                //if (!string.IsNullOrEmpty(searchValue))
-                //{
-                //    customerData = customerData.Where(m => m.Name == searchValue || m.Phoneno == searchValue || m.City == searchValue);
-                //}
 
                 //total number of rows count 
                 int recordsTotal = tasks.Count;
@@ -89,10 +84,6 @@ namespace TaskManager.Web.Controllers
                     taskGridVM.AssignedTo = employee.UserName;
                     tasksGridVMList.Add(taskGridVM);
                 }
-                //Paging 
-                //var data = customerData.Skip(skip).Take(pageSize).ToList();
-
-                //var data = customerData.Skip(skip).Take(pageSize).ToList();
                 //Returning Json Data
                 return Json(new { draw = "1", recordsFiltered = recordsTotal, recordsTotal = recordsTotal, data = tasksGridVMList });
 
@@ -143,23 +134,6 @@ namespace TaskManager.Web.Controllers
             return PartialView("_CreateMultiple", taskVM);
         }
 
-        public ActionResult Create2()
-        {
-            TaskViewModel taskVM = new TaskViewModel();
-            EmployeeList employeeList = new EmployeeList();
-            popuLateTaskViewDropDowns2(taskVM, employeeList);
-            return PartialView("Create", taskVM);
-        }
-
-        // GET: Tasks/Create
-        public IActionResult Create1()
-        {
-            TaskViewModel taskViewModel = new TaskViewModel();
-            EmployeeList employeeList = new EmployeeList();
-            popuLateTaskViewDropDowns2(taskViewModel, employeeList);
-            return View(taskViewModel);
-        }
-
         private void popuLateTaskViewDropDowns(TaskCreateViewModel taskVm, EmployeeList employeeList)
         {
             List<SelectListItem> employeeDrpDwnList = new List<SelectListItem>();
@@ -203,70 +177,6 @@ namespace TaskManager.Web.Controllers
             taskVm.EmployeeList = employeeDrpDwnList;
         }
   
-
-        [HttpPost]
-        public async Task<ActionResult> Create2(string title, string description, int priorityId, string assigneeUserName, string targetDate)
-        {
-            bool isTaskAdded = false;
-            try
-            {
-                Data.Task task = new Data.Task();
-                task.IsDeleted = false;
-                task.LastUpdatedAt = DateTime.Now;
-                task.LastUpdatedBy = currentUserName;
-                task.CreatedAt = DateTime.Now;
-                task.Target = DateTime.Parse(targetDate);
-                task.Title = title;
-                task.Description = description;
-                task.TaskProgress = "0";
-                task.TaskPriority = _context.TaskPriority.Where(x => x.Id == priorityId).SingleOrDefault();
-                task.TaskStatus = _context.TaskStatus.Where(x => x.Id == (int)TaskManager.Common.Common.TaskStatus.NotStarted).SingleOrDefault();
-                _context.Add(task);
-                await _context.SaveChangesAsync();
-
-                //Add task assignee
-                TaskEmployee taskAssignee = new TaskEmployee();
-                taskAssignee.Task = task;
-                int taskAssigneeCapacity = (int)TaskManager.Common.Common.TaskCapacity.Assignee;
-                taskAssignee.TaskCapacity = _context.TaskCapacities.Where(x => x.Id == taskAssigneeCapacity).SingleOrDefault();
-                taskAssignee.UserName = assigneeUserName;
-                _context.Add(taskAssignee);
-
-                //Add task creator
-                TaskEmployee taskCreator = new TaskEmployee();
-                taskCreator.Task = task;
-                int taskCreatorCapacity = (int)TaskManager.Common.Common.TaskCapacity.Creator;
-                taskCreator.TaskCapacity = _context.TaskCapacities.Where(x => x.Id == taskCreatorCapacity).SingleOrDefault();
-                taskCreator.UserName = currentUserName;
-                _context.Add(taskCreator);
-
-                //Audit this task creation..
-                TaskAudit progressAudit = new TaskAudit();
-                progressAudit.ActionDate = DateTime.Now;
-                progressAudit.ActionBy = currentUserName;
-                progressAudit.Description = "Task created. Progess is 0%";
-                progressAudit.Task = task;
-                progressAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.Progress).SingleOrDefault();
-                _context.Add(progressAudit);
-
-                TaskAudit assignmentAudit = new TaskAudit();
-                assignmentAudit.ActionDate = DateTime.Now;
-                assignmentAudit.ActionBy = currentUserName;
-                assignmentAudit.Description = "Task created. Assigned to " + assigneeUserName;
-                assignmentAudit.Task = task;
-                assignmentAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.Assignment).SingleOrDefault();
-                _context.Add(assignmentAudit);
-                await _context.SaveChangesAsync();
-                isTaskAdded = true;
-            }
-            catch (Exception ex)
-            {
-                isTaskAdded = false;
-            }
-
-            return new JsonResult(new { isTaskAdded = isTaskAdded });
-        }
-
         [HttpPost]
         public async Task<ActionResult> Create(TaskCreateViewModel taskCreateVM)
         {
@@ -675,7 +585,6 @@ namespace TaskManager.Web.Controllers
         }
 
         [HttpPost, ActionName("UpdateTaskProgress")]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateTaskProgress(int id, TaskUpdateProgressViewModel updateVM)
         {
             if (id != updateVM.Id)
@@ -689,7 +598,7 @@ namespace TaskManager.Web.Controllers
                 {
                     TaskEmployee currentEmployee = _context.TaskEmployees
                         .Include(x => x.TaskCapacity)
-                        .Where(x => x.UserName == currentUserName).FirstOrDefault();
+                        .Where(x => x.UserName == currentUserName && x.Task.Id == id).FirstOrDefault();
                     if (TaskPermissions.IsAllowed(Common.Common.TaskAction.ProgressUpdate, (Common.Common.TaskCapacity)currentEmployee.TaskCapacity.Id))
                     {
                         TaskManager.Data.Task thisTask = _context.Tasks.Where(x => x.Id == id).SingleOrDefault();
@@ -699,6 +608,7 @@ namespace TaskManager.Web.Controllers
                         thisTask.LastUpdatedAt = DateTime.Now;
                         thisTask.LastUpdatedBy = currentUserName;
                         thisTask.TaskProgress = taskProgress;
+                        thisTask.Description = updateVM.Remarks;
                         thisTask.TaskStatus = _context.TaskStatus.Where(x => x.Id == Convert.ToInt32(updateVM.Status)).SingleOrDefault();
                         _context.Update(thisTask);
 
@@ -731,7 +641,7 @@ namespace TaskManager.Web.Controllers
                         }
 
                         await _context.SaveChangesAsync();
-                        List<string> employeeList = GetTaskEmployeeEmailAddresses(currentTask, currentUserName);
+                        List<string> employeeList = GetTaskEmployeeEmailAddresses(id, currentUserName);
                         await MailSystem.SendEmail(MailSystem.FollowUpResponseEmailTemplate, employeeList);
                     }
                     else
@@ -823,7 +733,7 @@ namespace TaskManager.Web.Controllers
                         }
 
                         await _context.SaveChangesAsync();
-                        List<string> employeeList = GetTaskEmployeeEmailAddresses(currentTask, currentUserName);
+                        List<string> employeeList = GetTaskEmployeeEmailAddresses(id, currentUserName);
                         await MailSystem.SendEmail(MailSystem.FollowUpResponseEmailTemplate, employeeList);
                     }
                     else
@@ -931,7 +841,7 @@ namespace TaskManager.Web.Controllers
             taskHistoryVM.ProgressHistory = new List<TaskAudit>();
             taskHistoryVM.SubTasksHistory = new List<TaskAudit>();
 
-            List<TaskAudit> taskAuditList = await _context.TaskAudit.Where(x => x.Id == currentTask).ToListAsync();
+            List<TaskAudit> taskAuditList = await _context.TaskAudit.Where(x => x.Id == 4).ToListAsync();
             taskHistoryVM.ProgressHistory = taskAuditList.Where(x => x.Type.Id == (int)Common.Common.AuditType.Progress).ToList();
             taskHistoryVM.FollowUpHistory = taskAuditList.Where(x => x.Type.Id == (int)Common.Common.AuditType.FollowUp).ToList();
             taskHistoryVM.FollowUpResponseHistory = taskAuditList.Where(x => x.Type.Id == (int)Common.Common.AuditType.FollowUpResponse).ToList();

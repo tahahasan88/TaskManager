@@ -185,12 +185,35 @@
                     },
                     { "data" : "taskId", "name": "TaskId", "autoWidth": true, "visible" : false},
                     { "data": "title", "name": "Title", "autoWidth": true },
-                    { "data": "status", "name": "Status", "autoWidth": true },
-                     { "data": "progress", "name": "Progress", "autoWidth": true },
-                    //{
-                    //    "render": function (data, type, full, meta)
-                    //    { return '<input type="text" class="knob" value='+full.progress+'% data-width="10" data-height="10" data-fgColor="#3c8dbc">'; }
-                    //},
+                    {
+                         "render": function (data, type, full, meta)
+                         {
+                             if (full.status == "Not Started") {
+                                return '<span class="badge badge-secondary">Not Started</span>';
+                             }
+                             else
+                             if (full.status == "In Progress") {
+                                return '<span class="badge badge-warning">In Progress</span>';
+                             }
+                             else
+                             if (full.status == "On Hold") {
+                                return '<span class="badge badge-secondary">On Hold</span>';
+                             }
+                             else
+                             if (full.status == "Cancelled") {
+                                return '<span class="badge badge-secondary">Cancelled</span>';
+                             }
+                             else
+                                 return '<span class="badge badge-success">Completed</span>';
+                         }
+                    },
+                    {
+                         "render": function (data, type, full, meta) {
+                             return full.progress + "%";
+                         }
+                         //"data": "progress", "name": "Progress", "autoWidth": true
+                    },
+ 
 
                     { "data": "assignedTo", "name": "AssignedTo", "autoWidth": true },
                     { "data": "lastUpdated", "name": "LastUpdated", "autoWidth": true },

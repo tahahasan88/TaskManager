@@ -39,15 +39,20 @@ namespace TaskManager.Web.Controllers
             TaskSummaryViewModel taskSummaryVM = new TaskSummaryViewModel();
             taskSummaryVM.PendingTasksCount = _context.Tasks.Where(x => x.TaskStatus.Id
                 != (int)TaskManager.Common.Common.TaskStatus.Completed
-                && x.Target <= DateTime.Now).Count();
+                && x.IsDeleted != true
+                && x.Target >= DateTime.Now).Count();
 
             taskSummaryVM.CompletedTasksCount = _context.Tasks.Where(x => x.TaskStatus.Id
-               == (int)TaskManager.Common.Common.TaskStatus.Completed).Count();
+               == (int)TaskManager.Common.Common.TaskStatus.Completed
+               && x.IsDeleted != true
+               ).Count();
 
             taskSummaryVM.OnHoldTasksCount = _context.Tasks.Where(x => x.TaskStatus.Id
-               == (int)TaskManager.Common.Common.TaskStatus.OnHold).Count();
+               == (int)TaskManager.Common.Common.TaskStatus.OnHold
+               && x.IsDeleted != true
+               ).Count();
 
-            taskSummaryVM.TotalTasksCount = _context.Tasks.Count();
+            taskSummaryVM.TotalTasksCount = _context.Tasks.Where(x => x.IsDeleted != true).Count();
 
             return new JsonResult(new { records = taskSummaryVM });
         }

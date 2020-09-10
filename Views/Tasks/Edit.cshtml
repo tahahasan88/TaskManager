@@ -52,9 +52,9 @@
                         <dt class="col-sm-4">Status</dt>
                         <dd class="col-sm-8"><span id="taskStatusBadge" class="badge bg-primary">@Model.Task.TaskStatus.Status</span></dd>
                         <dt class="col-sm-4">Progress</dt>
-                        <dd class="col-sm-8"><input type="text" class="knob" value="@Model.Task.TaskProgress%" data-width="90" data-height="90" data-fgColor="#3c8dbc"></dd>
+                        <dd class="col-sm-8"><input id="taskProgressUpdateId" type="text" class="knob" value="@Model.Task.TaskProgress%" data-width="90" data-height="90" data-fgColor="#3c8dbc"></dd>
                         <dt class="col-sm-4">Remarks</dt>
-                        <dd class="col-sm-8">@Model.Task.Description</dd>
+                        <dd class="col-sm-8" id="taskRemarks">@Model.Task.Description</dd>
                     </dl>
                 </div>
             </div>
@@ -310,7 +310,7 @@
                                         if ($("#taskProgressInput").val() > 0 && $("#taskProgressInput").val() < 100) {
                                             $("#Status").val("2");
                                         }
-                                          else if ($("taskProgressInput").val() == 0) {
+                                          else if ($("taskProgressInput").val() == 0 || $("taskProgressInput").val() == null) {
                                                 $("#Status").val("1");
                                             }
                                             else
@@ -353,7 +353,6 @@
 
 
             }
-
 
 
             function setBadgeStyle() {
@@ -422,17 +421,40 @@
                 var form = $(this).parents('.modal').find('form');
                 var actionUrl = form.attr('action');
                 $("#TaskProgress").val($("#taskProgressId").val());
+                
                 var dataToSend = form.serialize();
                 $("#progressSpinner").show();
+                var status = $("#Status").val();
+                var taskProgress = $("#TaskProgress").val();
+                var remarks = $("#Remarks").val();
+
+                $("#taskStatusBadge").removeClass();
+                if (status == '1') {
+                    $("#taskStatusBadge").html("Not Started");
+                    $("#taskStatusBadge").addClass('badge badge-secondary');
+                    //$("#taskStatusBadge").val("In");
+                }
+                else if (status == '2') {
+                    $("#taskStatusBadge").html("In Progress");
+                    $("#taskStatusBadge").addClass('badge badge-warning');
+                }
+                else if (status == '3') {
+                    $("#taskStatusBadge").html("Completed");
+                    $("#taskStatusBadge").addClass('badge badge-success');
+                }
+                $("#taskProgressUpdateId").val(taskProgress + "%");
+                $("#taskRemarks").html(remarks);
+
                 $.post(actionUrl, dataToSend).done(function (data) {
                     var newBody = $('.modal-body', data);
                     $("#progressSpinner").hide();
+                    console.log('here');
+                    console.log(data);
                     progressUpdatePlaceHolder.find('.modal-body').replaceWith(newBody);
                     var isValid = newBody.find('[name="IsValid"]').val() == 'True';
                     if (isValid) {
                         getHistoryList();
                         progressUpdatePlaceHolder.find('.modal').modal('hide');
-                        tasksTable.ajax.reload();
                     }
                 });
             });

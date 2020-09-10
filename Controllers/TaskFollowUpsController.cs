@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using TaskManager.Common;
 using TaskManager.Data;
 using TaskManager.Web.Models;
@@ -14,11 +15,11 @@ namespace TaskManager.Web.Controllers
 {
     public class TaskFollowUpsController : BaseController
     {
-        private int currentTask = 4;
-        public string currentUserName = "Hasan";
+        private string currentUserName = "";
 
-        public TaskFollowUpsController(TaskManagerContext context) : base(context)
+        public TaskFollowUpsController(TaskManagerContext context, IConfiguration configuration) : base(context)
         {
+            currentUserName = configuration.GetSection("TaskManagerUserName").Value;
         }
 
         // GET: TaskFollowUps
@@ -154,10 +155,19 @@ namespace TaskManager.Web.Controllers
         {
             try
             {
-                var filteredTaskOutbox =  _context.TaskFollowUps
-                .Include(x => x.Task)
-                .Include(x => x.Task.TaskStatus)
-                .Where(x => x.FollowerUserName == currentUserName).ToList();
+                var filteredTaskOutbox = (from c in _context.TaskFollowUps
+                                          join o in _context.TaskEmployees
+                                          on c.Task.Id equals o.Task.Id
+                                          select new
+                                          {
+                                              c.FollowerUserName,
+                                              c.LastUpdatedAt,
+                                              c.Remarks,
+                                              c.Task.Id,
+                                              c.Task.TaskStatus.Status
+                                          })
+                                 .Where(x => x.FollowerUserName == currentUserName)
+                                 .OrderByDescending(m => m.LastUpdatedAt);
 
                 int recordsTotal = filteredTaskOutbox.Count();
 
@@ -170,8 +180,8 @@ namespace TaskManager.Web.Controllers
                         {
                             FollowUpDate = outbox.LastUpdatedAt,
                             Remarks = outbox.Remarks,
-                            TaskInfo = outbox.Task.Id.ToString(),
-                            Status = outbox.Task.TaskStatus.Status
+                            TaskInfo = outbox.Id.ToString(),
+                            Status = outbox.Status
                         }
                     );
                 }
@@ -214,7 +224,6 @@ namespace TaskManager.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(TaskFollowUpViewModel taskFollowUpVM)
         {
-            string currentUserName = "tahahasan";
             if (ModelState.IsValid)
             {
                 string [] listOfTaskIds = taskFollowUpVM.ListofTasks.Split(",");
