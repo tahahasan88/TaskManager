@@ -423,20 +423,6 @@ namespace TaskManager.Web.Controllers
             return View(subTask);
         }
 
-        // POST: SubTasks/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var subTask = await _context.SubTasks.FindAsync(id);
-            subTask.IsDeleted = true;
-            //_context.SubTasks.Remove(subTask);
-            _context.SubTasks.Attach(subTask);
-            _context.Entry(subTask).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
         public IActionResult IsSubTaskAlreadyExist(string subTaskDescription)
         {
             bool isSubTaskAlreadyAdded = false;

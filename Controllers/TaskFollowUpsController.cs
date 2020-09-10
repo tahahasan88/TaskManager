@@ -348,17 +348,6 @@ namespace TaskManager.Web.Controllers
             return View(taskFollowUp);
         }
 
-        // POST: TaskFollowUps/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var taskFollowUp = await _context.TaskFollowUps.FindAsync(id);
-            _context.TaskFollowUps.Remove(taskFollowUp);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
         private bool TaskFollowUpExists(int id)
         {
             return _context.TaskFollowUps.Any(e => e.Id == id);
