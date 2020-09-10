@@ -26,7 +26,7 @@ namespace TaskManager.Web.Controllers
             EmployeeList employeeList = new EmployeeList();
             foreach (TaskEmployee employee in taskEmployees)
             {
-                if (employee.UserName != currentUserName)
+                if (employee.UserName != null && employee.UserName != currentUserName)
                 {
                     listOfEmployeeEmailAddress.Add(employeeList.Employees.Where(x => x.UserName == employee.UserName)
                         .SingleOrDefault().EmailAddress);

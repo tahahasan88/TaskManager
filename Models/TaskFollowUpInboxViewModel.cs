@@ -7,7 +7,7 @@ namespace TaskManager.Web.Models
 {
     public class TaskFollowUpInboxViewModel
     {
-        public DateTime UpdatedDate { get; set; }
+        public string UpdatedDate { get; set; }
         public string Remarks { get; set; }
         public string TaskInfo { get; set; }
         public string Status { get; set; }

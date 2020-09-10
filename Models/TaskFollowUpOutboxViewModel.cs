@@ -7,7 +7,7 @@ namespace TaskManager.Web.Models
 {
     public class TaskFollowUpOutboxViewModel
     {
-        public DateTime FollowUpDate { get; set; }
+        public string FollowUpDate { get; set; }
         public string Remarks { get; set; }
         public string TaskInfo { get; set; }
         public string Status { get; set; }

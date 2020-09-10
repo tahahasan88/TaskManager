@@ -57,6 +57,7 @@ namespace TaskManager.Web.Controllers
             var filteredTaskInbox = (from c in _context.TaskFollowUps
                                  join o in _context.TaskEmployees
                                  .Where(x=>x.UserName == currentUserName)
+                                 .Where(x => x.Task.IsDeleted == false)
                                  on c.Task.Id equals o.Task.Id
                                  select new
                                  {
@@ -78,7 +79,7 @@ namespace TaskManager.Web.Controllers
                     new TaskFollowUpInboxViewModel()
                     {
                         Remarks = inbox.Remarks,
-                        UpdatedDate = inbox.LastUpdatedAt,
+                        UpdatedDate = inbox.LastUpdatedAt.ToString("dd-MMM-yyyy"),
                         TaskInfo = inbox.Id.ToString(),
                         FollowUpFrom = inbox.FollowerUserName,
                         Status = inbox.Status
@@ -93,7 +94,7 @@ namespace TaskManager.Web.Controllers
                 taskFollowUpMailBoxVM.OutBoxFollowUpList.Add(
                     new TaskFollowUpOutboxViewModel()
                     {
-                        FollowUpDate = outbox.LastUpdatedAt,
+                        FollowUpDate = outbox.LastUpdatedAt.ToString("dd-MMM-yyyy"),
                         Remarks = outbox.Remarks,
                         TaskInfo = outbox.Task.Id.ToString(),
                         Status = outbox.Task.TaskStatus.Status
@@ -111,6 +112,7 @@ namespace TaskManager.Web.Controllers
                 var filteredTaskInbox = (from c in _context.TaskFollowUps
                                          join o in _context.TaskEmployees
                                          .Where(x => x.UserName == currentUserName)
+                                         .Where(x => x.Task.IsDeleted == false)
                                          on c.Task.Id equals o.Task.Id
                                          select new
                                          {
@@ -133,7 +135,7 @@ namespace TaskManager.Web.Controllers
                         new TaskFollowUpInboxViewModel()
                         {
                             Remarks = inbox.Remarks,
-                            UpdatedDate = inbox.LastUpdatedAt,
+                            UpdatedDate = inbox.LastUpdatedAt.ToString("dd-MMM-yyyy"),
                             TaskInfo = inbox.Id.ToString(),
                             FollowUpFrom = inbox.FollowerUserName,
                             Status = inbox.Status
@@ -167,6 +169,7 @@ namespace TaskManager.Web.Controllers
                                               c.Task.TaskStatus.Status
                                           })
                                  .Where(x => x.FollowerUserName == currentUserName)
+                                 .Distinct()
                                  .OrderByDescending(m => m.LastUpdatedAt);
 
                 int recordsTotal = filteredTaskOutbox.Count();
@@ -178,7 +181,7 @@ namespace TaskManager.Web.Controllers
                     taskFollowUpOutBoxVMList.Add(
                         new TaskFollowUpOutboxViewModel()
                         {
-                            FollowUpDate = outbox.LastUpdatedAt,
+                            FollowUpDate = outbox.LastUpdatedAt.ToString("dd-MMM-yyyy"),
                             Remarks = outbox.Remarks,
                             TaskInfo = outbox.Id.ToString(),
                             Status = outbox.Status

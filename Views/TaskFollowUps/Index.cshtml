@@ -131,8 +131,32 @@
                     { "data" : "followUpFrom", "name": "Follow Up From", "autoWidth": true, "visible" : false},
                     { "data": "updatedDate", "name": "Date", "autoWidth": true },
                     { "data": "remarks", "name": "Remarks", "autoWidth": true },
-                    { "data": "taskInfo", "name": "Tasks", "autoWidth": true },
-                    { "data": "status", "name": "Status", "autoWidth": true }
+                    {
+                        "render": function (data, type, full, meta) {
+                            return '<a href="' + baseUrl.replace("taskfollowups", "") + 'tasks/Edit?id=' + full.taskInfo + '"><u>' + full.taskInfo +'</u> </a>';
+                         }
+                    },
+                    {
+                        "render": function (data, type, full, meta) {
+                        if (full.status == "Not Started") {
+                            return '<span class="badge badge-danger">Not Started</span>';
+                        }
+                        else
+                        if (full.status == "In Progress") {
+                            return '<span class="badge badge-warning text-white"> In Progress</span > ';
+                        }
+                        else
+                        if (full.status == "On Hold") {
+                            return '<span class="badge badge-secondary">On Hold</span>';
+                        }
+                        else
+                        if (full.status == "Cancelled") {
+                            return '<span class="badge badge-secondary">Cancelled</span>';
+                        }
+                        else
+                            return '<span class="badge badge-success">Completed</span>';
+                        }
+                     }
                 ],
                 order: [[ 1, 'desc' ]]
              });
@@ -147,12 +171,6 @@
                 //fixedColumns:   {
                 //    leftColumns: 2
                 //},
-
-                columnDefs: [ {
-                    orderable: false,
-                    className: 'select-checkbox',
-                    targets:   0
-                } ],
                 select: {
                     //style:    'os',
                     style:    'multiple',
@@ -164,10 +182,34 @@
                     "datatype": "json"
                  },
                  columns: [
-                    { "data" : "followUpDate", "name": "Date", "autoWidth": true, "visible" : false},
+                    { "data" : "followUpDate", "name": "Date", "autoWidth": true, "visible" : true},
                     { "data": "remarks", "name": "Remarks", "autoWidth": true },
-                    { "data": "taskInfo", "name": "Tasks", "autoWidth": true },
-                    { "data": "status", "name": "Status", "autoWidth": true }
+                    {
+                        "render": function (data, type, full, meta) {
+                            return '<a href="' + baseUrl.replace("taskfollowups", "") + 'tasks/Edit?id=' + full.taskInfo + '"><u>' + full.taskInfo +'</u> </a>';
+                         }
+                    },
+                    {
+                        "render": function (data, type, full, meta) {
+                        if (full.status == "Not Started") {
+                            return '<span class="badge badge-danger">Not Started</span>';
+                        }
+                        else
+                        if (full.status == "In Progress") {
+                            return '<span class="badge badge-warning text-white"> In Progress</span > ';
+                        }
+                        else
+                        if (full.status == "On Hold") {
+                            return '<span class="badge badge-secondary">On Hold</span>';
+                        }
+                        else
+                        if (full.status == "Cancelled") {
+                            return '<span class="badge badge-secondary">Cancelled</span>';
+                        }
+                        else
+                            return '<span class="badge badge-success">Completed</span>';
+                        }
+                     }
                 ],
                 order: [[ 1, 'desc' ]]
              });
