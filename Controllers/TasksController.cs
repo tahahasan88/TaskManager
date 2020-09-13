@@ -66,6 +66,9 @@ namespace TaskManager.Web.Controllers
                 var tasks = _context.Tasks
                             .Include(x => x.TaskStatus)
                             .Where(x => x.IsDeleted != true).OrderByDescending(x => x.LastUpdatedAt).ToList();
+                var taskEmployees = _context.TaskEmployees.Include(x => x.Task)
+                                    .Include(x => x.TaskCapacity)
+                                    .ToList();
 
                 //total number of rows count 
                 int recordsTotal = tasks.Count;
@@ -76,12 +79,19 @@ namespace TaskManager.Web.Controllers
 
                     taskGridVM.TaskId = task.Id;
                     taskGridVM.Progress = task.TaskProgress;
-                    taskGridVM.LastUpdated = task.LastUpdatedAt.ToString();
+                    taskGridVM.TargetDate = task.Target.ToString("dd-MMM-yyyy HH:mm:ss");
+                    taskGridVM.LastUpdated = task.LastUpdatedAt.ToString("dd-MMM-yyyy HH:mm:ss");
                     taskGridVM.Status = task.TaskStatus.Status;
                     taskGridVM.Title = task.Title;
-                    TaskEmployee employee = _context.TaskEmployees.Where(x => x.TaskCapacity.Id == (int)Common.Common.TaskCapacity.Assignee
+                    //taskGridVM.CreatedBy = tas
+                    TaskEmployee assignee = taskEmployees.Where(x => x.TaskCapacity.Id == (int)Common.Common.TaskCapacity.Assignee
                         && x.Task.Id == task.Id).FirstOrDefault();
-                    taskGridVM.AssignedTo = employee.UserName;
+
+                    TaskEmployee creator = taskEmployees.Where(x => x.TaskCapacity.Id == (int)Common.Common.TaskCapacity.Creator
+                        && x.Task.Id == task.Id).FirstOrDefault();
+
+                    taskGridVM.CreatedBy = creator.UserName;
+                    taskGridVM.AssignedTo = assignee.UserName;
                     tasksGridVMList.Add(taskGridVM);
                 }
                 //Returning Json Data
@@ -436,6 +446,55 @@ namespace TaskManager.Web.Controllers
                 updateVM.TaskEmployees.Add(employee.UserName);
             }
             return PartialView("_UpdateProgress", updateVM);
+        }
+
+        private void popuLateTaskEditViewDropDowns(TaskViewModel taskVm, EmployeeList employeeList)
+        {
+            List<SelectListItem> employeeDrpDwnList = new List<SelectListItem>();
+            List<SelectListItem> taskPriorityDrpDwnList = new List<SelectListItem>();
+            var taskPriorityEnumsList = Enum.GetValues(typeof(Common.Common.TaskPriority));
+            foreach (Common.Common.TaskPriority priority in taskPriorityEnumsList)
+            {
+                taskPriorityDrpDwnList.Add(new SelectListItem() { Text = priority.ToString(), Value = ((int)priority).ToString() });
+            }
+            taskVm.PriorityList = taskPriorityDrpDwnList;
+
+            foreach (Employee employee in employeeList.Employees)
+            {
+                if (employee.UserName != currentUserName)
+                {
+                    employeeDrpDwnList.Add(new SelectListItem() { Text = employee.EmployeeName, Value = employee.UserName.ToString() });
+                }
+            }
+            taskVm.EmployeeList = employeeDrpDwnList;
+        }
+
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var task = await _context.Tasks
+                .Include(x => x.TaskPriority)
+                .Include(x => x.TaskStatus)
+                .Where(x => x.Id == id).SingleOrDefaultAsync();
+
+            if (task == null)
+            {
+                return NotFound();
+            }
+            TaskViewModel taskVM = new TaskViewModel();
+            taskVM.Task = task;
+            popuLateTaskEditViewDropDowns(taskVM, new EmployeeList());
+            taskVM.PriorityId = task.TaskPriority.Id;
+            TaskEmployee currentEmployee = _context.TaskEmployees.Where(x => x.Task.Id == id
+                && x.TaskCapacity.Id == (int)Common.Common.TaskCapacity.Assignee).FirstOrDefault();
+
+            taskVM.AssigneeCode = currentEmployee.UserName;
+            taskVM.CurrentUserName = currentUserName;
+            return View(taskVM);
         }
 
 

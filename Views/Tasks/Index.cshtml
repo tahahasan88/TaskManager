@@ -5,161 +5,91 @@
 }
 
 @section HeaderScripts {
+
     <link rel="stylesheet" href="../../plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
     <link rel="stylesheet" href="../../plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
     <link rel="stylesheet" href="../../plugins/datatables-select/css/select.bootstrap4.min.css">
-<style>
+    @*<link rel="stylesheet" href="../../plugins/select2/css/select2.min.css">
+    <link rel="stylesheet" href="../../plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css">
+    <link rel="stylesheet" href="../../dist/css/adminlte.min.css">*@
+    <!-- Select2 -->
 
-.progress{
-    width: 80px;
-    height: 80px;
-    line-height: 100px;
-    background: none;
-    margin: 0 auto;
-    box-shadow: none;
-    position: relative;
-}
-.progress:after{
-    content: "";
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    border: 12px solid #fff;
-    position: absolute;
-    top: 0;
-    left: 0;
-}
-.progress > span{
-    width: 50%;
-    height: 100%;
-    overflow: hidden;
-    position: absolute;
-    top: 0;
-    z-index: 1;
-}
-.progress .progress-left{
-    left: 0;
-}
-.progress .progress-bar{
-    width: 100%;
-    height: 100%;
-    background: none;
-    border-width: 12px;
-    border-style: solid;
-    position: absolute;
-    top: 0;
-}
-.progress .progress-left .progress-bar{
-    left: 100%;
-    border-top-right-radius: 80px;
-    border-bottom-right-radius: 80px;
-    border-left: 0;
-    -webkit-transform-origin: center left;
-    transform-origin: center left;
-}
-.progress .progress-right{
-    right: 0;
-}
-.progress .progress-right .progress-bar{
-    left: -100%;
-    border-top-left-radius: 80px;
-    border-bottom-left-radius: 80px;
-    border-right: 0;
-    -webkit-transform-origin: center right;
-    transform-origin: center right;
-    animation: loading-1 1.8s linear forwards;
-}
-.progress .progress-value{
-    width: 90%;
-    height: 90%;
-    border-radius: 50%;
-    background: #44484b;
-    font-size: 24px;
-    color: #fff;
-    line-height: 80px;
-    text-align: center;
-    position: relative;
-    top: 5%;
-    left: 5%;
-}
-.progress.blue .progress-bar{
-    border-color: #049dff;
-}
-.progress.blue .progress-left .progress-bar{
-    animation: loading-2 1.5s linear forwards 1.8s;
-}
-.progress.yellow .progress-bar{
-    border-color: #fdba04;
-}
-.progress.yellow .progress-left .progress-bar{
-    animation: loading-3 1s linear forwards 1.8s;
-}
-.progress.pink .progress-bar{
-    border-color: #ed687c;
-}
-.progress.pink .progress-left .progress-bar{
-    animation: loading-4 0.4s linear forwards 1.8s;
-}
-.progress.green .progress-bar{
-    border-color: #1abc9c;
-}
-.progress.green .progress-left .progress-bar{
-    animation: loading-5 1.2s linear forwards 1.8s;
-}
+    <style>
+        th.progressCls {
+            width: 10px !important;
+        }
 
-@@keyframes loading-1{
-    0%{
-        -webkit-transform: rotate(0deg);
-        transform: rotate(0deg);
-    }
-    100%{
-        -webkit-transform: rotate(180deg);
-        transform: rotate(180deg);
-    }
-}
-@@keyframes loading-2{
-    0%{
-        -webkit-transform: rotate(0deg);
-        transform: rotate(0deg);
-    }
-    100%{
-        -webkit-transform: rotate(144deg);
-        transform: rotate(144deg);
-    }
-}
-@@keyframes loading-3{
-    0%{
-        -webkit-transform: rotate(0deg);
-        transform: rotate(0deg);
-    }
-    100%{
-        -webkit-transform: rotate(90deg);
-        transform: rotate(90deg);
-    }
-}
-@@keyframes loading-4{
-    0%{
-        -webkit-transform: rotate(0deg);
-        transform: rotate(0deg);
-    }
-    100%{
-        -webkit-transform: rotate(36deg);
-        transform: rotate(36deg);
-    }
-}
-@@keyframes loading-5{
-    0%{
-        -webkit-transform: rotate(0deg);
-        transform: rotate(0deg);
-    }
-    100%{
-        -webkit-transform: rotate(126deg);
-        transform: rotate(126deg);
-    }
-}
+        .select2-results__option[aria-selected=true] {
+            display: none;
+        }
 
+        .spinner {
+          height: 60px;
+          width: 60px;
+          margin: auto;
+          display: flex;
+          position: absolute;
+          -webkit-animation: rotation .6s infinite linear;
+          -moz-animation: rotation .6s infinite linear;
+          -o-animation: rotation .6s infinite linear;
+          animation: rotation .6s infinite linear;
+          border-left: 6px solid rgba(0, 174, 239, .15);
+          border-right: 6px solid rgba(0, 174, 239, .15);
+          border-bottom: 6px solid rgba(0, 174, 239, .15);
+          border-top: 6px solid rgba(0, 174, 239, .8);
+         border-radius: 100%;
+        }
 
-</style>
+        @@-webkit-keyframes rotation {
+          from {
+            -webkit-transform: rotate(0deg);
+          }
+          to {
+            -webkit-transform: rotate(359deg);
+          }
+        }
+
+        @@-moz-keyframes rotation {
+          from {
+            -moz-transform: rotate(0deg);
+          }
+          to {
+            -moz-transform: rotate(359deg);
+          }
+        }
+
+        @@-o-keyframes rotation {
+          from {
+            -o-transform: rotate(0deg);
+          }
+          to {
+            -o-transform: rotate(359deg);
+          }
+        }
+
+        @@keyframes rotation {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(359deg);
+          }
+        }
+
+        #overlay {
+          position: absolute;
+          display: none;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: rgba(0,0,0,0.5);
+          z-index: 2;
+          cursor: pointer;
+        }
+
+    </style>
+
 }
 
 <div class="container-fluid">
@@ -169,10 +99,10 @@
             @{
                 if (ViewData["deletionMessage"] != null)
                 {
-                        <div class="alert alert-danger alert-dismissible" role="alert">
-                            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                            @ViewData["deletionMessage"]
-                        </div>
+                    <div class="alert alert-danger alert-dismissible" role="alert">
+                        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                        @ViewData["deletionMessage"]
+                    </div>
                 }
             }
 
@@ -195,10 +125,13 @@
                                 <th>TaskId</th>
                                 <th>Title</th>
                                 <th>Status</th>
-                                <th>Progress</th>
+                                <th class="progressCls">Progress</th>
                                 <th>AssignedTo</th>
                                 <th>Last Updated</th>
                                 <th>Update</th>
+                                <th>Created By</th>
+                                <th>Target Date</th>
+                                <th>ProgressVal</th>
                             </tr>
                         </thead>
                     </table>
@@ -226,92 +159,338 @@
                         </button>
                     </div>
                 </div>
+                <div class="card-body">
+                    <div>
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Task Name</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <input id="taskNameId" type="text" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Status</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <select id="statusSelectValuesId" class="select2" multiple="multiple" data-placeholder="Select status" style="width: 100%;">
+                                        <option>Not Started</option>
+                                        <option>In Progress</option>
+                                        <option>On Hold</option>
+                                        <option>Cancelled</option>
+                                        <option>Completed</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Assigned To</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <select id="assignSelectValuesId" class="select2" multiple="multiple" data-placeholder="Select assigned to" style="width: 100%;">
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Progress</label>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <select name="progressFrom" class="form-control" id="progressFromSelectId">
+                                        <option>Any</option>
+                                        <option>0</option>
+                                        <option>25</option>
+                                        <option>50</option>
+                                        <option>75</option>
+                                        <option>100</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-1">
+                                <div class="form-group">
+                                    <i class="fa fa-arrow-right"></i>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <select name="progressTo" class="form-control" id="progressToSelectId">
+                                        <option>Any</option>
+                                        <option>0</option>
+                                        <option>25</option>
+                                        <option>50</option>
+                                        <option>75</option>
+                                        <option>100</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Target Date</label>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <div class="input-group date" id="targetFromdate" data-target-input="nearest">
+                                        <input id="fromRange" placeholder="From Date" type="text" class="form-control datetimepicker-input" data-target="#targetFromdate" />
+                                        <div class="input-group-append" hidden data-target="#targetFromdate" data-toggle="datetimepicker">
+                                            <div class="input-group-text"><i id="calendarFromtrigger" hidden class="fa fa-calendar"></i></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-1">
+                                <div class="form-group">
+                                    <i class="fa fa-arrow-right"></i>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <div class="input-group date" id="targetTodate" data-target-input="nearest">
+                                        <input id="toRange" placeholder="To Date" type="text" class="form-control datetimepicker-input" data-target="#targetTodate" />
+                                        <div class="input-group-append" hidden data-target="#targetTodate" data-toggle="datetimepicker">
+                                            <div class="input-group-text"><i id="calendarTotrigger" hidden class="fa fa-calendar"></i></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Created By</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <input id="createdById" type="text" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <button type="button" id="filter-submit-id" class="btn btn-primary">Apply</button>
+                    <button type="button" id="filter-reset-id" class="btn btn-default" data-dismiss="modal">Reset</button>
+                </div>
             </div>
             <!-- /.card -->
         </div>
     </div>
 
 
-        <div class="row">
-            <div class="col-12">
-                <!-- Default box -->
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Summary</h3>
-                        <div class="card-tools">
-                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
-                                <i class="fas fa-minus"></i>
-                            </button>
-                        </div>
+    <div class="row">
+        <div class="col-12">
+            <!-- Default box -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Summary</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                            <i class="fas fa-minus"></i>
+                        </button>
                     </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-6 col-md-3 text-center">
-                                <input id="pendingTasksId" type="text" class="knob" value="30" data-width="120" data-height="120"
-                                       data-fgColor="#f56954">
+                </div>
+                <div class="card-body">
+                    <div class="row" id="summaryRow">
+                        <div class="col-6 col-md-3 text-center">
+                            <input id="pendingTasksId" type="text" class="knob" value="30" data-width="120" data-height="120"
+                                   data-fgColor="#f56954">
 
-                                <div class="knob-label">PENDING</div>
-                            </div>
-                            <div class="col-6 col-md-3 text-center">
-                                <input id="completedTasksId" type="text" class="knob" value="30" data-width="120" data-height="120"
-                                       data-fgColor="#f56954">
-                                <div class="knob-label">COMPLETED</div>
-                            </div>
-                            <div class="col-6 col-md-3 text-center">
-                                <input id="onHoldTaskId" type="text" class="knob" value="30" data-width="120" data-height="120"
-                                       data-fgColor="#f56954">
-                                <div class="knob-label">ONHOLD</div>
-                            </div>
-                            <div class="col-6 col-md-3 text-center">
-                                <input id="totalTasksId" type="text" class="knob" value="30" data-width="120" data-height="120"
-                                       data-fgColor="#f56954">
-                                <div class="knob-label">TOTAL</div>
-                            </div>
+                            <div class="knob-label">PENDING</div>
+                        </div>
+                        <div class="col-6 col-md-3 text-center">
+                            <input id="completedTasksId" type="text" class="knob" value="30" data-width="120" data-height="120"
+                                   data-fgColor="#f56954">
+                            <div class="knob-label">COMPLETED</div>
+                        </div>
+                        <div class="col-6 col-md-3 text-center">
+                            <input id="onHoldTaskId" type="text" class="knob" value="30" data-width="120" data-height="120"
+                                   data-fgColor="#f56954">
+                            <div class="knob-label">ONHOLD</div>
+                        </div>
+                        <div class="col-6 col-md-3 text-center">
+                            <input id="totalTasksId" type="text" class="knob" value="30" data-width="120" data-height="120"
+                                   data-fgColor="#f56954">
+                            <div class="knob-label">TOTAL</div>
                         </div>
                     </div>
                 </div>
-                <!-- /.card -->
             </div>
-
+            <!-- /.card -->
         </div>
 
     </div>
-    <!-- /.container-fluid -->
+    <input type="text" id="progressFromId" value="0" hidden />
+    <input type="text" id="progressToId" value="50" hidden />
+</div>
+<!-- /.container-fluid -->
 
-    @section BodyScripts {
-        <script src="../../plugins/datatables/jquery.dataTables.min.js"></script>
-        <script src="../../plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
-        <script src="../../plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
-        <script src="../../plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
-        <script src="../../plugins/datatables-select/js/select.bootstrap4.min.js"></script>
-        <script src="../../plugins/datatables-select/js/dataTables.select.min.js"></script>
-        <script src="https://timeago.yarp.com/jquery.timeago.js" type="text/javascript"></script>>
+@section BodyScripts {
+    <script src="../../plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="../../plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+    <script src="../../plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+    <script src="../../plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+    <script src="../../plugins/datatables-select/js/select.bootstrap4.min.js"></script>
+    <script src="../../plugins/datatables-select/js/dataTables.select.min.js"></script>
+    <script src="https://timeago.yarp.com/jquery.timeago.js" type="text/javascript"></script>
+    <script src="../../plugins/select2/js/select2.full.min.js"></script>
 
-        <script>
+
+    <script>
         $(document).ready(function() {
 
+            //Initialize Select2 Elements
+            $('.select2').select2();
+            var progressFrom = '0';
+            var progressTo = '';
+            var fromTargetDate = '';
+            var toTargetDate = '';
 
-            $(".progress").each(function () {
 
-                var value = $(this).attr('data-value');
-                var left = $(this).find('.progress-left .progress-bar');
-                var right = $(this).find('.progress-right .progress-bar');
+            //Initialize Select2 Elements
+            $('.select2bs4').select2({
+                theme: 'bootstrap4'
+            });
 
-                if (value > 0) {
-                    if (value <= 50) {
-                        right.css('transform', 'rotate(' + percentageToDegrees(value) + 'deg)')
-                    } else {
-                        right.css('transform', 'rotate(180deg)')
-                        left.css('transform', 'rotate(' + percentageToDegrees(value - 50) + 'deg)')
+            var allEmployeeList = [];
+            
+            $('#targetFromdate').datetimepicker({
+                format: 'L'
+            });
+
+            $('#targetTodate').datetimepicker({
+                format: 'L'
+            });
+
+            $("#fromRange").click(function () {
+                $("#calendarFromtrigger").click();
+            });
+
+             $("#toRange").click(function () {
+                $("#calendarTotrigger").click();
+             });
+
+            $('#statusSelectValuesId').select2({
+                allowClear: true,
+                minimumResultsForSearch: -1,
+                width: 500
+            });
+
+            $("#assignSelectValuesId").select2({
+                allowClear: true,
+                minimumResultsForSearch: -1,
+                width: 500
+            });
+
+            $("#filter-submit-id").click(function () {
+
+                var taskName = ($("#taskNameId").val() != "") ? $("#taskNameId").val() : "";
+                var createdBy = ($("#createdById").val() != "") ? $("#createdById").val() : "";
+                
+                var selectStatuses = '';
+                $('#statusSelectValuesId > option:selected').each(function() {
+                    //alert($(this).text() + ' ' + $(this).val());
+                    selectStatuses += $(this).val() + "|";
+                });
+                if (selectStatuses.length > 0) {
+                    selectStatuses = selectStatuses.substring(0, selectStatuses.length - 1);
+                }
+
+                var assignedToValues = '';
+                $('#assignSelectValuesId > option:selected').each(function() {
+                    //alert($(this).text() + ' ' + $(this).val());
+                    assignedToValues += $(this).val() + "|";
+                });
+                if (assignedToValues.length > 0) {
+                    assignedToValues = assignedToValues.substring(0, assignedToValues.length - 1);
+                }
+                            
+                $('#progressFromSelectId > option:selected').each(function() {
+                    //alert($(this).text() + ' ' + $(this).val());
+                    progressFrom = $(this).val();
+                });
+                
+                 $('#progressToSelectId > option:selected').each(function() {
+                    progressTo = $(this).val();
+                 });
+
+                var isValid = true;
+                if (progressTo != '') {
+                    if (parseInt(progressTo) < parseInt(progressFrom)) {
+                        alert('Progress range is not valid. Progress to value can not be less than progress from value');
+                        isValid = false;
                     }
                 }
 
+                if ($("#fromRange").val() != '') {
+                    var d = new Date($("#fromRange").val());
+                    fromTargetDate = d;
+                }
+                if ($("#toRange").val() != '') {
+                    var d = new Date($("#toRange").val());
+                    toTargetDate = d;
+
+                    if (fromTargetDate != '') {
+                        if (toTargetDate.getTime() < fromTargetDate.getTime()) {
+                            alert('Target to Date can not be less than Target from range');
+                            isValid = false;
+                        }
+                    }
+                }
+
+                if (isValid) {
+                    tasksTable.column(2).search(taskName, true, false)
+                        .column(3).search(selectStatuses, true, false)
+                        .column(5).search(assignedToValues, true, false)
+                        .column(8).search(createdBy, true, false)
+                        .draw();
+                }
             });
 
-          function percentageToDegrees(percentage) {
-            return percentage / 100 * 360
 
-          }
+            $("#filter-reset-id").click(function () {
+
+                $("#taskNameId").val("");
+                
+                $("#statusSelectValuesId").val('').trigger('change');
+                $("#assignSelectValuesId").val('').trigger('change');
+                $("#progressFromSelectId").val($("#progressFromSelectId option:first").val());
+                $("#progressToSelectId").val($("#progressToSelectId option:first").val());
+                $("#fromRange").val('');
+                progressFrom = '0';
+                progressTo = '';
+                $("#toRange").val('');
+                $("#createdById").val('');
+                fromTargetDate = '';
+                toTargetDate = '';
+
+                 tasksTable.column(2).search('', true, false)
+                .column(3).search('', true, false)
+                .column(5).search('', true, false)
+                .column(8).search('', true, false)
+                .draw();
+            });
+
+
+            var summaryplaceHolder = $("#summaryRow");
 
             var thisPage = '../tasks';
             $(".nav-sidebar .nav-item .nav-link").each(function () {
@@ -322,10 +501,128 @@
                 }
             });
 
+
+            function validateTargetDateFilter(thisTargetDate) {
+
+                if (thisTargetDate != '') {
+                    thisTargetDate = new Date(thisTargetDate);
+                }
+                var min = '';
+                if (fromTargetDate != '') {
+                    min = new Date(fromTargetDate);;
+                }
+
+                if (min != '') {
+                    if (toTargetDate != '') {
+                        var max = new Date(toTargetDate);
+                        max.setHours(max.getHours() + 23);
+                        if (thisTargetDate.getTime() >= min.getTime() && thisTargetDate <= max.getTime()) {
+                            return true;
+                        }
+                        else
+                            return false;
+                    }
+                    else {
+                        if (thisTargetDate.getTime() >= min.getTime()) {
+                            return true;
+                        }
+                        else
+                            return false;
+                    }
+                }
+                else {
+                    min = new Date('0001-01-01T00:00:00');
+                    if (toTargetDate != '') {
+                        var max = new Date(toTargetDate);
+                        max.setHours(max.getHours() + 23);
+                        if (thisTargetDate.getTime() >= min.getTime() && thisTargetDate.getTime() <= max.getTime()) {
+                            return true;
+                        }
+                        else
+                            return false;
+                    }
+                    else if (thisTargetDate.getTime() >= min.getTime()) {
+                        return true;
+                    }
+                    else
+                        return false; 
+                }
+            }
+
+
+            function validateProgressFilter(thisProgress) {
+                 if (isNaN(progressFrom)) {
+                        progressFrom = '0';
+                    }
+                    thisProgress = parseInt(thisProgress);
+                    var min = parseInt(progressFrom);
+                    if (min != 0) {
+                        if (progressTo != 'Any' && progressTo != '') {
+                            var max = parseInt(progressTo);
+                            if (thisProgress >= min && thisProgress <= max) {
+                                return true;
+                            }
+                            else
+                                return false;
+                        }
+                        else {
+                            if (thisProgress >= min) {
+                                return true;
+                            }
+                            else
+                                return false;
+                        }
+                    }
+                    else {
+                        if (progressTo != 'Any' && progressTo != '') {
+                            var max = parseInt(progressTo);
+                            if (thisProgress >= min && thisProgress <= max) {
+                                return true;
+                            }
+                            else
+                                return false;
+                        }
+                        else if (thisProgress >= min) {
+                            return true;
+                        }
+                        else
+                            return false; 
+                    }
+            }
+
+
+            /* Custom filtering function which will search data in column four between two values */
+            $.fn.dataTable.ext.search.push(
+                function (settings, data, dataIndex) {
+                    var isValid = validateProgressFilter(data[10]);
+                    if (isValid) {
+                        isValid = validateTargetDateFilter(data[9]);
+                    }
+                    //console.log(targetDate.getDate());
+                    //if ( ( isNaN( min ) && isNaN( max ) ) ||
+                    //     ( isNaN( min ) && progress <= max ) ||
+                    //     ( min <= progress   && isNaN( max ) ) ||
+                    //     ( min <= progress   && progress <= max ) )
+                    //{
+                    //    return true;
+                    //}
+                    //return false;
+                    return isValid;
+                }
+            );
+
+
              var baseUrl = "@Html.Raw(this.Context.Request.Scheme + "://" + this.Context.Request.Host + this.Context.Request.Path)";
             var tasksTable = $('#example2')
                 .on('init.dt', function () {
-                } ).
+                    $(".knob").knob({});
+                }).on('page.dt', function () {
+                    setTimeout(
+                      function() 
+                        {
+                                $(".knob").knob({});
+                        }, 100);
+                }).
                 DataTable({
                 //scrollY:        300,
                 //scrollX:        true,
@@ -342,12 +639,14 @@
                 }, {
                         targets: -1,
                         className: 'dt[-head|-body]-center'
-                    } ],
+                    }
+                    ],
                 select: {
                     //style:    'os',
                     style:    'multiple',
                     selector: 'td:first-child'
-                 },
+                    },
+                search: {regex: true, caseInsensitive: true},
                  ajax: {
                     "url": baseUrl + "/LoadTasksData",
                     "type": "POST",
@@ -360,14 +659,11 @@
                             return "";
                         }
                     },
-                    { "data" : "taskId", "name": "TaskId", "autoWidth": true, "visible" : false},
+                    { "data" : "taskId", "name": "TaskId", "autoWidth": true, "visible" : false, "searchable" : true},
                     { "data": "title", "name": "Title", "autoWidth": true },
                     {
                          "render": function (data, type, full, meta)
                         {
-                            //'<i class="fa fa-exclamation-triangle" style="color:red"></i>'
-                            //         '<span class="badge badge-secondary">Not Started</span>';
-                             //alert(jQuery.timeago(full.lastUpdated));
                              if (full.status == "Not Started") {
                                  return '<span class="badge badge-danger">Not Started</span>';
                              }
@@ -387,25 +683,27 @@
                                  return '<span class="badge badge-success">Completed</span>';
                          }
                     },
-                    {
-                        "render": function (data, type, full, meta) {
-                            //return '<div class="progress blue"><span class="progress-left"><span class="progress-bar"></span></span><span class="progress-right"><span class="progress-bar"></span></span><div class="progress-value">90%</div></div>';
+                     {
 
-                             return full.progress + "%";
+                         "render": function (data, type, full, meta) {
+                              return '<input type =\"text\" class=\"knob\" value=\"'+ full.progress+ '%'+'\" data-width=\"50\" data-height=\"50\"' +
+                                "data-fgColor=\"#f56954\">";
                          }
                     },
-
 
                     { "data": "assignedTo", "name": "AssignedTo", "autoWidth": true },
                     {
                         "render": function (data, type, full, meta) {
-                            return '<a href="javascript:void(null);" title="'+full.lastUpdated+'" name="lastupdatedLink"><u>' + jQuery.timeago(full.lastUpdated) +'</u> </a>';
+                            return '<a href="javascript:void(null);" title="'+full.lastUpdated+'" name="lastupdatedLink">' + jQuery.timeago(full.lastUpdated) +'</a>';
                          }
                     },
                     {
                         "render": function (data, type, full, meta)
                         { return '<a class="btn btn-info" href="' + baseUrl + '/Edit?id=' + full.taskId + '">Edit</a>'; }
-                    },
+                     },
+                    { "data": "createdBy", "name": "Created By", "autoWidth": true, "visible": true, "searchable": true },
+                    { "data": "targetDate", "name": "Target Date", "autoWidth": true, "visible": true, "searchable": true },
+                    { "data" : "progress", "name": "ProgressVal", "autoWidth": true, "visible" : false, "searchable" : true},
                 ],
                 order: [[ 1, 'desc' ]]
             });
@@ -458,7 +756,7 @@
 
             $("#take-followup-btnId").click(function () {
                 var $buttonClicked = $(this);
-                //var id = $buttonClicked.attr('data-id');
+
                 var row_data = tasksTable.rows('.selected').data();
                 if (row_data.length > 0) {
                     var options = { "backdrop": "static", keyboard: true };
@@ -486,6 +784,13 @@
 
             function getSummaryInfo() {
 
+                var summaryRow = "<div class=\"col-6 col-md-3 text-center\">" +
+                    "<input id=\"pendingTasksId\" type=\"text\" class=\"knob\" value=\"summaryValue\" data-width=\"120\" data-height=\"120\"" +
+                            "data-fgColor=\"#f56954\">" +
+                    "<div class=\"knob-label\">summaryType</div>" +
+                    "</div>";
+                var completeSummaryHtml = "";
+
                 $.ajax({
                     type: "GET",
                     url: baseUrl.replace("tasks", "") + "TaskSummary/list",
@@ -495,10 +800,39 @@
                     success: function (data) {
                         $.each(data, function (i, val) {
                             tmpData = data[i];
+
                             $("#pendingTasksId").val(tmpData.pendingTasksCount);
                             $("#completedTasksId").val(tmpData.completedTasksCount);
                             $("#onHoldTaskId").val(tmpData.onHoldTasksCount);
                             $("#totalTasksId").val(tmpData.totalTasksCount);
+                            $("input.knob").trigger('change');
+                        });
+                    },
+                    error: function () {
+                        alert("Dynamic content load failed.");
+                    }
+                });
+            }
+
+            
+            function getAllEmployees() {
+                    assignSelectValuesId
+                    $.ajax({
+                    type: "GET",
+                    url: baseUrl.replace("tasks", "") + "TaskEmployees/AllEmployees",
+                    contentType: "application/json; charset=utf-8",
+                    data: null,
+                    datatype: "json",
+                    success: function (data) {
+                        $.each(data, function (i, val) {
+                            tmpData = data[i];
+                            $.each(tmpData, function (i, val) {
+                                allEmployeeList.push(tmpData[i].userName);
+                                 var o = new Option(tmpData[i].userName, tmpData[i].userName);
+                                /// jquerify the DOM object 'o' so we can use the html method
+                                $(o).html(tmpData[i].userName);
+                                $("#assignSelectValuesId").append(o);
+                            });
                         });
                     },
                     error: function () {
@@ -598,8 +932,9 @@
                 });
             });
 
+            getAllEmployees();
             getSummaryInfo();
 
         });
-        </script>
-    }
+    </script>
+}
