@@ -130,7 +130,10 @@ namespace TaskManager.Web.Controllers
 
                 if (assignee != null && assignee != "")
                 {
-                    TaskEmployee employee = _context.TaskEmployees.Where(x => x.UserName == assignee && x.Task.Id == taskId).FirstOrDefault();
+                    TaskEmployee employee = _context.TaskEmployees.Where(x => x.UserName == assignee
+                    && x.Task.Id == taskId
+                    && x.TaskCapacity.Id == (int)TaskManager.Common.Common.TaskCapacity.SubTaskAssignee
+                    ).FirstOrDefault();
                     if (employee == null)
                     {
                         TaskEmployee subTaskAssignee = new TaskEmployee();
@@ -138,7 +141,14 @@ namespace TaskManager.Web.Controllers
                         int subTaskAssigneeCapacity = (int)TaskManager.Common.Common.TaskCapacity.SubTaskAssignee;
                         subTaskAssignee.TaskCapacity = _context.TaskCapacities.Where(x => x.Id == subTaskAssigneeCapacity).SingleOrDefault();
                         subTaskAssignee.UserName = assignee;
+                        subTaskAssignee.IsActive = true;
                         _context.Add(subTaskAssignee);
+                    }
+                    else
+                    {
+                        employee.IsActive = true;
+                        _context.TaskEmployees.Attach(employee);
+                        _context.Entry(employee).State = EntityState.Modified;
                     }
                 }
 
@@ -207,6 +217,21 @@ namespace TaskManager.Web.Controllers
                         assigneeAudit.Task = subTask.Task;
                         assigneeAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.SubTasks).SingleOrDefault();
                         _context.Add(assigneeAudit);
+
+                        TaskEmployee existingSubTaskEmployee = _context.TaskEmployees.Where(x => x.UserName == previousAssignee
+                            && x.Task.Id == taskId
+                            && x.TaskCapacity.Id == (int)TaskManager.Common.Common.TaskCapacity.SubTaskAssignee
+                            ).FirstOrDefault();
+
+                        int userSubTaskCount = _context.SubTasks.Where(x => x.Task.Id == taskId && x.IsDeleted == false
+                            && x.SubTaskAssigneeUserName == previousAssignee).Count();
+
+                        if (existingSubTaskEmployee != null && userSubTaskCount <= 1)
+                        {
+                            existingSubTaskEmployee.IsActive = false;
+                            _context.TaskEmployees.Attach(existingSubTaskEmployee);
+                            _context.Entry(existingSubTaskEmployee).State = EntityState.Modified;
+                        }
                     }
                     if ( (isCompleted && previousStatus != Common.Common.TaskStatus.Completed)
                         || (!isCompleted && previousStatus == Common.Common.TaskStatus.Completed)
@@ -221,7 +246,10 @@ namespace TaskManager.Web.Controllers
                         _context.Add(progressAudit);
                     }
 
-                    TaskEmployee employee = _context.TaskEmployees.Where(x => x.UserName == assignee && x.Task.Id == taskId).FirstOrDefault();
+                    TaskEmployee employee = _context.TaskEmployees.Where(x => x.UserName == assignee
+                    && x.Task.Id == taskId
+                    && x.TaskCapacity.Id == (int)TaskManager.Common.Common.TaskCapacity.SubTaskAssignee
+                    ).FirstOrDefault();
                     if (employee == null)
                     {
                         TaskEmployee taskAssignee = new TaskEmployee();
@@ -229,7 +257,14 @@ namespace TaskManager.Web.Controllers
                         int subTaskAssigneeCapacity = (int)TaskManager.Common.Common.TaskCapacity.SubTaskAssignee;
                         taskAssignee.TaskCapacity = _context.TaskCapacities.Where(x => x.Id == subTaskAssigneeCapacity).SingleOrDefault();
                         taskAssignee.UserName = assignee;
+                        taskAssignee.IsActive = true;
                         _context.Add(taskAssignee);
+                    }
+                    else
+                    {
+                        employee.IsActive = true;
+                        _context.TaskEmployees.Attach(employee);
+                        _context.Entry(employee).State = EntityState.Modified;
                     }
 
                     _context.SaveChanges();
@@ -435,7 +470,9 @@ namespace TaskManager.Web.Controllers
         public IActionResult DeleteSubTask(int subTaskId)
         {
             bool isSubTaskDeleted = false;
-            Data.SubTask existingSubTask = _context.SubTasks.Where(x => x.Id == subTaskId).SingleOrDefault();
+            Data.SubTask existingSubTask = _context.SubTasks
+                .Include(x => x.Task)
+                .Where(x => x.Id == subTaskId).SingleOrDefault();
             if (existingSubTask != null)
             {
                 existingSubTask.IsDeleted = true;
@@ -443,6 +480,32 @@ namespace TaskManager.Web.Controllers
                 existingSubTask.LastUpdatedBy = currentUserName;
                 _context.SubTasks.Attach(existingSubTask);
                 _context.Entry(existingSubTask).State = EntityState.Modified;
+
+                TaskAudit deleteAudit = new TaskAudit();
+                deleteAudit.ActionDate = DateTime.Now;
+                deleteAudit.ActionBy = currentUserName;
+                deleteAudit.Description = "Sub task deleted";
+                deleteAudit.Task = existingSubTask.Task;
+                deleteAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.SubTasks).SingleOrDefault();
+                _context.Add(deleteAudit);
+
+                TaskEmployee taskEmployee = _context.TaskEmployees
+                    .Where(x => x.Task.Id == existingSubTask.Task.Id
+                    && x.TaskCapacity.Id == (int)TaskManager.Common.Common.TaskCapacity.SubTaskAssignee
+                    && x.UserName == existingSubTask.SubTaskAssigneeUserName
+                    ).FirstOrDefault();
+
+                int userSubTaskCount = _context.SubTasks.Where(x => x.Task.Id == existingSubTask.Task.Id && x.IsDeleted == false
+                           && x.SubTaskAssigneeUserName == existingSubTask.SubTaskAssigneeUserName
+                           ).Count();
+
+                if (taskEmployee != null && userSubTaskCount <= 1)
+                {
+                    taskEmployee.IsActive = false;
+                    _context.TaskEmployees.Attach(taskEmployee);
+                    _context.Entry(taskEmployee).State = EntityState.Modified;
+                }
+
                 _context.SaveChanges();
                 isSubTaskDeleted = true;
             }

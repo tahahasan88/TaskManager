@@ -194,6 +194,7 @@ namespace TaskManager.Web.Controllers
                     int taskAssigneeCapacity = (int)TaskManager.Common.Common.TaskCapacity.Assignee;
                     taskAssignee.TaskCapacity = _context.TaskCapacities.Where(x => x.Id == taskAssigneeCapacity).SingleOrDefault();
                     taskAssignee.UserName = taskCreateVM.AssigneeCode;
+                    taskAssignee.IsActive = true;
                     _context.Add(taskAssignee);
 
                     //Add task creator
@@ -202,6 +203,7 @@ namespace TaskManager.Web.Controllers
                     int taskCreatorCapacity = (int)TaskManager.Common.Common.TaskCapacity.Creator;
                     taskCreator.TaskCapacity = _context.TaskCapacities.Where(x => x.Id == taskCreatorCapacity).SingleOrDefault();
                     taskCreator.UserName = currentUserName;
+                    taskCreator.IsActive = true;
                     _context.Add(taskCreator);
 
                     //Audit this task creation..

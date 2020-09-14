@@ -42,7 +42,7 @@ namespace TaskManager.Web.Controllers
             List<TaskEmployee> employeeList = await _context.TaskEmployees
                 .Include(x => x.Task)
                 .Include(x => x.TaskCapacity)
-                .Where(x => x.Task.Id == taskId)
+                .Where(x => x.Task.Id == taskId && x.IsActive == true)
                 .ToListAsync();
 
             foreach (TaskEmployee employee in employeeList)

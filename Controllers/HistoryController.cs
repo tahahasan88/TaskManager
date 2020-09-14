@@ -35,7 +35,7 @@ namespace TaskManager.Web.Controllers
             {
                 auditVMList.Add(new HistoryViewModel()
                 {
-                    HistoryDate = auditTask.ActionDate,
+                    HistoryDate = auditTask.ActionDate.ToString("dd-MMM-yyyy hh:mm:ss"),
                     ActionBy = auditTask.ActionBy,
                     Description = auditTask.Description,
                     Type = auditTask.Type.Id

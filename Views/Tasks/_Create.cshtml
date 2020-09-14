@@ -36,7 +36,7 @@
                     </div>
                     <div class="form-group">
                         <label asp-for="@Model.Target" class="control-label"></label>
-                        <input asp-for="@Model.Target" class="form-control" />
+                        <input asp-for="@Model.Target" asp-format="{0:dd/MM/yyyy HH:mm}" class="form-control" />
                         <span asp-validation-for="@Model.Target" class="text-danger"></span>
                     </div>
                     <div class="form-group">

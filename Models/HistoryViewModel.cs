@@ -8,7 +8,7 @@ namespace TaskManager.Web.Models
 {
     public class HistoryViewModel
     { 
-        public DateTime HistoryDate { get; set; }
+        public string HistoryDate { get; set; }
         public int Type { get; set; }
         public string Description { get; set; }
         public string ActionBy { get; set; }

@@ -11,6 +11,18 @@
     <link rel="stylesheet" href="../../plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
     <link rel="stylesheet" href="../../plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
     <link rel="stylesheet" href="../../plugins/datatables-select/css/select.bootstrap4.min.css">
+    <style>
+        .active, .multi-btn:hover {
+          background-color: #666;
+          color: white;
+        }
+
+         .multi-btn.active{
+          background-color: #666 !important;
+          color: white !important;
+        }
+
+    </style>
 
 }
 
@@ -159,19 +171,19 @@
                     </div>
                 </div>
                 <div class="btn-group-toggle flex-wrap mt-3 ml-3" data-toggle="buttons">
-                    <label class="btn btn-info active">
+                    <label class="btn btn-info multi-btn active">
                         <input type="checkbox" class="historyType" value="progress" checked autocomplete="off"> Progress
                     </label>
-                    <label class="btn btn-info">
+                    <label class="btn btn-info multi-btn">
                         <input type="checkbox" class="historyType" value="assignment" autocomplete="off"> Assignment
                     </label>
-                    <label class="btn btn-info">
+                    <label class="btn btn-info multi-btn">
                         <input type="checkbox" class="historyType" value="followup" autocomplete="off"> Follow Up
                     </label>
-                    <label class="btn btn-info">
+                    <label class="btn btn-info multi-btn">
                         <input type="checkbox" class="historyType" value="followupresponse" autocomplete="off"> Follow Up Response
                     </label>
-                    <label class="btn btn-info">
+                    <label class="btn btn-info multi-btn">
                         <input type="checkbox" class="historyType" value="subtasks" autocomplete="off"> SubTasks
                     </label>
                 </div>
@@ -221,6 +233,7 @@
                 }
             });
             var disabled = false;
+            $(".knob").knob({});
 
             function setFormState() {
 
@@ -560,6 +573,7 @@
                                             success: function (data) {
                                                 subTaskPlaceHolder.html('');
                                                 getSubTasksList();
+                                                appendEmployeeList();
                                             },
                                             error: function () {
                                                 alert("Dynamic content load failed.");

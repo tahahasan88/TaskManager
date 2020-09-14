@@ -18,9 +18,17 @@ namespace TaskManager.Web.Models
         public string Title { get; set; }
         [Required]
         public string Description { get; set; }
+
+        private DateTime _date = DateTime.Now;
+
         [Required]
         [ValidateDateRange]
-        public DateTime Target { get; set; }
+
+        public DateTime Target
+        {
+            get { return _date; }
+            set { _date = value; }
+        }
         public bool IsDeleted { get; set; }
         public DateTime LastUpdatedAt { get; set; }
         public string LastUpdatedBy { get; set; }
