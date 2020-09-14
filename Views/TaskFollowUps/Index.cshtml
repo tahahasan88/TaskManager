@@ -114,12 +114,11 @@
 
                 columnDefs: [ {
                     orderable: false,
-                    className: 'select-checkbox',
                     targets:   0
                 } ],
                 select: {
                     //style:    'os',
-                    style:    'multiple',
+                    style:    'os',
                     selector: 'td:first-child'
                  },
                  ajax: {
@@ -128,7 +127,7 @@
                     "datatype": "json"
                  },
                  columns: [
-                    { "data" : "followUpFrom", "name": "Follow Up From", "autoWidth": true, "visible" : false},
+                    { "data" : "followUpFrom", "name": "Follow Up From", "autoWidth": true, "visible" : true},
                     { "data": "updatedDate", "name": "Date", "autoWidth": true },
                     { "data": "remarks", "name": "Remarks", "autoWidth": true },
                     {

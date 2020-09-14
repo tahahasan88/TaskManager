@@ -93,8 +93,12 @@ namespace TaskManager.Web.Controllers
                .Include(x => x.TaskCapacity)
                .Where(x => x.Task.Id == taskId && x.UserName == userName)
                .FirstOrDefault();
+            if (employeeProfile == null)
+            {
+                employeeProfile = new TaskEmployee();
+                employeeProfile.TaskCapacity = new TaskCapacity() { Id = (int)Common.Common.TaskCapacity.Follower };
+            }
             
-
             bool isTaskDeletionAllowed = TaskPermissions.IsAllowed(Common.Common.TaskAction.TaskDelete, (Common.Common.TaskCapacity)employeeProfile.TaskCapacity.Id);
             bool isSubTaskDeletionAllowed = TaskPermissions.IsAllowed(Common.Common.TaskAction.SubTaskDelete, (Common.Common.TaskCapacity)employeeProfile.TaskCapacity.Id);
             bool isTaskEditAllowed = TaskPermissions.IsAllowed(Common.Common.TaskAction.TaskEdit, (Common.Common.TaskCapacity)employeeProfile.TaskCapacity.Id);

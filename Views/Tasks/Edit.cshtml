@@ -431,18 +431,22 @@
                     $("#taskStatusBadge").html("Completed");
                     $("#taskStatusBadge").addClass('badge badge-success');
                 }
-                $("#taskProgressUpdateId").val(taskProgress + "%");
+                $("#taskProgressUpdateId").val(taskProgress + '%');
                 $("#taskRemarks").html(remarks);
 
                 $.post(actionUrl, dataToSend).done(function (data) {
                     var newBody = $('.modal-body', data);
                     $("#progressSpinner").hide();
                     console.log('here');
-                    console.log(data);
                     progressUpdatePlaceHolder.find('.modal-body').replaceWith(newBody);
                     var isValid = newBody.find('[name="IsValid"]').val() == 'True';
                     if (isValid) {
-                        getHistoryList();
+                        getHistoryList();    
+                        setTimeout(
+                            function() 
+                            {
+                                    $("input.knob").trigger('change');
+                            }, 100);
                         progressUpdatePlaceHolder.find('.modal').modal('hide');
                     }
                 });

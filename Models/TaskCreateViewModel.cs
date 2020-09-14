@@ -54,7 +54,7 @@ namespace TaskManager.Web.Models
             string taskTitle = (string)value;
             // your validation logic
 
-            Data.Task existingTask = _context.Tasks.Where(x => x.Title == taskTitle).SingleOrDefault();
+            Data.Task existingTask = _context.Tasks.Where(x => x.Title == taskTitle && x.IsDeleted == false).SingleOrDefault();
             bool isTaskAlreadyAdded = existingTask != null ? true : false;
 
             if (!isTaskAlreadyAdded)

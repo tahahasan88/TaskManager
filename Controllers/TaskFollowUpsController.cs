@@ -111,15 +111,15 @@ namespace TaskManager.Web.Controllers
             {
                 var filteredTaskInbox = (from c in _context.TaskFollowUps
                                          join o in _context.TaskEmployees
-                                         .Where(x => x.UserName == currentUserName)
-                                         .Where(x => x.Task.IsDeleted == false)
+                                         .Where(x => x.UserName == currentUserName &&
+                                          x.IsActive == true && x.Task.IsDeleted == false)
                                          on c.Task.Id equals o.Task.Id
                                          select new
                                          {
                                              c.FollowerUserName,
                                              c.LastUpdatedAt,
                                              c.Remarks,
-                                             c.Task.Id,
+                                             c.Task.Title,
                                              c.Task.TaskStatus.Status
                                          })
                                  .Where(x => x.FollowerUserName != currentUserName)
@@ -136,7 +136,7 @@ namespace TaskManager.Web.Controllers
                         {
                             Remarks = inbox.Remarks,
                             UpdatedDate = inbox.LastUpdatedAt.ToString("dd-MMM-yyyy"),
-                            TaskInfo = inbox.Id.ToString(),
+                            TaskInfo = inbox.Title,
                             FollowUpFrom = inbox.FollowerUserName,
                             Status = inbox.Status
                         });
@@ -159,13 +159,14 @@ namespace TaskManager.Web.Controllers
             {
                 var filteredTaskOutbox = (from c in _context.TaskFollowUps
                                           join o in _context.TaskEmployees
+                                          .Where(x => x.IsActive == true && x.Task.IsDeleted == false)
                                           on c.Task.Id equals o.Task.Id
                                           select new
                                           {
                                               c.FollowerUserName,
                                               c.LastUpdatedAt,
                                               c.Remarks,
-                                              c.Task.Id,
+                                              c.Task.Title,
                                               c.Task.TaskStatus.Status
                                           })
                                  .Where(x => x.FollowerUserName == currentUserName)
@@ -183,7 +184,7 @@ namespace TaskManager.Web.Controllers
                         {
                             FollowUpDate = outbox.LastUpdatedAt.ToString("dd-MMM-yyyy"),
                             Remarks = outbox.Remarks,
-                            TaskInfo = outbox.Id.ToString(),
+                            TaskInfo = outbox.Title,
                             Status = outbox.Status
                         }
                     );
@@ -199,7 +200,6 @@ namespace TaskManager.Web.Controllers
             }
 
         }
-
 
 
         public bool IsUserAlreadyFollowing(string userName, int taskId)

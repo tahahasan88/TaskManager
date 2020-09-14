@@ -1,4 +1,6 @@
 ﻿
+@model TaskManager.Web.Models.TaskViewModel
+
 @{
     ViewData["Title"] = "Tasks";
     ViewData["Heading"] = "Tasks";
@@ -9,10 +11,8 @@
     <link rel="stylesheet" href="../../plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
     <link rel="stylesheet" href="../../plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
     <link rel="stylesheet" href="../../plugins/datatables-select/css/select.bootstrap4.min.css">
-    @*<link rel="stylesheet" href="../../plugins/select2/css/select2.min.css">
-    <link rel="stylesheet" href="../../plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css">
-    <link rel="stylesheet" href="../../dist/css/adminlte.min.css">*@
-    <!-- Select2 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
 
     <style>
         th.progressCls {
@@ -22,7 +22,6 @@
         .select2-results__option[aria-selected=true] {
             display: none;
         }
-
     </style>
 
 }
@@ -96,128 +95,163 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div>
-                        <div class="row" style="height:40px;">
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label>Task Name</label>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <input id="taskNameId" type="text" class="form-control">
-                                </div>
+                    <div class="row" style="height:40px;">
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Task Name</label>
                             </div>
                         </div>
-                        <div class="row" style="height:40px;">
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label>Status</label>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <select id="statusSelectValuesId" class="select2" multiple="multiple" data-placeholder="Select status" style="width: 100%;">
-                                        <option>Not Started</option>
-                                        <option>In Progress</option>
-                                        <option>On Hold</option>
-                                        <option>Cancelled</option>
-                                        <option>Completed</option>
-                                    </select>
-                                </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <input id="taskNameId" type="text" class="form-control">
                             </div>
                         </div>
-                        <div class="row" style="height:40px;">
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label>Assigned To</label>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <select id="assignSelectValuesId" class="select2" multiple="multiple" data-placeholder="Select assigned to" style="width: 100%;">
-                                    </select>
-                                </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <button id="clearTaskNameId" class="btn btn-default"><i class="fa fa-close"></i>Clear</button>
                             </div>
                         </div>
-                        <div class="row" style="height:40px;">
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label>Progress</label>
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <select name="progressFrom" class="form-control" id="progressFromSelectId">
-                                        <option>Any</option>
-                                        <option>0</option>
-                                        <option>25</option>
-                                        <option>50</option>
-                                        <option>75</option>
-                                        <option>100</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-1" style="text-align:center">
-                                <div class="form-group">
-                                    <i class="fa fa-arrow-right"></i>
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <select name="progressTo" class="form-control" id="progressToSelectId">
-                                        <option>Any</option>
-                                        <option>0</option>
-                                        <option>25</option>
-                                        <option>50</option>
-                                        <option>75</option>
-                                        <option>100</option>
-                                    </select>
-                                </div>
+                    </div>
+                    <div class="row" style="height:40px;">
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Status</label>
                             </div>
                         </div>
-                        <div class="row" style="height:40px;">
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label>Target Date</label>
-                                </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <select id="statusSelectValuesId" class="select2" multiple="multiple" data-placeholder="Select status" style="width: 100%;">
+                                    <option>Not Started</option>
+                                    <option>In Progress</option>
+                                    <option>On Hold</option>
+                                    <option>Cancelled</option>
+                                    <option>Completed</option>
+                                </select>
                             </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <div class="input-group date" id="targetFromdate" data-target-input="nearest">
-                                        <input id="fromRange" placeholder="From Date" type="text" class="form-control datetimepicker-input" data-target="#targetFromdate" />
-                                        <div class="input-group-append" hidden data-target="#targetFromdate" data-toggle="datetimepicker">
-                                            <div class="input-group-text"><i id="calendarFromtrigger" hidden class="fa fa-calendar"></i></div>
-                                        </div>
+                        </div>
+                        <div class="col-md-4" style="text-align:left">
+                            <div class="form-group">
+                                <button id="clearStatusId" class="btn btn-default"><i class="fa fa-close"></i>Clear</button>
+                                <button id="defaultStatusId" class="btn btn-default"><i class="far fa-circle"></i>Default</button>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row" style="height:40px;">
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Assigned To</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <select id="assignSelectValuesId" class="select2" multiple="multiple" data-placeholder="Select assigned to" style="width: 100%;">
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <button id="clearAssignId" class="btn btn-default"><i class="fa fa-close"></i>Clear</button>
+                                <button id="defaultAssignUserId" class="btn btn-default"><i class="fas fa-user"></i>Me</button>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" style="height:40px;">
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Progress</label>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <select name="progressFrom" class="form-control" id="progressFromSelectId">
+                                    <option>Any</option>
+                                    <option>0</option>
+                                    <option>25</option>
+                                    <option>50</option>
+                                    <option>75</option>
+                                    <option>100</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-1" style="text-align:center">
+                            <div class="form-group">
+                                <i class="fa fa-arrow-right"></i>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <select name="progressTo" class="form-control" id="progressToSelectId">
+                                    <option>Any</option>
+                                    <option>0</option>
+                                    <option>25</option>
+                                    <option>50</option>
+                                    <option>75</option>
+                                    <option>100</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2" style="text-align:right">
+                            <div class="form-group">
+                                <button id="clearProgressId" class="btn btn-default"><i class="fa fa-close"></i>Clear</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" style="height:40px;">
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Target Date</label>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <div class="input-group date" id="targetFromdate" data-target-input="nearest">
+                                    <input id="fromRange" placeholder="From Date" type="text" class="form-control datetimepicker-input" data-target="#targetFromdate" />
+                                    <div class="input-group-append" hidden data-target="#targetFromdate" data-toggle="datetimepicker">
+                                        <div class="input-group-text"><i id="calendarFromtrigger" hidden class="fa fa-calendar"></i></div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-1" style="text-align:center">
-                                <div class="form-group">
-                                    <i class="fa fa-arrow-right"></i>
-                                </div>
+                        </div>
+                        <div class="col-md-1" style="text-align:center">
+                            <div class="form-group">
+                                <i class="fa fa-arrow-right"></i>
                             </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <div class="input-group date" id="targetTodate" data-target-input="nearest">
-                                        <input id="toRange" placeholder="To Date" type="text" class="form-control datetimepicker-input" data-target="#targetTodate" />
-                                        <div class="input-group-append" hidden data-target="#targetTodate" data-toggle="datetimepicker">
-                                            <div class="input-group-text"><i id="calendarTotrigger" hidden class="fa fa-calendar"></i></div>
-                                        </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <div class="input-group date" id="targetTodate" data-target-input="nearest">
+                                    <input id="toRange" placeholder="To Date" type="text" class="form-control datetimepicker-input" data-target="#targetTodate" />
+                                    <div class="input-group-append" hidden data-target="#targetTodate" data-toggle="datetimepicker">
+                                        <div class="input-group-text"><i id="calendarTotrigger" hidden class="fa fa-calendar"></i></div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="row" style="height:40px;">
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label>Created By</label>
-                                </div>
+                        <div class="col-md-2" style="text-align:right">
+                            <div class="form-group">
+                                <button id="clearTargetId" class="btn btn-default"><i class="fa fa-close"></i>Clear</button>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <input id="createdById" type="text" class="form-control">
-                                </div>
+                        </div>
+                    </div>
+                    <div class="row" style="height:40px;">
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Created By</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <input id="createdById" type="text" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <button id="clearCreatedById" class="btn btn-default"><i class="fa fa-close"></i>Clear</button>
+                                <button id="defaultCreatedByUserId" class="btn btn-default"><i class="fas fa-user"></i>Me</button>
+
                             </div>
                         </div>
                     </div>
@@ -227,55 +261,56 @@
                     <button type="button" id="filter-reset-id" class="btn btn-default" data-dismiss="modal">Reset</button>
                 </div>
             </div>
-            <!-- /.card -->
         </div>
+        <!-- /.card -->
     </div>
+</div>
 
 
-    <div class="row">
-        <div class="col-12">
-            <!-- Default box -->
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Summary</h3>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
-                            <i class="fas fa-minus"></i>
-                        </button>
-                    </div>
+<div class="row">
+    <div class="col-12">
+        <!-- Default box -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Summary</h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
                 </div>
-                <div class="card-body">
-                    <div class="row" id="summaryRow">
-                        <div class="col-6 col-md-3 text-center">
-                            <input id="pendingTasksId" type="text" class="knob" value="30" data-width="120" data-height="120"
-                                   data-fgColor="#3c8dbc">
+            </div>
+            <div class="card-body">
+                <div class="row" id="summaryRow">
+                    <div class="col-6 col-md-3 text-center">
+                        <input id="pendingTasksId" type="text" class="knob" value="30" data-width="120" data-height="120"
+                               data-fgColor="#3c8dbc">
 
-                            <div class="knob-label">PENDING</div>
-                        </div>
-                        <div class="col-6 col-md-3 text-center">
-                            <input id="completedTasksId" type="text" class="knob" value="30" data-width="120" data-height="120"
-                                   data-fgColor="#3c8dbc">
-                            <div class="knob-label">COMPLETED</div>
-                        </div>
-                        <div class="col-6 col-md-3 text-center">
-                            <input id="onHoldTaskId" type="text" class="knob" value="30" data-width="120" data-height="120"
-                                   data-fgColor="#3c8dbc">
-                            <div class="knob-label">ONHOLD</div>
-                        </div>
-                        <div class="col-6 col-md-3 text-center">
-                            <input id="totalTasksId" type="text" class="knob" value="30" data-width="120" data-height="120"
-                                   data-fgColor="#3c8dbc">
-                            <div class="knob-label">TOTAL</div>
-                        </div>
+                        <div class="knob-label">PENDING</div>
+                    </div>
+                    <div class="col-6 col-md-3 text-center">
+                        <input id="completedTasksId" type="text" class="knob" value="30" data-width="120" data-height="120"
+                               data-fgColor="#3c8dbc">
+                        <div class="knob-label">COMPLETED</div>
+                    </div>
+                    <div class="col-6 col-md-3 text-center">
+                        <input id="onHoldTaskId" type="text" class="knob" value="30" data-width="120" data-height="120"
+                               data-fgColor="#3c8dbc">
+                        <div class="knob-label">ONHOLD</div>
+                    </div>
+                    <div class="col-6 col-md-3 text-center">
+                        <input id="totalTasksId" type="text" class="knob" value="30" data-width="120" data-height="120"
+                               data-fgColor="#3c8dbc">
+                        <div class="knob-label">TOTAL</div>
                     </div>
                 </div>
             </div>
-            <!-- /.card -->
         </div>
-
+        <!-- /.card -->
     </div>
-    <input type="text" id="progressFromId" value="0" hidden />
-    <input type="text" id="progressToId" value="50" hidden />
+
+</div>
+<input type="text" id="progressFromId" value="0" hidden />
+<input type="text" id="progressToId" value="50" hidden />
 </div>
 <!-- /.container-fluid -->
 
@@ -307,7 +342,7 @@
             });
 
             var allEmployeeList = [];
-            
+
             $('#targetFromdate').datetimepicker({
                 format: 'L'
             });
@@ -323,6 +358,49 @@
              $("#toRange").click(function () {
                 $("#calendarTotrigger").click();
              });
+
+            $("#clearTaskNameId").click(function () {
+                $("#taskNameId").val("");
+            });
+
+            $("#clearStatusId").click(function () {
+                $("#statusSelectValuesId").val('').trigger('change');
+            });
+
+            $("#defaultStatusId").click(function () {
+                $("#statusSelectValuesId").val('').trigger('change');
+                $("#statusSelectValuesId").val($("#statusSelectValuesId option:first").val()).trigger('change');
+            });
+
+            $("#defaultAssignUserId").click(function () {
+                $("#assignSelectValuesId").val('').trigger('change');
+                currentUserName = "@Model.CurrentUserName";
+                //currentUserName = 'Kashif';
+                $("#assignSelectValuesId").val(currentUserName).trigger('change');
+            });
+
+            $("#defaultCreatedByUserId").click(function () {
+                currentUserName = "@Model.CurrentUserName";
+                $("#createdById").val(currentUserName);
+            });
+
+            $("#clearAssignId").click(function () {
+                $("#assignSelectValuesId").val('').trigger('change');
+            });
+
+            $("#clearProgressId").click(function () {
+                $("#progressFromSelectId").val($("#progressFromSelectId option:first").val());
+                $("#progressToSelectId").val($("#progressToSelectId option:first").val());
+            });
+
+             $("#clearTargetId").click(function () {
+                 $("#fromRange").val('');
+                 $("#toRange").val('');
+             });
+
+              $("#clearCreatedById").click(function () {
+                  $("#createdById").val('');
+            });
 
             $('#statusSelectValuesId').select2({
                 allowClear: true,
@@ -340,7 +418,7 @@
 
                 var taskName = ($("#taskNameId").val() != "") ? $("#taskNameId").val() : "";
                 var createdBy = ($("#createdById").val() != "") ? $("#createdById").val() : "";
-                
+
                 var selectStatuses = '';
                 $('#statusSelectValuesId > option:selected').each(function() {
                     //alert($(this).text() + ' ' + $(this).val());
@@ -358,12 +436,12 @@
                 if (assignedToValues.length > 0) {
                     assignedToValues = assignedToValues.substring(0, assignedToValues.length - 1);
                 }
-                            
+
                 $('#progressFromSelectId > option:selected').each(function() {
                     //alert($(this).text() + ' ' + $(this).val());
                     progressFrom = $(this).val();
                 });
-                
+
                  $('#progressToSelectId > option:selected').each(function() {
                     progressTo = $(this).val();
                  });
@@ -405,7 +483,7 @@
             $("#filter-reset-id").click(function () {
 
                 $("#taskNameId").val("");
-                
+
                 $("#statusSelectValuesId").val('').trigger('change');
                 $("#assignSelectValuesId").val('').trigger('change');
                 $("#progressFromSelectId").val($("#progressFromSelectId option:first").val());
@@ -481,7 +559,7 @@
                         return true;
                     }
                     else
-                        return false; 
+                        return false;
                 }
             }
 
@@ -522,7 +600,7 @@
                             return true;
                         }
                         else
-                            return false; 
+                            return false;
                     }
             }
 
@@ -554,10 +632,10 @@
                     $(".knob").knob({});
                 }).on('page.dt', function () {
                     setTimeout(
-                      function() 
-                        {
-                                $(".knob").knob({});
-                        }, 100);
+                    function()
+                    {
+                            $(".knob").knob({});
+                    }, 100);
                 }).
                 DataTable({
                 //scrollY:        300,
@@ -750,7 +828,7 @@
                 });
             }
 
-            
+
             function getAllEmployees() {
                     assignSelectValuesId
                     $.ajax({
@@ -801,7 +879,13 @@
                     var isValid = newBody.find('[name="IsValid"]').val() == 'True';
                     if (isValid) {
                         taskFollowUpPlaceHolder.find('.modal').modal('hide');
-                        tasksTable.ajax.reload();
+                        tasksTable.ajax.reload(function () {
+                             setTimeout(
+                                function()
+                                {
+                                        $(".knob").knob({});
+                                }, 100);
+                        });
                     }
                 });
             });
@@ -839,7 +923,7 @@
                         taskCreationPlaceHolder.find('.modal').modal('hide');
                         tasksTable.ajax.reload(function () {
                              setTimeout(
-                                function() 
+                                function()
                                 {
                                         $(".knob").knob({});
                                 }, 100);
@@ -871,7 +955,7 @@
                         }
                         tasksTable.ajax.reload(function () {
                              setTimeout(
-                                function() 
+                                function()
                                 {
                                         $(".knob").knob({});
                                 }, 100);

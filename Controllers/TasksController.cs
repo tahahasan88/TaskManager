@@ -14,7 +14,7 @@ namespace TaskManager.Web.Controllers
 {
     public class TasksController : BaseController
     {
-        private string currentUserName;
+        public string currentUserName;
 
         public TasksController(TaskManagerContext context, IConfiguration configuration) : base(context)
         {
@@ -49,14 +49,17 @@ namespace TaskManager.Web.Controllers
 
 
         // GET: Tasks
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
             if (TempData.ContainsKey("deletionId"))
             {
                 TaskManager.Data.Task deletedTask = _context.Tasks.Where(x => x.Id == Convert.ToInt32(TempData["deletionId"])).SingleOrDefault();
                 ViewData["deletionMessage"] = "Task with ID => " + deletedTask.Id + " has been deleted";
             }
-            return View(await _context.Tasks.Where(x => x.IsDeleted != true).ToListAsync());
+            TaskViewModel taskVM = new TaskViewModel();
+            taskVM.CurrentUserName = currentUserName;
+            //return View(await _context.Tasks.Where(x => x.IsDeleted != true).ToListAsync());
+            return View(taskVM);
         }
 
         public IActionResult LoadTasksData()
@@ -157,10 +160,10 @@ namespace TaskManager.Web.Controllers
 
             foreach (Employee employee in employeeList.Employees)
             {
-                if (employee.UserName != currentUserName)
-                {
+                //if (employee.UserName != currentUserName)
+                //{
                     employeeDrpDwnList.Add(new SelectListItem() { Text = employee.EmployeeName, Value = employee.UserName.ToString() });
-                }
+                //}
             }
             taskVm.EmployeeList = employeeDrpDwnList;
             taskVm.Target = DateTime.Now;
@@ -347,10 +350,12 @@ namespace TaskManager.Web.Controllers
             populateUpdateProgressVMDropDowns(updateProgressVM);
             updateProgressVM.TaskEmployees = new List<string>();
             var taskEmployees = await _context.TaskEmployees
-                .Where(x => x.Task.Id == id).ToListAsync();
-            foreach (TaskEmployee employee in taskEmployees)
+                .Where(x => x.Task.Id == id && x.IsActive == true)
+                .Select(x => x.UserName).Distinct()
+                .ToListAsync();
+            foreach (string employeeUserName in taskEmployees)
             {
-                updateProgressVM.TaskEmployees.Add(employee.UserName);
+                updateProgressVM.TaskEmployees.Add(employeeUserName);
             }
             return PartialView("_UpdateProgress", updateProgressVM);
         }
@@ -412,7 +417,7 @@ namespace TaskManager.Web.Controllers
                             TaskAudit progressAudit = new TaskAudit();
                             progressAudit.ActionDate = DateTime.Now;
                             progressAudit.ActionBy = currentUserName;
-                            progressAudit.Description = "Progress updated to " + taskProgress;
+                            progressAudit.Description = "Progress updated to " + taskProgress + "%";
                             progressAudit.Task = thisTask;
                             progressAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.Progress).SingleOrDefault();
                             _context.Add(progressAudit);

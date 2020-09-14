@@ -41,7 +41,7 @@ namespace TaskManager.Web.Models
                     {
                         foreach (string taskTitle in taskTitles)
                         {
-                            Data.Task existingTask = _context.Tasks.Where(x => x.Title == taskTitle).SingleOrDefault();
+                            Data.Task existingTask = _context.Tasks.Where(x => x.Title == taskTitle && x.IsDeleted == false).SingleOrDefault();
                             bool isTaskAlreadyAdded = existingTask != null ? true : false;
 
                             if (isTaskAlreadyAdded)

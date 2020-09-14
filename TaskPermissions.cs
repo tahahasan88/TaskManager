@@ -23,7 +23,8 @@ namespace TaskManager.Web
             {
                 isAllowed = true;
             }
-            else if (taskAction == TaskAction.SubTaskCreate && ((capacity == TaskCapacity.Assignee) || (capacity == TaskCapacity.Creator) || (capacity == TaskCapacity.Follower)))
+            else if (taskAction == TaskAction.SubTaskCreate && ((capacity == TaskCapacity.Assignee) || (capacity == TaskCapacity.Creator)
+                || (capacity == TaskCapacity.Follower)))
             {
                 isAllowed = true;
             }
@@ -39,7 +40,6 @@ namespace TaskManager.Web
             {
                 isAllowed = true;
             }
-
             return isAllowed;
         }
     }
