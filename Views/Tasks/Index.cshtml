@@ -19,6 +19,30 @@
             width: 10px !important;
         }
 
+        /*tr.selected
+        {background-color:#dee2e6 !important}*/
+
+        table.dataTable tbody td.select-checkbox, table.dataTable tbody th.select-checkbox {
+          width: 2px !important;
+          /*height: 10px !important;*/
+          margin: 0px;
+          /*margin-top:10px !important;*/
+          margin-left: -20px;
+          -webkit-appearance: none;
+          -moz-appearance: none;
+          -o-appearance: none;
+          appearance: none;
+          box-shadow: none;
+          font-size: 0.6em;
+          line-height: 6em;
+          /*text-align: left;
+          line-height: 1.9em;*/
+        }
+
+         td.select-checkbox:before {
+              margin-top: 10px !important;            
+        }
+
         .select2-results__option[aria-selected=true] {
             display: none;
         }
@@ -244,7 +268,9 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <input id="createdById" type="text" class="form-control">
+                                @*<input id="createdById" type="text" class="form-control">*@
+                                <select id="createdByValuesId" class="select2" multiple="multiple" data-placeholder="Created by" style="width: 100%;">
+                                </select>
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -307,10 +333,6 @@
         </div>
         <!-- /.card -->
     </div>
-
-</div>
-<input type="text" id="progressFromId" value="0" hidden />
-<input type="text" id="progressToId" value="50" hidden />
 </div>
 <!-- /.container-fluid -->
 
@@ -344,11 +366,12 @@
             var allEmployeeList = [];
 
             $('#targetFromdate').datetimepicker({
-                format: 'L'
+                format: 'DD-MMM-yyyy'
+
             });
 
             $('#targetTodate').datetimepicker({
-                format: 'L'
+                format: 'DD-MMM-yyyy'
             });
 
             $("#fromRange").click(function () {
@@ -380,8 +403,9 @@
             });
 
             $("#defaultCreatedByUserId").click(function () {
+                $("#createdByValuesId").val('').trigger('change');
                 currentUserName = "@Model.CurrentUserName";
-                $("#createdById").val(currentUserName);
+                $("#createdByValuesId").val(currentUserName).trigger('change');
             });
 
             $("#clearAssignId").click(function () {
@@ -399,7 +423,7 @@
              });
 
               $("#clearCreatedById").click(function () {
-                  $("#createdById").val('');
+                  $("#createdByValuesId").val('').trigger('change');
             });
 
             $('#statusSelectValuesId').select2({
@@ -414,10 +438,25 @@
                 width: 500
             });
 
+            $("#createdByValuesId").select2({
+                allowClear: true,
+                minimumResultsForSearch: -1,
+                width: 500
+            });
+
             $("#filter-submit-id").click(function () {
 
                 var taskName = ($("#taskNameId").val() != "") ? $("#taskNameId").val() : "";
-                var createdBy = ($("#createdById").val() != "") ? $("#createdById").val() : "";
+                //var createdBy = ($("#createdById").val() != "") ? $("#createdById").val() : "";
+
+                var createdBy = "";
+                $('#createdByValuesId > option:selected').each(function() {
+                    //alert($(this).text() + ' ' + $(this).val());
+                    createdBy += $(this).val() + "|";
+                });
+                if (createdBy.length > 0) {
+                    createdBy = createdBy.substring(0, createdBy.length - 1);
+                }
 
                 var selectStatuses = '';
                 $('#statusSelectValuesId > option:selected').each(function() {
@@ -486,6 +525,7 @@
 
                 $("#statusSelectValuesId").val('').trigger('change');
                 $("#assignSelectValuesId").val('').trigger('change');
+                $("#createdByValuesId").val('').trigger('change');
                 $("#progressFromSelectId").val($("#progressFromSelectId option:first").val());
                 $("#progressToSelectId").val($("#progressToSelectId option:first").val());
                 $("#fromRange").val('');
@@ -650,10 +690,11 @@
                     orderable: false,
                     className: 'select-checkbox',
                     targets:   0
-                }, {
-                        targets: -1,
-                        className: 'dt[-head|-body]-center'
-                    }
+                }
+                    //, {
+                    //    targets: -1,
+                    //    className: 'dt[-head|-body]-center'
+                    //}
                     ],
                 select: {
                     //style:    'os',
@@ -830,7 +871,7 @@
 
 
             function getAllEmployees() {
-                    assignSelectValuesId
+                    
                     $.ajax({
                     type: "GET",
                     url: baseUrl.replace("tasks", "") + "TaskEmployees/AllEmployees",
@@ -846,6 +887,9 @@
                                 /// jquerify the DOM object 'o' so we can use the html method
                                 $(o).html(tmpData[i].userName);
                                 $("#assignSelectValuesId").append(o);
+                                var o1 = new Option(tmpData[i].userName, tmpData[i].userName);
+                                $(o1).html(tmpData[i].userName);
+                                $("#createdByValuesId").append(o1);
                             });
                         });
                     },

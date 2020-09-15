@@ -30,6 +30,8 @@
     <link rel="stylesheet" href="~/plugins/daterangepicker/daterangepicker.css">
     <!-- summernote -->
     <link rel="stylesheet" href="~/plugins/summernote/summernote-bs4.min.css">
+    <link rel="stylesheet" href="../../plugins/employee/css/employee.css">
+
     <section class="HeaderScripts">
         @RenderSection("HeaderScripts", required: false)
     </section>
@@ -56,7 +58,7 @@
                         <img src="../dist/img/user2-160x160.jpg" class="img-circle elevation-2" alt="User Image">
                     </div>
                     <div class="info">
-                        <a href="#" class="d-block">Alexander Pierce</a>
+                        <a id="employeeDetailId" href="#" class="d-block">Alexander Pierce</a>
                     </div>
                 </div>
 
@@ -166,6 +168,7 @@
     <script src="~/plugins/jquery-ui/jquery-ui.min.js"></script>
     <!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
 
+    <div id="employeeDetailDiv" style="display:none"></div>
     <section class="BodyScripts">
         @RenderSection("BodyScripts", required:false)
     </section>
@@ -199,5 +202,41 @@
     <script src="~/dist/js/demo.js"></script>
     <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
     @*<script src="~/dist/js/pages/dashboard.js"></script>*@
+
+    <script>
+       $(document).ready(function() {
+
+           var baseUrl = "@Html.Raw(this.Context.Request.Scheme + "://" + this.Context.Request.Host)";
+           var employeeDiv = $('#employeeDetailDiv');
+           //var options = { "backdrop": "static", keyboard: true };
+
+           $("#employeeDetailId").click(function () {
+               $.ajax({
+                        type: "GET",
+                        url:  baseUrl + "/employeeDetail/Index",
+                        contentType: "application/json; charset=utf-8",
+                        data:null,
+                        datatype: "json",
+                        success: function (data) {
+                            employeeDiv.html(data);
+                            //employeeDiv.find('.modal').modal(options);
+                            employeeDiv.find('.modal').modal('show');
+                            employeeDiv.show();
+
+                            $("#employee-closePopup-icon").click(function () {
+                                $('.modal-backdrop').removeClass("modal-backdrop");   
+                                employeeDiv.hide();
+                            });
+                        },
+                        error: function () {
+                            alert("Dynamic content load failed.");
+                        }
+                    });
+           });
+        });
+    </script>
+
+
+
 </body>
 </html>
