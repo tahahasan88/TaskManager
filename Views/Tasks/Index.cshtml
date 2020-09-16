@@ -8,11 +8,6 @@
 
 @section HeaderScripts {
 
-    <link rel="stylesheet" href="../../plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
-    <link rel="stylesheet" href="../../plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
-    <link rel="stylesheet" href="../../plugins/datatables-select/css/select.bootstrap4.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-
 
     <style>
         th.progressCls {
@@ -337,12 +332,6 @@
 <!-- /.container-fluid -->
 
 @section BodyScripts {
-    <script src="../../plugins/datatables/jquery.dataTables.min.js"></script>
-    <script src="../../plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
-    <script src="../../plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
-    <script src="../../plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
-    <script src="../../plugins/datatables-select/js/select.bootstrap4.min.js"></script>
-    <script src="../../plugins/datatables-select/js/dataTables.select.min.js"></script>
     <script src="https://timeago.yarp.com/jquery.timeago.js" type="text/javascript"></script>
     <script src="../../plugins/select2/js/select2.full.min.js"></script>
 
@@ -357,10 +346,16 @@
             var fromTargetDate = '';
             var toTargetDate = '';
 
+            @if (ViewData["UserName"] != null)
+            {
+                <text>
+                    $("#employeeDetailId").html("@ViewData["UserName"]");
+                </text>
+            }
 
             //Initialize Select2 Elements
             $('.select2bs4').select2({
-                theme: 'bootstrap4'
+            theme: 'bootstrap4'
             });
 
             var allEmployeeList = [];
@@ -447,11 +442,8 @@
             $("#filter-submit-id").click(function () {
 
                 var taskName = ($("#taskNameId").val() != "") ? $("#taskNameId").val() : "";
-                //var createdBy = ($("#createdById").val() != "") ? $("#createdById").val() : "";
-
                 var createdBy = "";
                 $('#createdByValuesId > option:selected').each(function() {
-                    //alert($(this).text() + ' ' + $(this).val());
                     createdBy += $(this).val() + "|";
                 });
                 if (createdBy.length > 0) {
@@ -460,7 +452,6 @@
 
                 var selectStatuses = '';
                 $('#statusSelectValuesId > option:selected').each(function() {
-                    //alert($(this).text() + ' ' + $(this).val());
                     selectStatuses += $(this).val() + "|";
                 });
                 if (selectStatuses.length > 0) {
@@ -469,7 +460,6 @@
 
                 var assignedToValues = '';
                 $('#assignSelectValuesId > option:selected').each(function() {
-                    //alert($(this).text() + ' ' + $(this).val());
                     assignedToValues += $(this).val() + "|";
                 });
                 if (assignedToValues.length > 0) {
@@ -477,7 +467,6 @@
                 }
 
                 $('#progressFromSelectId > option:selected').each(function() {
-                    //alert($(this).text() + ' ' + $(this).val());
                     progressFrom = $(this).val();
                 });
 
@@ -652,15 +641,6 @@
                     if (isValid) {
                         isValid = validateTargetDateFilter(data[9]);
                     }
-                    //console.log(targetDate.getDate());
-                    //if ( ( isNaN( min ) && isNaN( max ) ) ||
-                    //     ( isNaN( min ) && progress <= max ) ||
-                    //     ( min <= progress   && isNaN( max ) ) ||
-                    //     ( min <= progress   && progress <= max ) )
-                    //{
-                    //    return true;
-                    //}
-                    //return false;
                     return isValid;
                 }
             );
@@ -678,26 +658,14 @@
                     }, 100);
                 }).
                 DataTable({
-                //scrollY:        300,
-                //scrollX:        true,
-                //scrollCollapse: true,
-                paging:         true,
-                //fixedColumns:   {
-                //    leftColumns: 2
-                //},
-
+                paging: true,
                 columnDefs: [ {
                     orderable: false,
                     className: 'select-checkbox',
                     targets:   0
                 }
-                    //, {
-                    //    targets: -1,
-                    //    className: 'dt[-head|-body]-center'
-                    //}
                     ],
                 select: {
-                    //style:    'os',
                     style:    'multiple',
                     selector: 'td:first-child'
                     },
@@ -720,7 +688,7 @@
                          "render": function (data, type, full, meta)
                         {
                              if (full.status == "Not Started") {
-                                 return '<span class="badge badge-danger">Not Started</span>';
+                                 return '<span class="badge badge-secondary">Not Started</span>';
                              }
                              else
                              if (full.status == "In Progress") {
@@ -769,7 +737,6 @@
 
              $("#create-task-btnId").click(function () {
                 var $buttonClicked = $(this);
-                //var id = $buttonClicked.attr('data-id');
                 var options = { "backdrop": "static", keyboard: true };
                 $.ajax({
                     type: "GET",
@@ -793,7 +760,6 @@
                                     taskMultipleCreationPlaceHolder.html(data);
                                     taskMultipleCreationPlaceHolder.find('.modal').modal(options);
                                     taskMultipleCreationPlaceHolder.find('.modal').modal('show');
-
                                 },
                                 error: function () {
                                     alert("Dynamic content load failed.");

@@ -58,6 +58,7 @@ namespace TaskManager.Web.Controllers
             }
             TaskViewModel taskVM = new TaskViewModel();
             taskVM.CurrentUserName = currentUserName;
+            ViewData["UserName"] = currentUserName;
             //return View(await _context.Tasks.Where(x => x.IsDeleted != true).ToListAsync());
             return View(taskVM);
         }
@@ -501,6 +502,7 @@ namespace TaskManager.Web.Controllers
 
             taskVM.AssigneeCode = currentEmployee.UserName;
             taskVM.CurrentUserName = currentUserName;
+            ViewData["UserName"] = currentUserName;
             return View(taskVM);
         }
 

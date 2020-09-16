@@ -31,6 +31,11 @@
     <!-- summernote -->
     <link rel="stylesheet" href="~/plugins/summernote/summernote-bs4.min.css">
     <link rel="stylesheet" href="../../plugins/employee/css/employee.css">
+    @*<script src='https://kit.fontawesome.com/a076d05399.js'></script>*@
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="../../plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="../../plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
+    <link rel="stylesheet" href="../../plugins/datatables-select/css/select.bootstrap4.min.css">
 
     <section class="HeaderScripts">
         @RenderSection("HeaderScripts", required: false)
@@ -40,15 +45,14 @@
     <div class="wrapper">
 
         <!-- Navbar -->
-       
         <!-- /.navbar -->
         <!-- Main Sidebar Container -->
         <aside class="main-sidebar sidebar-dark-primary elevation-4">
             <!-- Brand Logo -->
             @*<a href="index3.html" class="brand-link">
-                <img src="dist/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
-                <span class="brand-text font-weight-light">AdminLTE 3</span>
-            </a>*@
+                    <img src="dist/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
+                    <span class="brand-text font-weight-light">AdminLTE 3</span>
+                </a>*@
 
             <!-- Sidebar -->
             <div class="sidebar">
@@ -58,7 +62,7 @@
                         <img src="../dist/img/user2-160x160.jpg" class="img-circle elevation-2" alt="User Image">
                     </div>
                     <div class="info">
-                        <a id="employeeDetailId" href="#" class="d-block">Alexander Pierce</a>
+                        <a id="employeeDetailId" href="#" class="d-block"></a>
                     </div>
                 </div>
 
@@ -83,7 +87,7 @@
                             <a href=".." class="nav-link">
                                 <i class="nav-icon fas fa-tachometer-alt"></i>
                                 <p>
-                                    Dashboard 
+                                    Dashboard
                                 </p>
                             </a>
                         </li>
@@ -167,10 +171,18 @@
     <!-- jQuery UI 1.11.4 -->
     <script src="~/plugins/jquery-ui/jquery-ui.min.js"></script>
     <!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
+    <script src="../../plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="../../plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+    <script src="../../plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+    <script src="../../plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+    <script src="../../plugins/datatables-select/js/select.bootstrap4.min.js"></script>
+    <script src="../../plugins/datatables-select/js/dataTables.select.min.js"></script>
+
+
 
     <div id="employeeDetailDiv" style="display:none"></div>
     <section class="BodyScripts">
-        @RenderSection("BodyScripts", required:false)
+        @RenderSection("BodyScripts", required: false)
     </section>
 
     <script>
@@ -203,6 +215,7 @@
     <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
     @*<script src="~/dist/js/pages/dashboard.js"></script>*@
 
+
     <script>
        $(document).ready(function() {
 
@@ -219,12 +232,107 @@
                         datatype: "json",
                         success: function (data) {
                             employeeDiv.html(data);
-                            //employeeDiv.find('.modal').modal(options);
                             employeeDiv.find('.modal').modal('show');
                             employeeDiv.show();
 
+                            var employeeTasksTable = $('#employeeTasksTable').
+                                DataTable({
+                                paging: true,
+                                pageLength: 10,
+                                initComplete: function (settings, json) {
+                                    $("#taskCount").html(this.api().data().length);
+                                },
+                                search: {regex: true, caseInsensitive: true},
+                                    ajax: {
+                                    "url": baseUrl + "/employeeDetail/LoadEmployeeTasksData",
+                                    "type": "POST",
+                                    "datatype": "json"
+                                    },
+                                    columns: [
+                                        { "data": "title", "name": "Title", "autoWidth": true, "visible": true, "searchable": true },
+                                        { "data": "status", "name": "Status", "autoWidth": true, "visible": true, "searchable": true },
+                                        { "data" : "targetDate", "name": "Target Date", "autoWidth": true, "visible" : true, "searchable" : true},
+                                ],
+                                order: [[ 1, 'desc' ]]
+                            });
+
+                            var employeefollowUpsTable = $('#employeefollowUpsTable').
+                                DataTable({
+                                paging: true,
+                                pageLength: 10,
+                                initComplete: function(settings, json) {
+                                    $("#followupCount").html(this.api().data().length);
+                                },
+                                search: {regex: true, caseInsensitive: true},
+                                    ajax: {
+                                    "url": baseUrl + "/employeeDetail/LoadEmployeeFollowUps",
+                                    "type": "POST",
+                                    "datatype": "json"
+                                    },
+                                    columns: [
+                                        { "data": "taskInfo", "name": "Title", "autoWidth": true, "visible": true, "searchable": true },
+                                        { "data": "followUpFrom", "name": "Follow Up From", "autoWidth": true, "visible": true, "searchable": true },
+                                        { "data" : "status", "name": "Status", "autoWidth": true, "visible" : true, "searchable" : true},
+                                ],
+                                order: [[ 1, 'desc' ]]
+                                });
+
+                            var donutData        = {
+                              labels: [
+                                  'Chrome',
+                                  'IE',
+                                  'FireFox',
+                                  'Safari',
+                                  'Opera',
+                                  'Navigator',
+                              ],
+                              datasets: [
+                                {
+                                  data: [700,500,400,600,300,100],
+                                  backgroundColor : ['#f56954', '#00a65a', '#f39c12', '#00c0ef', '#3c8dbc', '#d2d6de'],
+                                }
+                              ]
+                            }
+
+                            //-------------
+                            //- PIE CHART -
+                            //-------------
+                            // Get context with jQuery - using jQuery's .get() method.
+                            var pieChartCanvas = $('#pieChart').get(0).getContext('2d');
+                            var pieData        = donutData;
+                            var pieOptions     = {
+                              maintainAspectRatio : false,
+                              responsive : true,
+                            }
+                            //Create pie or douhnut chart
+                            // You can switch between pie and douhnut using the method below.
+                            var pieChart = new Chart(pieChartCanvas, {
+                                type: 'pie',
+                                data: pieData,
+                                options: pieOptions
+                            });
+
+                             //-------------
+                            //- PIE CHART -
+                            //-------------
+                            // Get context with jQuery - using jQuery's .get() method.
+                            var pieChartCanvas2 = $('#pieChart2').get(0).getContext('2d');
+                            var pieData        = donutData;
+                            var pieOptions     = {
+                              maintainAspectRatio : false,
+                              responsive : true,
+                            }
+                            //Create pie or douhnut chart
+                            // You can switch between pie and douhnut using the method below.
+                            var pieChart2 = new Chart(pieChartCanvas2, {
+                                type: 'pie',
+                                data: pieData,
+                                options: pieOptions
+                            });
+
+
                             $("#employee-closePopup-icon").click(function () {
-                                $('.modal-backdrop').removeClass("modal-backdrop");   
+                                $('.modal-backdrop').removeClass("modal-backdrop");
                                 employeeDiv.hide();
                             });
                         },

@@ -30,6 +30,7 @@ namespace TaskManager.Web.Controllers
 
         public async Task<IActionResult> Index()
         {
+            ViewData["UserName"] = currentUserName;
             return View(await _context.TaskFollowUps.ToListAsync());
         }
 

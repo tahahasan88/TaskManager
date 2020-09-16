@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Principal;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using TaskManager.Data;
 using TaskManager.Data.Repositories;
@@ -18,12 +19,14 @@ namespace TaskManager.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly ITaskRepository _taskRepository;
         private readonly TaskManagerContext _context;
+        public string currentUserName;
 
-        public HomeController(ILogger<HomeController> logger, ITaskRepository taskRepository, TaskManagerContext context)
+        public HomeController(ILogger<HomeController> logger, ITaskRepository taskRepository, TaskManagerContext context, IConfiguration configuration)
         {
             _logger = logger;
             _taskRepository = taskRepository;
             _context = context;
+            currentUserName = configuration.GetSection("TaskManagerUserName").Value;
         }
 
         public IActionResult Index()
@@ -48,7 +51,7 @@ namespace TaskManager.Controllers
             taskSummaryVM.FollowUpsCount = _context.TaskFollowUps.Where(x => x.Task.TaskStatus.Id
                 != (int)TaskManager.Common.Common.TaskStatus.Completed).Count();
 
-
+            ViewData["UserName"] = currentUserName;
             return View(taskSummaryVM);
         }
 

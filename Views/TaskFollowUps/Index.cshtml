@@ -102,6 +102,13 @@
                 }
             });
 
+            @if (ViewData["UserName"] != null)
+            {
+                <text>
+                    $("#employeeDetailId").html("@ViewData["UserName"]");
+                </text>
+            }
+
              var baseUrl = "@Html.Raw(this.Context.Request.Scheme + "://" + this.Context.Request.Host + this.Context.Request.Path)";
              var inboxTable = $('#inboxTable').DataTable( {
                 //scrollY:        300,

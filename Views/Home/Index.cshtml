@@ -73,15 +73,7 @@
 <script>
 
     $(document).ready(function () {
-        //$('#example2').DataTable({
-        //    "paging": true,
-        //    "lengthChange": false,
-        //    "searching": false,
-        //    "ordering": true,
-        //    "info": true,
-        //    "autoWidth": false,
-        //    "responsive": true,
-        //});
+
 
         var thisPage = '..';
         $(".nav-sidebar .nav-item .nav-link").each(function () {
@@ -93,6 +85,13 @@
         });
         var baseUrl = "@Html.Raw(this.Context.Request.Scheme + "://" + this.Context.Request.Host + this.Context.Request.Path)";
 
+
+        @if (ViewData["UserName"] != null)
+        {
+            <text>
+                $("#employeeDetailId").html("@ViewData["UserName"].ToString()");
+            </text>
+        }
         
         function getSummaryInfo() {
 
