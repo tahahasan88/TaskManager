@@ -5,6 +5,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Common\**" />
+    <Compile Remove="TaskManager.Data\**" />
+    <Content Remove="Common\**" />
+    <Content Remove="TaskManager.Data\**" />
+    <EmbeddedResource Remove="Common\**" />
+    <EmbeddedResource Remove="TaskManager.Data\**" />
+    <None Remove="Common\**" />
+    <None Remove="TaskManager.Data\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="wwwroot\dist\css\adminlte.css" />
     <None Include="wwwroot\dist\css\adminlte.css.map" />
     <None Include="wwwroot\dist\css\adminlte.min.css" />
@@ -1975,8 +1986,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Common\TaskManager.Common.csproj" />
-    <ProjectReference Include="..\TaskManager.Data\TaskManager.Data.csproj" />
+    <ProjectReference Include="Common\TaskManager.Common.csproj" />
+    <ProjectReference Include="TaskManager.Data\TaskManager.Data.csproj" />
   </ItemGroup>
 
 </Project>

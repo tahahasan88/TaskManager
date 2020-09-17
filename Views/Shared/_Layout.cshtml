@@ -58,8 +58,11 @@
             <div class="sidebar">
                 <!-- Sidebar user panel (optional) -->
                 <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+                    @*<div class="image">
+                        <img id="employeeAvatarId" src="../dist/img/user2-160x160.jpg" class="img-circle elevation-2" alt="User Image">
+                    </div>*@
                     <div class="image">
-                        <img src="../dist/img/user2-160x160.jpg" class="img-circle elevation-2" alt="User Image">
+                        <img id="employeeAvatarId" class="img-circle elevation-2" alt="User Image">
                     </div>
                     <div class="info">
                         <a id="employeeDetailId" href="#" class="d-block"></a>
@@ -221,6 +224,7 @@
 
            var baseUrl = "@Html.Raw(this.Context.Request.Scheme + "://" + this.Context.Request.Host)";
            var employeeDiv = $('#employeeDetailDiv');
+           $("#employeeAvatarId").attr("src", "../dist/img/user2-160x160.jpg");
            //var options = { "backdrop": "static", keyboard: true };
 
            $("#employeeDetailId").click(function () {
@@ -281,15 +285,12 @@
                               labels: [
                                   'Chrome',
                                   'IE',
-                                  'FireFox',
-                                  'Safari',
-                                  'Opera',
-                                  'Navigator',
+                                  'FireFox'
                               ],
                               datasets: [
                                 {
-                                  data: [700,500,400,600,300,100],
-                                  backgroundColor : ['#f56954', '#00a65a', '#f39c12', '#00c0ef', '#3c8dbc', '#d2d6de'],
+                                  data: [700,500,400],
+                                  backgroundColor : ['#f56954', '#00a65a', '#f39c12'],
                                 }
                               ]
                             }

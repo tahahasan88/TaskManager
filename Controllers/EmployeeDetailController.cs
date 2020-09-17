@@ -121,12 +121,7 @@ namespace TaskManager.Web.Controllers
             employeeVM.EmailAddres = thisEmployee.EmailAddress;
             employeeVM.Phone = thisEmployee.PhoneNo;
             employeeVM.Presence = "Present";
-            List<string> reportingManagers = new List<string>();
-            reportingManagers.Add("Haroon");
-            reportingManagers.Add("Shahid");
-            
-            employeeVM.ReportsTo = reportingManagers;
-
+            employeeVM.ReportsTo = "Haroon";
 
             ViewData["UserName"] = currentUserName;
             return PartialView("Index", employeeVM);

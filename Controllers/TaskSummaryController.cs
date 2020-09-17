@@ -39,8 +39,7 @@ namespace TaskManager.Web.Controllers
             TaskSummaryViewModel taskSummaryVM = new TaskSummaryViewModel();
             taskSummaryVM.PendingTasksCount = _context.Tasks.Where(x => x.TaskStatus.Id
                 != (int)TaskManager.Common.Common.TaskStatus.Completed
-                && x.IsDeleted != true
-                && x.Target >= DateTime.Now).Count();
+                && x.IsDeleted != true).Count();
 
             taskSummaryVM.CompletedTasksCount = _context.Tasks.Where(x => x.TaskStatus.Id
                == (int)TaskManager.Common.Common.TaskStatus.Completed

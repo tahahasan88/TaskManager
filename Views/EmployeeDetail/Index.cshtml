@@ -32,6 +32,7 @@
             {
                 <text>
                     $("#userinfoName").html("@ViewData["UserName"]");
+                    $("#employeeAvatarPic").attr("src", "https://cdn.flickeringmyth.com/wp-content/uploads/2020/08/The-Batman.jpg");    
                 </text>
             }
 
@@ -58,7 +59,7 @@
                                 <div class="col-md-4 employee-sidebar">
                                     <div class="portlet light profile-sidebar-portlet bordered">
                                         <div class="profile-userpic" style="text-align:center">
-                                            <img src="https://cdn.flickeringmyth.com/wp-content/uploads/2020/08/The-Batman.jpg" class="img-responsive" alt="">
+                                            <img id="employeeAvatarPic" class="img-responsive" alt="">
                                         </div>
                                         <div class="profile-usertitle">
                                             <div class="profile-usertitle-name">@Model.EmployeeName</div>
@@ -76,6 +77,10 @@
                                                 <tr>
                                                     <td><b>Email</b></td>
                                                     <td>@Model.EmailAddres</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><b>Reports To</b></td>
+                                                    <td>@Model.ReportsTo</td>
                                                 </tr>
                                             </tbody>
                                         </table>
@@ -99,26 +104,13 @@
                                             <div class="row">
                                                 <div class="col-md-4">
                                                     <canvas id="pieChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                                                    <span><b>Tasks</b></span>
                                                 </div>
                                                 <div class="col-md-4">
                                                     <canvas id="pieChart2" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                                                    <span><b>Follow Ups</b></span>
                                                 </div>
                                             </div>
-                                            <table class="table">
-                                                <tbody>
-                                                    <tr>
-                                                        <td><b>Reports To</b></td>
-                                                        <td>
-                                                            @foreach (string employeeManager in Model.ReportsTo)
-                                                            {
-                                                                <i class="far fa-user-circle mr-1" style="font-size:24px" aria-hidden="true"></i> 
-                                                                @employeeManager
-                                                                <br />
-                                                            }
-                                                        </td>
-                                                        </tr>
-                                                </tbody>
-                                            </table>
                                             </div>
                                             <div class="tab-pane fade" id="custom-content-below-profile" role="tabpanel" aria-labelledby="custom-content-below-profile-tab">
                                                 <div class="card-body">

@@ -46,70 +46,59 @@
 }
 
 <div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
 
-            @{
-                if (ViewData["deletionMessage"] != null)
-                {
-                    <div class="alert alert-danger alert-dismissible" role="alert">
-                        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                        @ViewData["deletionMessage"]
-                    </div>
-                }
-            }
-
-            <div class="card">
-                <div class="card-header">
-                    <button id="create-task-btnId" class="btn btn-info" data-toggle="ajax-modal" data-target="#add-contact" data-url="@Url.Action("Create")">Create Task</button>
-                </div>
-                <div id="modal-default">
-                </div>
-                <div id="modal-followup">
-                </div>
-                <div id="modal-multiple">
-                </div>
-                <!-- /.card-header -->
-                <div class="card-body">
-                    <table id="example2" class="table table-bordered table-hover">
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th>TaskId</th>
-                                <th>Title</th>
-                                <th>Status</th>
-                                <th class="progressCls">Progress</th>
-                                <th>AssignedTo</th>
-                                <th>Last Updated</th>
-                                <th>Update</th>
-                                <th>Created By</th>
-                                <th>Target Date</th>
-                                <th>ProgressVal</th>
-                            </tr>
-                        </thead>
-                    </table>
-                </div>
-                <!-- /.card-body -->
-            </div>
-            <!-- /.card -->
-            <!-- /.card -->
-        </div>
-        <!-- /.col -->
-    </div>
-    <!-- /.row -->
-    <button id="take-followup-btnId" class="btn btn-info" data-toggle="ajax-modal" data-target="#add-contact1" data-url="@Url.Action("Create", "TaskFollowUps")">Follow up!</button>
-    <br />
-    <br />
     <div class="row">
         <div class="col-12">
             <!-- Default box -->
             <div class="card">
                 <div class="card-header">
-                    <i class="fa fa-filter" style="float:left" aria-hidden="true"></i>
-                    <h3 class="card-title">Filters</h3>
+                    <h3 class="card-title">Summary</h3>
                     <div class="card-tools">
                         <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
                             <i class="fas fa-minus"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row" id="summaryRow">
+                        <div class="col-6 col-md-3 text-center">
+                            <input id="totalTasksId" type="text" class="knob" value="30" data-width="120" data-height="120"
+                                   data-fgColor="#3c8dbc">
+                            <div class="knob-label">Total</div>
+                        </div>
+                        <div class="col-6 col-md-3 text-center">
+                            <input id="pendingTasksId" type="text" class="knob" value="30" data-width="120" data-height="120"
+                                   data-fgColor="#3c8dbc">
+
+                            <div class="knob-label">Pending</div>
+                        </div>
+                        <div class="col-6 col-md-3 text-center">
+                            <input id="completedTasksId" type="text" class="knob" value="30" data-width="120" data-height="120"
+                                   data-fgColor="#3c8dbc">
+                            <div class="knob-label">Completed</div>
+                        </div>
+                        <div class="col-6 col-md-3 text-center">
+                            <input id="onHoldTaskId" type="text" class="knob" value="30" data-width="120" data-height="120"
+                                   data-fgColor="#3c8dbc">
+                            <div class="knob-label">OnHold</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /.card -->
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <!-- Default box -->
+            <div class="card collapsed-card">
+                <div class="card-header">
+                    <i class="fa fa-filter" style="float:left" aria-hidden="true"></i>
+                    <h3 class="card-title">Filters</h3>
+                    <div class="card-tools">
+                        <button id="filterCollapseBtnId" type="button" class="btn btn-tool" aria-expanded="false" data-card-widget="collapse" title="Collapse">
+                            <i class="fas fa-plus"></i>
                         </button>
                     </div>
                 </div>
@@ -285,50 +274,65 @@
         </div>
         <!-- /.card -->
     </div>
-</div>
 
+    <div class="row">
+        <div class="col-12">
 
-<div class="row">
-    <div class="col-12">
-        <!-- Default box -->
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">Summary</h3>
-                <div class="card-tools">
-                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
-                        <i class="fas fa-minus"></i>
-                    </button>
+            @{
+                if (ViewData["deletionMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible" role="alert">
+                        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                        @ViewData["deletionMessage"]
+                    </div>
+                }
+            }
+
+            <div class="card">
+                <div class="card-header">
+                    <button id="create-task-btnId" class="btn btn-info" data-toggle="ajax-modal" data-target="#add-contact" data-url="@Url.Action("Create")">Create Task</button>
                 </div>
-            </div>
-            <div class="card-body">
-                <div class="row" id="summaryRow">
-                    <div class="col-6 col-md-3 text-center">
-                        <input id="pendingTasksId" type="text" class="knob" value="30" data-width="120" data-height="120"
-                               data-fgColor="#3c8dbc">
-
-                        <div class="knob-label">PENDING</div>
-                    </div>
-                    <div class="col-6 col-md-3 text-center">
-                        <input id="completedTasksId" type="text" class="knob" value="30" data-width="120" data-height="120"
-                               data-fgColor="#3c8dbc">
-                        <div class="knob-label">COMPLETED</div>
-                    </div>
-                    <div class="col-6 col-md-3 text-center">
-                        <input id="onHoldTaskId" type="text" class="knob" value="30" data-width="120" data-height="120"
-                               data-fgColor="#3c8dbc">
-                        <div class="knob-label">ONHOLD</div>
-                    </div>
-                    <div class="col-6 col-md-3 text-center">
-                        <input id="totalTasksId" type="text" class="knob" value="30" data-width="120" data-height="120"
-                               data-fgColor="#3c8dbc">
-                        <div class="knob-label">TOTAL</div>
-                    </div>
+                <div id="modal-default">
                 </div>
+                <div id="modal-followup">
+                </div>
+                <div id="modal-multiple">
+                </div>
+                <!-- /.card-header -->
+                <div class="card-body">
+                    <table id="example2" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>TaskId</th>
+                                <th>Title</th>
+                                <th>Status</th>
+                                <th class="progressCls">Progress</th>
+                                <th>AssignedTo</th>
+                                <th>Last Updated</th>
+                                <th>Update</th>
+                                <th>Created By</th>
+                                <th>Target Date</th>
+                                <th>ProgressVal</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+                <!-- /.card-body -->
             </div>
+            <!-- /.card -->
+            <!-- /.card -->
         </div>
-        <!-- /.card -->
+        <!-- /.col -->
     </div>
+    <!-- /.row -->
+    <button id="take-followup-btnId" class="btn btn-info" data-toggle="ajax-modal" data-target="#add-contact1" data-url="@Url.Action("Create", "TaskFollowUps")">Follow up</button>
+    <br />
+    <br />
+
 </div>
+
+
 <!-- /.container-fluid -->
 
 @section BodyScripts {
@@ -352,6 +356,8 @@
                     $("#employeeDetailId").html("@ViewData["UserName"]");
                 </text>
             }
+
+            //$("#filterCollapseBtnId").click();
 
             //Initialize Select2 Elements
             $('.select2bs4').select2({
@@ -645,20 +651,23 @@
                 }
             );
 
-
             var baseUrl = "@Html.Raw(this.Context.Request.Scheme + "://" + this.Context.Request.Host + this.Context.Request.Path)";
             var tasksTable = $('#example2')
                 .on('init.dt', function () {
                     $(".knob").knob({});
                 }).on('page.dt', function () {
-                    setTimeout(
-                    function()
-                    {
-                            $(".knob").knob({});
-                    }, 100);
+                    //setTimeout(
+                    //function()
+                    //{
+                    //        $(".knob").knob({});
+                    //}, 100);
                 }).
                 DataTable({
-                paging: true,
+                    paging: true,
+                    initComplete: function (settings, json) {
+                        //$("#taskCount").html(this.api().data().length);
+
+                    },
                 columnDefs: [ {
                     orderable: false,
                     className: 'select-checkbox',
@@ -709,7 +718,7 @@
                      {
 
                          "render": function (data, type, full, meta) {
-                              return '<input type =\"text\" class=\"knob\" value=\"'+ full.progress+ '%'+'\" data-width=\"50\" data-height=\"50\"' +
+                              return '<input type =\"text\" class=\"knob gridknob\" value=\"'+ full.progress+ '%'+'\" data-width=\"50\" data-height=\"50\"' +
                                 "data-fgColor=\"#3c8dbc\">";
                          }
                     },
@@ -805,13 +814,6 @@
 
             function getSummaryInfo() {
 
-                var summaryRow = "<div class=\"col-6 col-md-3 text-center\">" +
-                    "<input id=\"pendingTasksId\" type=\"text\" class=\"knob\" value=\"summaryValue\" data-width=\"120\" data-height=\"120\"" +
-                            "data-fgColor=\"#f56954\">" +
-                    "<div class=\"knob-label\">summaryType</div>" +
-                    "</div>";
-                var completeSummaryHtml = "";
-
                 $.ajax({
                     type: "GET",
                     url: baseUrl.replace("tasks", "") + "TaskSummary/list",
@@ -820,12 +822,50 @@
                     datatype: "json",
                     success: function (data) {
                         $.each(data, function (i, val) {
-                            tmpData = data[i];
+                            tmpData = data[i];                            
+                            $('#pendingTasksId').trigger(
+                                'configure',
+                                {
+                                    "min":0,
+                                    "max": tmpData.totalTasksCount,
+                                    "fgColor":"#ffc107",
+                                    "cursor": false
+                                }
+                            );
+                            $("#pendingTasksId").val(tmpData.pendingTasksCount).trigger('change');
+                            $('#completedTasksId').trigger(
+                                'configure',
+                                {
+                                    "min":0,
+                                    "max": tmpData.totalTasksCount,
+                                    "fgColor":"#28a745",
+                                    "cursor": false
+                                }
+                            );
 
-                            $("#pendingTasksId").val(tmpData.pendingTasksCount);
-                            $("#completedTasksId").val(tmpData.completedTasksCount);
-                            $("#onHoldTaskId").val(tmpData.onHoldTasksCount);
-                            $("#totalTasksId").val(tmpData.totalTasksCount);
+                            $("#completedTasksId").val(tmpData.completedTasksCount).trigger('change');
+                            $('#onHoldTaskId').trigger(
+                                'configure',
+                                {
+                                    "min":0,
+                                    "max": tmpData.totalTasksCount,
+                                    "fgColor":"#6c757d",
+                                    "cursor": false
+                                }
+                            );
+
+                            $("#onHoldTaskId").val(tmpData.onHoldTasksCount).trigger('change');
+
+                            $('#totalTasksId').trigger(
+                                'configure',
+                                {
+                                    "min":0,
+                                    "max": tmpData.totalTasksCount,
+                                    "fgColor":"#3c8dbc",
+                                    "cursor": false
+                                }
+                            );
+                            $("#totalTasksId").val(tmpData.totalTasksCount).trigger('change');;
                             $("input.knob").trigger('change');
                         });
                     },
@@ -961,6 +1001,7 @@
                             taskCreationPlaceHolder.find('.modal').modal('hide');
                         }
                         else {
+                            getSummaryInfo();
                             alert("Task added");
                         }
                         tasksTable.ajax.reload(function () {
