@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TaskManager.Data;
 
 namespace TaskManager.Data.Migrations
 {
     [DbContext(typeof(TaskManagerContext))]
-    partial class TaskManagerContextModelSnapshot : ModelSnapshot
+    [Migration("20200920084317_V40")]
+    partial class V40
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -41,22 +43,20 @@ namespace TaskManager.Data.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("ManagerId")
+                    b.Property<int?>("Employee")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("ParentDepartmentId")
+                    b.Property<int>("ParentDepartmentId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ManagerId")
+                    b.HasIndex("Employee")
                         .IsUnique()
-                        .HasFilter("[ManagerId] IS NOT NULL");
-
-                    b.HasIndex("ParentDepartmentId");
+                        .HasFilter("[Employee] IS NOT NULL");
 
                     b.ToTable("Departments");
                 });
@@ -346,11 +346,7 @@ namespace TaskManager.Data.Migrations
                 {
                     b.HasOne("TaskManager.Data.Employee", "Manager")
                         .WithOne("Department")
-                        .HasForeignKey("TaskManager.Data.Department", "ManagerId");
-
-                    b.HasOne("TaskManager.Data.Department", "ParentDepartment")
-                        .WithMany()
-                        .HasForeignKey("ParentDepartmentId");
+                        .HasForeignKey("TaskManager.Data.Department", "Employee");
                 });
 
             modelBuilder.Entity("TaskManager.Data.SubTask", b =>

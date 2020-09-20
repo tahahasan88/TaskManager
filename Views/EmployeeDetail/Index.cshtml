@@ -93,57 +93,77 @@
                                             <a class="nav-link active" id="custom-content-below-home-tab" data-toggle="pill" href="#custom-content-below-home" role="tab" aria-controls="custom-content-below-home" aria-selected="true">Summary</a>
                                         </li>
                                         <li class="nav-item">
-                                            <a class="nav-link" id="custom-content-below-profile-tab" data-toggle="pill" href="#custom-content-below-profile" role="tab" aria-controls="custom-content-below-profile" aria-selected="false"><span id="taskCount" class="badge badge-pill badge-warning"></span>Tasks</a>
+                                            <a class="nav-link" id="custom-content-below-profile-tab" data-toggle="pill" href="#custom-content-below-profile" role="tab" aria-controls="custom-content-below-profile" aria-selected="false">Tasks&nbsp;<span id="taskCount" class="badge badge-pill badge-warning"></span></a>
                                         </li>
                                         <li class="nav-item">
-                                            <a class="nav-link" id="custom-content-below-messages-tab" data-toggle="pill" href="#custom-content-below-messages" role="tab" aria-controls="custom-content-below-messages" aria-selected="false"><span id="followupCount" class="badge badge-pill badge-warning"></span>Follow Ups</a>
+                                            <a class="nav-link" id="custom-content-below-messages-tab" data-toggle="pill" href="#custom-content-below-messages" role="tab" aria-controls="custom-content-below-messages" aria-selected="false">Follow Ups&nbsp;<span id="followupCount" class="badge badge-pill badge-warning"></span></a>
                                         </li>
                                     </ul>
                                     <div class="tab-content" id="custom-content-below-tabContent">
                                         <div class="tab-pane fade show active" id="custom-content-below-home" role="tabpanel" aria-labelledby="custom-content-below-home-tab">
+                                            <br />
                                             <div class="row">
-                                                <div class="col-md-4">
-                                                    <canvas id="pieChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                                                <div class="col-md-6">
+                                                    <canvas id="pieChart" style="min-height: 250px; height: 250px; max-height: 250px; min-width:80%; max-width: 80%;"></canvas>
+
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <canvas id="pieChart2" style="min-height: 250px; height: 250px; max-height: 250px; min-width:80%; max-width: 80%;"></canvas>
+
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6 d-flex justify-content-center">
                                                     <span><b>Tasks</b></span>
                                                 </div>
-                                                <div class="col-md-4">
-                                                    <canvas id="pieChart2" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                                                <div class="col-md-6 d-flex justify-content-center">
                                                     <span><b>Follow Ups</b></span>
                                                 </div>
                                             </div>
-                                            </div>
-                                            <div class="tab-pane fade" id="custom-content-below-profile" role="tabpanel" aria-labelledby="custom-content-below-profile-tab">
-                                                <div class="card-body">
-                                                    <div class="table-responsive">
-                                                        <table id="employeeTasksTable" class="table table-bordered table-hover">
-                                                            <thead>
-                                                                <tr>
-                                                                    <th>Title</th>
-                                                                    <th>Status</th>
-                                                                    <th>Target Date</th>
-                                                                </tr>
-                                                            </thead>
-                                                        </table>
+                                        </div>
+                                        <div class="tab-pane fade" id="custom-content-below-profile" role="tabpanel" aria-labelledby="custom-content-below-profile-tab">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="card">
+                                                        <div class="card-body">
+
+                                                            <table id="employeeTasksTable" class="table table-bordered table-hover" style="width:80%">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>Title</th>
+                                                                        <th>Status</th>
+                                                                        <th>SortId</th>
+                                                                    </tr>
+                                                                </thead>
+                                                            </table>
+
+                                                        </div>
                                                     </div>
+
                                                 </div>
                                             </div>
-                                            <div class="tab-pane fade" id="custom-content-below-messages" role="tabpanel" aria-labelledby="custom-content-below-messages-tab">
-                                                <div class="card-body">
-                                                    <div class="table-responsive">
-                                                        <table id="employeefollowUpsTable" class="table table-bordered table-hover">
-                                                            <thead>
-                                                                <tr>
-                                                                    <th>Title</th>
-                                                                    <th>Follow Up From</th>
-                                                                    <th>Status</th>
-                                                                </tr>
-                                                            </thead>
-                                                        </table>
+                                        </div>
+                                        <div class="tab-pane fade" id="custom-content-below-messages" role="tabpanel" aria-labelledby="custom-content-below-messages-tab">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="card">
+                                                        <div class="card-body">
+                                                            <table id="employeefollowUpsTable" class="table table-bordered table-hover" style="width:80%">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>Title</th>
+                                                                        <th>Follow Up From</th>
+                                                                        <th>Status</th>
+                                                                        <th>SortId</th>
+                                                                    </tr>
+                                                                </thead>
+                                                            </table>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-
+                                    </div>
                                 </div>
                             </div>
                         </div>

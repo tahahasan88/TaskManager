@@ -62,7 +62,7 @@ namespace TaskManager.Web.Controllers
             List<TaskEmployeeListViewModel> emmployeeVMList = new List<TaskEmployeeListViewModel>();
             EmployeeList employeeList = new EmployeeList();
 
-            foreach (Employee employee in employeeList.Employees)
+            foreach (InternalEmployee employee in employeeList.Employees)
             {
                 emmployeeVMList.Add(new TaskEmployeeListViewModel()
                 {

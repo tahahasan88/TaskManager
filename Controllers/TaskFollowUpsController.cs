@@ -121,7 +121,8 @@ namespace TaskManager.Web.Controllers
                                              c.LastUpdatedAt,
                                              c.Remarks,
                                              c.Task.Title,
-                                             c.Task.TaskStatus.Status
+                                             c.Task.TaskStatus.Status,
+                                             c.Task.Id
                                          })
                                  .Where(x => x.FollowerUserName != currentUserName)
                                  .OrderByDescending(m => m.LastUpdatedAt);
@@ -139,7 +140,8 @@ namespace TaskManager.Web.Controllers
                             UpdatedDate = inbox.LastUpdatedAt.ToString("dd-MMM-yyyy"),
                             TaskInfo = inbox.Title,
                             FollowUpFrom = inbox.FollowerUserName,
-                            Status = inbox.Status
+                            Status = inbox.Status,
+                            TaskId = inbox.Id
                         });
                 }
 

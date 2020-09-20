@@ -159,7 +159,7 @@ namespace TaskManager.Web.Controllers
             }
             taskVm.PriorityList = taskPriorityDrpDwnList;
 
-            foreach (Employee employee in employeeList.Employees)
+            foreach (InternalEmployee employee in employeeList.Employees)
             {
                 //if (employee.UserName != currentUserName)
                 //{
@@ -467,7 +467,7 @@ namespace TaskManager.Web.Controllers
             }
             taskVm.PriorityList = taskPriorityDrpDwnList;
 
-            foreach (Employee employee in employeeList.Employees)
+            foreach (InternalEmployee employee in employeeList.Employees)
             {
                 if (employee.UserName != currentUserName)
                 {

@@ -60,7 +60,7 @@ namespace TaskManager.Web.Controllers
                 .ToListAsync();
 
             EmployeeList employeeList = new EmployeeList();
-            foreach (Employee employee in employeeList.Employees)
+            foreach (InternalEmployee employee in employeeList.Employees)
             {
                 emmployeeVMList.Add(new TaskEmployeeListViewModel()
                 {
@@ -309,7 +309,7 @@ namespace TaskManager.Web.Controllers
             List<TaskEmployee> filteredTaskEmployees = _context.TaskEmployees.Where(x => x.TaskCapacity.Id == (int)Common.Common.TaskCapacity.Creator
                 || x.TaskCapacity.Id == (int)Common.Common.TaskCapacity.Assignee && x.Task.Id == currentTaskId).ToList();
 
-            foreach (Employee employee in employeeList.Employees)
+            foreach (InternalEmployee employee in employeeList.Employees)
             {
                 if (filteredTaskEmployees.Where(x => x.UserName == employee.UserName).Count() == 0)
                 {

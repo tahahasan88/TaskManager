@@ -228,120 +228,195 @@
            //var options = { "backdrop": "static", keyboard: true };
 
            $("#employeeDetailId").click(function () {
-               $.ajax({
-                        type: "GET",
-                        url:  baseUrl + "/employeeDetail/Index",
-                        contentType: "application/json; charset=utf-8",
-                        data:null,
-                        datatype: "json",
-                        success: function (data) {
-                            employeeDiv.html(data);
-                            employeeDiv.find('.modal').modal('show');
-                            employeeDiv.show();
-
-                            var employeeTasksTable = $('#employeeTasksTable').
-                                DataTable({
-                                paging: true,
-                                pageLength: 10,
-                                initComplete: function (settings, json) {
-                                    $("#taskCount").html(this.api().data().length);
-                                },
-                                search: {regex: true, caseInsensitive: true},
-                                    ajax: {
-                                    "url": baseUrl + "/employeeDetail/LoadEmployeeTasksData",
-                                    "type": "POST",
-                                    "datatype": "json"
-                                    },
-                                    columns: [
-                                        { "data": "title", "name": "Title", "autoWidth": true, "visible": true, "searchable": true },
-                                        { "data": "status", "name": "Status", "autoWidth": true, "visible": true, "searchable": true },
-                                        { "data" : "targetDate", "name": "Target Date", "autoWidth": true, "visible" : true, "searchable" : true},
-                                ],
-                                order: [[ 1, 'desc' ]]
-                            });
-
-                            var employeefollowUpsTable = $('#employeefollowUpsTable').
-                                DataTable({
-                                paging: true,
-                                pageLength: 10,
-                                initComplete: function(settings, json) {
-                                    $("#followupCount").html(this.api().data().length);
-                                },
-                                search: {regex: true, caseInsensitive: true},
-                                    ajax: {
-                                    "url": baseUrl + "/employeeDetail/LoadEmployeeFollowUps",
-                                    "type": "POST",
-                                    "datatype": "json"
-                                    },
-                                    columns: [
-                                        { "data": "taskInfo", "name": "Title", "autoWidth": true, "visible": true, "searchable": true },
-                                        { "data": "followUpFrom", "name": "Follow Up From", "autoWidth": true, "visible": true, "searchable": true },
-                                        { "data" : "status", "name": "Status", "autoWidth": true, "visible" : true, "searchable" : true},
-                                ],
-                                order: [[ 1, 'desc' ]]
-                                });
-
-                            var donutData        = {
-                              labels: [
-                                  'Chrome',
-                                  'IE',
-                                  'FireFox'
-                              ],
-                              datasets: [
-                                {
-                                  data: [700,500,400],
-                                  backgroundColor : ['#f56954', '#00a65a', '#f39c12'],
-                                }
-                              ]
-                            }
-
-                            //-------------
-                            //- PIE CHART -
-                            //-------------
-                            // Get context with jQuery - using jQuery's .get() method.
-                            var pieChartCanvas = $('#pieChart').get(0).getContext('2d');
-                            var pieData        = donutData;
-                            var pieOptions     = {
-                              maintainAspectRatio : false,
-                              responsive : true,
-                            }
-                            //Create pie or douhnut chart
-                            // You can switch between pie and douhnut using the method below.
-                            var pieChart = new Chart(pieChartCanvas, {
-                                type: 'pie',
-                                data: pieData,
-                                options: pieOptions
-                            });
-
-                             //-------------
-                            //- PIE CHART -
-                            //-------------
-                            // Get context with jQuery - using jQuery's .get() method.
-                            var pieChartCanvas2 = $('#pieChart2').get(0).getContext('2d');
-                            var pieData        = donutData;
-                            var pieOptions     = {
-                              maintainAspectRatio : false,
-                              responsive : true,
-                            }
-                            //Create pie or douhnut chart
-                            // You can switch between pie and douhnut using the method below.
-                            var pieChart2 = new Chart(pieChartCanvas2, {
-                                type: 'pie',
-                                data: pieData,
-                                options: pieOptions
-                            });
-
-
-                            $("#employee-closePopup-icon").click(function () {
-                                $('.modal-backdrop').removeClass("modal-backdrop");
-                                employeeDiv.hide();
-                            });
-                        },
-                        error: function () {
-                            alert("Dynamic content load failed.");
-                        }
-                    });
+               showEmployeeDetails(null);
            });
+
+           function showEmployeeDetails(userName) {
+
+               userName == null ? null : userName;
+               $.ajax({
+                   type: "GET",
+                   url: baseUrl + "/employeeDetail/Index",
+                   contentType: "application/json; charset=utf-8",
+                   data: { userName : userName},
+                   datatype: "json",
+                   success: function (data) {
+                       employeeDiv.html(data);
+                       employeeDiv.find('.modal').modal('show');
+                       employeeDiv.show();
+
+                       var employeeTasksTable = $('#employeeTasksTable').
+                           DataTable({
+                               paging: false,
+                               info: false,
+                               searching: false,
+                               //scrollY:        300,
+                               //scrollX:        true,
+                               //scrollCollapse: true,
+                               initComplete: function (settings, json) {
+                                   var response = settings.json;
+                                   $("#taskCount").html(response.pendingCount);
+
+                                   var taskDonutData = {
+                                       labels: [
+                                           'Completed',
+                                           'Not Started Yet',
+                                           'In Progress',
+                                           'On Hold',
+                                           'Cancelled'
+                                       ],
+                                       datasets: [
+                                           {
+                                               data: [response.completedCount, response.notStartedCount,
+                                               response.progressCount, response.onHoldCount, response.cancelledCount],
+                                               backgroundColor: ['#00a65a', '#6c757d', '#f39c12', '#6f42c1', '#343a40'],
+                                           }
+                                       ]
+                                   }
+
+                                   var pieChartCanvas = $('#pieChart').get(0).getContext('2d');
+                                   var pieData = taskDonutData;
+                                   var pieOptions = {
+                                       maintainAspectRatio: false,
+                                       responsive: true,
+                                   }
+                                   //Create pie or douhnut chart
+                                   // You can switch between pie and douhnut using the method below.
+                                   var tasksPieChart = new Chart(pieChartCanvas, {
+                                       type: 'pie',
+                                       data: pieData,
+                                       options: pieOptions
+                                   });
+
+                               },
+                               search: { regex: true, caseInsensitive: true },
+                               ajax: {
+                                   "url": baseUrl + "/employeeDetail/LoadEmployeeTasksData",
+                                   "type": "POST",
+                                   "datatype": "json"
+                               },
+                               columns: [
+                                   {
+                                       "render": function (data, type, full, meta) {
+                                           return '<a href="' + baseUrl + '/tasks/Edit?id=' + full.taskId + '"><u>' + full.title + '</u> </a>';
+                                       }
+                                   },
+                                   {
+                                       "render": function (data, type, full, meta) {
+                                           if (full.status == "Not Started") {
+                                               return '<span class="badge badge-secondary">Not Started</span>';
+                                           }
+                                           else
+                                               if (full.status == "In Progress") {
+                                                   return '<span class="badge badge-warning text-white"> In Progress</span > ';
+                                               }
+                                               else
+                                                   if (full.status == "On Hold") {
+                                                       return '<span class="badge badge-secondary">On Hold</span>';
+                                                   }
+                                                   else
+                                                       if (full.status == "Cancelled") {
+                                                           return '<span class="badge badge-secondary">Cancelled</span>';
+                                                       }
+                                                       else
+                                                           return '<span class="badge badge-success">Completed</span>';
+                                       }
+                                   },
+                                   { "data": "sortId", "name": "SortId", "autoWidth": true, "visible": false, "searchable": false },
+
+                               ],
+                               order: [[2, 'asc']]
+                           });
+
+                       var employeefollowUpsTable = $('#employeefollowUpsTable').
+                           DataTable({
+                               paging: false,
+                               info: false,
+                               searching: false,
+                               //pageLength: 10,
+                               //"scrollY": 200,
+                               initComplete: function (settings, json) {
+                                   $("#followupCount").html(this.api().data().length);
+                                   var response = settings.json;
+                                   var followupsDonutData = {
+                                       labels: [
+                                           'Pending',
+                                           'Completed'
+                                       ],
+                                       datasets: [
+                                           {
+                                               data: [response.pendingFollowUps, response.completedFollowUps],
+                                               backgroundColor: ['#f39c12', '#00a65a'],
+                                           }
+                                       ]
+                                   }
+
+                                   var pieChartCanvas2 = $('#pieChart2').get(0).getContext('2d');
+                                   var pieData = followupsDonutData;
+                                   var pieOptions = {
+                                       maintainAspectRatio: false,
+                                       responsive: true,
+                                   }
+                                   //Create pie or douhnut chart
+                                   // You can switch between pie and douhnut using the method below.
+                                   var followupPieChart = new Chart(pieChartCanvas2, {
+                                       type: 'pie',
+                                       data: pieData,
+                                       options: pieOptions
+                                   });
+                               },
+                               search: { regex: true, caseInsensitive: true },
+                               ajax: {
+                                   "url": baseUrl + "/employeeDetail/LoadEmployeeFollowUps",
+                                   "type": "POST",
+                                   "datatype": "json"
+                               },
+                               columns: [
+                                   {
+                                       "render": function (data, type, full, meta) {
+                                           return '<a href="' + baseUrl + '/tasks/Edit?id=' + full.taskId + '"><u>' + full.taskInfo + '</u> </a>';
+                                       }
+                                   },
+                                   { "data": "followUpFrom", "name": "Follow Up From", "autoWidth": true, "visible": true, "searchable": true },
+                                   {
+                                       "render": function (data, type, full, meta) {
+                                           if (full.status == "Not Started") {
+                                               return '<span class="badge badge-secondary">Not Started</span>';
+                                           }
+                                           else
+                                               if (full.status == "In Progress") {
+                                                   return '<span class="badge badge-warning text-white"> In Progress</span > ';
+                                               }
+                                               else
+                                                   if (full.status == "On Hold") {
+                                                       return '<span class="badge badge-secondary">On Hold</span>';
+                                                   }
+                                                   else
+                                                       if (full.status == "Cancelled") {
+                                                           return '<span class="badge badge-secondary">Cancelled</span>';
+                                                       }
+                                                       else
+                                                           return '<span class="badge badge-success">Completed</span>';
+                                       }
+                                   },
+                                   { "data": "sortId", "name": "SortId", "autoWidth": true, "visible": false, "searchable": false }
+                               ],
+                               order: [[3, 'asc']]
+                           });
+
+
+
+                       $("#employee-closePopup-icon").click(function () {
+                           $('.modal-backdrop').removeClass("modal-backdrop");
+                           employeeDiv.hide();
+                       });
+                   },
+                   error: function () {
+                       alert("Dynamic content load failed.");
+                   }
+               });
+           }
+
         });
     </script>
 

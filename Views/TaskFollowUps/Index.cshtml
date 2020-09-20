@@ -26,7 +26,7 @@
                                 <th>Tasks</th>
                                 <th>Remarks</th>
                                 <th>Status</th>
-                                <th>Date</th>
+                                <th>Activity Date</th>
                             </tr>
                         </thead>
                     </table>
@@ -57,7 +57,7 @@
                                 <th>Tasks</th>
                                 <th>Remarks</th>
                                 <th>Status</th>
-                                <th>Follow up Date</th>
+                                <th>Activity Date</th>
                             </tr>
                         </thead>
                     </table>
@@ -137,7 +137,7 @@
                      { "data": "followUpFrom", "name": "Follow Up From", "autoWidth": true, "visible": true },
                      {
                         "render": function (data, type, full, meta) {
-                            return '<a href="' + baseUrl.replace("taskfollowups", "") + 'tasks/Edit?id=' + full.taskInfo + '"><u>' + full.taskInfo +'</u> </a>';
+                            return '<a href="' + baseUrl.replace("taskfollowups", "") + 'tasks/Edit?id=' + full.taskId + '"><u>' + full.taskInfo +'</u> </a>';
                          }
                      },
                      { "data": "remarks", "name": "Remarks", "autoWidth": true },

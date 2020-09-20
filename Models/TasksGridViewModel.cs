@@ -15,5 +15,6 @@ namespace TaskManager.Web.Models
         public string LastUpdated { get; set; }
         public string CreatedBy { get; set; }
         public string TargetDate { get; set; }
+        public int SortId { get; set; }
     }
 }

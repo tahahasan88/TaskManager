@@ -36,6 +36,8 @@ namespace TaskManager.Data
         public DbSet<TaskStatus> TaskStatus { get; set; }
         public DbSet<TaskAudit> TaskAudit { get; set; }
         public DbSet<AuditType> AuditType { get; set; }
+        public DbSet<Department> Departments { get; set; }
+        public DbSet<Employee> Employees { get; set; }
 
     }
 }

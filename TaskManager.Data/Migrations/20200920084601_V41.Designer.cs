@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TaskManager.Data;
 
 namespace TaskManager.Data.Migrations
 {
     [DbContext(typeof(TaskManagerContext))]
-    partial class TaskManagerContextModelSnapshot : ModelSnapshot
+    [Migration("20200920084601_V41")]
+    partial class V41
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -47,7 +49,7 @@ namespace TaskManager.Data.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("ParentDepartmentId")
+                    b.Property<int>("ParentDepartmentId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -55,8 +57,6 @@ namespace TaskManager.Data.Migrations
                     b.HasIndex("ManagerId")
                         .IsUnique()
                         .HasFilter("[ManagerId] IS NOT NULL");
-
-                    b.HasIndex("ParentDepartmentId");
 
                     b.ToTable("Departments");
                 });
@@ -347,10 +347,6 @@ namespace TaskManager.Data.Migrations
                     b.HasOne("TaskManager.Data.Employee", "Manager")
                         .WithOne("Department")
                         .HasForeignKey("TaskManager.Data.Department", "ManagerId");
-
-                    b.HasOne("TaskManager.Data.Department", "ParentDepartment")
-                        .WithMany()
-                        .HasForeignKey("ParentDepartmentId");
                 });
 
             modelBuilder.Entity("TaskManager.Data.SubTask", b =>

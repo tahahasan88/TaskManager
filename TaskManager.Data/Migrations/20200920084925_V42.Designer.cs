@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TaskManager.Data;
 
 namespace TaskManager.Data.Migrations
 {
     [DbContext(typeof(TaskManagerContext))]
-    partial class TaskManagerContextModelSnapshot : ModelSnapshot
+    [Migration("20200920084925_V42")]
+    partial class V42
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -47,7 +49,7 @@ namespace TaskManager.Data.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("ParentDepartmentId")
+                    b.Property<int?>("ParentDepartmentIdId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -56,7 +58,7 @@ namespace TaskManager.Data.Migrations
                         .IsUnique()
                         .HasFilter("[ManagerId] IS NOT NULL");
 
-                    b.HasIndex("ParentDepartmentId");
+                    b.HasIndex("ParentDepartmentIdId");
 
                     b.ToTable("Departments");
                 });
@@ -348,9 +350,9 @@ namespace TaskManager.Data.Migrations
                         .WithOne("Department")
                         .HasForeignKey("TaskManager.Data.Department", "ManagerId");
 
-                    b.HasOne("TaskManager.Data.Department", "ParentDepartment")
+                    b.HasOne("TaskManager.Data.Department", "ParentDepartmentId")
                         .WithMany()
-                        .HasForeignKey("ParentDepartmentId");
+                        .HasForeignKey("ParentDepartmentIdId");
                 });
 
             modelBuilder.Entity("TaskManager.Data.SubTask", b =>
