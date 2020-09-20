@@ -1,0 +1,88 @@
+﻿
+
+<div class="container-fluid">
+
+    <div class="row">
+        <div class="col-12">
+
+            @{
+                if (ViewData["deletionMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible" role="alert">
+                        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                        @ViewData["deletionMessage"]
+                    </div>
+                }
+            }
+
+            <div class="card">
+                <div id="modal-default">
+                </div>
+                <!-- /.card-header -->
+                <div class="card-body">
+                    <table id="example2" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Employee</th>
+                                <th>Total</th>
+                                <th>Not Started Yet</th>
+                                <th>In Progress</th>
+                                <th>Completed</th>
+                                <th>On-Hold</th>
+                                <th>Cancelled</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+                <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+            <!-- /.card -->
+        </div>
+        <!-- /.col -->
+    </div>
+</div>
+
+@section BodyScripts {
+
+    <script>
+    $(document).ready(function () {
+
+        var baseUrl = "@Html.Raw(this.Context.Request.Scheme + "://" + this.Context.Request.Host)";
+
+        var tasksTable = $('#example2')
+                .DataTable({
+                    paging: true,
+                    initComplete: function (settings, json) {
+                        //$("a[name='employeeDetailLink']").click(function () {
+                        //    showEmployeeDetails($(this).html());
+                        //});
+                    },
+                select: {
+                    style:    'multiple',
+                    selector: 'td:first-child'
+                    },
+                search: {regex: true, caseInsensitive: true},
+                 ajax: {
+                    "url": baseUrl + "/reports/LoadReportsData",
+                    "type": "POST",
+                    "datatype": "json"
+                 },
+                 columns: [
+                    { "data" : "tagName", "name": "Employee", "autoWidth": true, "searchable" : true},
+                    { "data": "tagCount", "name": "Total", "autoWidth": true, "searchable" : true },
+                    { "data" : "notStartedTasksCount", "name": "Not Started Yet", "autoWidth": true, "searchable" : true},
+                    { "data": "inProgressTasksCount", "name": "In Progress", "autoWidth": true, "searchable" : true },
+                    { "data" : "completedTasksCount", "name": "Completed", "autoWidth": true, "visible" : true, "searchable" : true},
+                    { "data": "onHoldTasksCount", "name": "On-Hold", "autoWidth": true, "searchable" : true },
+                    { "data": "cancelledTasksCount", "name": "Cancelled", "autoWidth": true, "searchable" : true }
+                    
+                ]
+            });
+
+
+    });
+
+    </script>
+
+}

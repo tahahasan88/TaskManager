@@ -41,7 +41,8 @@ namespace TaskManager.Common
             InProgress = 2,
             Completed = 3,
             OnHold = 4,
-            Cancelled = 5
+            Cancelled = 5,
+            AllTasks = 0
         }
 
         public enum TaskAction
