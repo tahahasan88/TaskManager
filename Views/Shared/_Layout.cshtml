@@ -111,7 +111,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="#" class="nav-link">
+                            <a href="../reports" class="nav-link">
                                 <i class="nav-icon fas fa-chart-pie"></i>
                                 <p>
                                     Reports
@@ -364,6 +364,15 @@
                                        data: pieData,
                                        options: pieOptions
                                    });
+
+                                   if (this.api().data().length == 0) {
+                                    $('#pieChart2').hide();
+                                    $('#followUpPiDiv').hide();
+                                    $("#tasksPiDiv").removeClass("col-md-6 d-flex justify-content-center");
+                                    $("#tasksPiDiv").addClass("col-md-12 d-flex justify-content-center");
+                                    $("#textset1").hide();
+                                    $("#textset2").show();
+                                }
                                },
                                search: { regex: true, caseInsensitive: true },
                                ajax: {
@@ -384,19 +393,19 @@
                                                return '<span class="badge badge-secondary">Not Started</span>';
                                            }
                                            else
-                                               if (full.status == "In Progress") {
-                                                   return '<span class="badge badge-warning text-white"> In Progress</span > ';
-                                               }
-                                               else
-                                                   if (full.status == "On Hold") {
-                                                       return '<span class="badge badge-secondary">On Hold</span>';
-                                                   }
-                                                   else
-                                                       if (full.status == "Cancelled") {
-                                                           return '<span class="badge badge-secondary">Cancelled</span>';
-                                                       }
-                                                       else
-                                                           return '<span class="badge badge-success">Completed</span>';
+                                            if (full.status == "In Progress") {
+                                                return '<span class="badge badge-warning text-white"> In Progress</span > ';
+                                            }
+                                            else
+                                            if (full.status == "On Hold") {
+                                                return '<span class="badge badge-secondary">On Hold</span>';
+                                            }
+                                            else
+                                            if (full.status == "Cancelled") {
+                                                return '<span class="badge badge-secondary">Cancelled</span>';
+                                            }
+                                            else
+                                                return '<span class="badge badge-success">Completed</span>';
                                        }
                                    },
                                    { "data": "sortId", "name": "SortId", "autoWidth": true, "visible": false, "searchable": false }

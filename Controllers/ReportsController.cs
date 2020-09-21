@@ -27,15 +27,115 @@ namespace TaskManager.Web.Controllers
 
         public IActionResult Index()
         {
+            ViewData["UserName"] = currentUserName;
             return View();
         }
 
+        public bool IsThisUserManagingThisDepartment(Department thisDepartment, string userName)
+        {
+            bool isThisUserManager = false;
+            thisDepartment = thisDepartment.ParentDepartment;
+            while (thisDepartment != null)
+            {
+                if (thisDepartment.Manager.UserName == userName)
+                {
+                    isThisUserManager = true;
+                    break;
+                }
+                thisDepartment = thisDepartment.ParentDepartment;
+            }
+            return isThisUserManager;
+        }
 
         public IActionResult LoadReportsData()
         {
             var connectionString = _iconfiguration.GetConnectionString("DefaultConnection");
             Dictionary<string, List<TaskData>> userTaskDictionary = new Dictionary<string, List<TaskData>>();
+            int tagCounter = 0;
 
+            GetTaskDatabyTaskStatus(connectionString, userTaskDictionary);
+            List<Employee> employees = _context.Employees.Include(x => x.Department).ToList();
+            List<Department> departments = _context.Departments.Include(x => x.Manager).OrderBy(x => x.Id).ToList();
+            Employee loggedInEmployee = employees
+                .Where(x => x.UserName == currentUserName).FirstOrDefault();
+            bool isHeadOfDepartments = loggedInEmployee.Department.ParentDepartment == null ? true : false;
+
+            List<ReportsViewModel> reportsVM = new List<ReportsViewModel>();
+            //ReportsViewModel firstRow = new ReportsViewModel();
+            //firstRow.TagId = ++tagCounter;
+            //firstRow.IsDeptName = true;
+            //firstRow.TagName = departments.FirstOrDefault().Name;
+            //reportsVM.Add(firstRow);
+
+            List<Department> restOfDepartments = departments.Where(x => x.ParentDepartment != null).ToList();
+            foreach (Department department in departments)
+            {
+                ReportsViewModel reportRow = new ReportsViewModel();
+                reportRow.TagName = department.Name;
+                reportRow.TagId = ++tagCounter;
+                reportRow.IsDeptName = true;
+                reportsVM.Add(reportRow);
+
+                foreach (Employee employee in employees.Where(x => x.Department.Id == department.Id))
+                {
+                    if (userTaskDictionary.ContainsKey(employee.UserName))
+                    {
+                        if (isHeadOfDepartments || IsThisUserManagingThisDepartment(department, currentUserName) || employee.Department == loggedInEmployee.Department)
+                        {
+                            CreateReportRows(userTaskDictionary, reportsVM, employee, ++tagCounter);
+                        }
+                    }
+                }
+            }
+            int recordsTotal = reportsVM.Count;
+
+            return Json(new { draw = "1", recordsFiltered = recordsTotal, recordsTotal = recordsTotal, data = reportsVM });
+        }
+
+        private void CreateReportRows(Dictionary<string, List<TaskData>> userTaskDictionary, List<ReportsViewModel> reportsVM, Employee employee, int tagId)
+        {
+            ReportsViewModel newRow = new ReportsViewModel();
+            newRow.TagName = employee.EmployeeName;
+            newRow.TagId = tagId;
+            newRow.TagCount = userTaskDictionary[employee.UserName].
+                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.AllTasks)
+                .SingleOrDefault().TaskCount;
+            if (userTaskDictionary[employee.UserName].
+                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.Cancelled).Count() > 0)
+            {
+                newRow.CancelledTasksCount = userTaskDictionary[employee.UserName].
+                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.Cancelled).SingleOrDefault().TaskCount;
+            }
+            if (userTaskDictionary[employee.UserName].
+                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.Completed).Count() > 0)
+            {
+                newRow.CompletedTasksCount = userTaskDictionary[employee.UserName].
+                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.Completed).SingleOrDefault().TaskCount;
+            }
+            if (userTaskDictionary[employee.UserName].
+                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.InProgress).Count() > 0)
+            {
+                newRow.InProgressTasksCount = userTaskDictionary[employee.UserName].
+                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.InProgress).SingleOrDefault().TaskCount;
+            }
+            if (userTaskDictionary[employee.UserName].
+                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.NotStarted).Count() > 0)
+            {
+                newRow.NotStartedTasksCount = userTaskDictionary[employee.UserName].
+                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.NotStarted).SingleOrDefault().TaskCount;
+            }
+            if (userTaskDictionary[employee.UserName].
+                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.OnHold).Count() > 0)
+            {
+                newRow.OnHoldTasksCount = userTaskDictionary[employee.UserName].
+                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.OnHold).SingleOrDefault().TaskCount;
+            }
+            newRow.TagUserName = employee.UserName;
+            reportsVM.Add(newRow);
+        }
+
+        private void GetTaskDatabyTaskStatus(string connectionString, Dictionary<string, List<TaskData>> userTaskDictionary)
+        {
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 string sqlQuery = "select taskdata.UserName, taskdata.TaskStatusId, count(taskdata.id) as taskCount from " +
@@ -81,77 +181,6 @@ namespace TaskManager.Web.Controllers
                     }
                 }
             }
-
-            List<Employee> employees = _context.Employees.Include(x => x.Department).ToList();
-            List<Department> departments = _context.Departments.Include(x => x.Manager).OrderBy(x => x.Id).ToList();
-
-            Employee loggedInEmployee = employees
-                .Where(x => x.UserName == currentUserName).FirstOrDefault();
-            bool isHeadOfDepartments = loggedInEmployee.Department.ParentDepartment == null ? true : false;
-
-            List<ReportsViewModel> reportsVM = new List<ReportsViewModel>();
-            ReportsViewModel firstRow = new ReportsViewModel();
-            firstRow.TagName = departments.FirstOrDefault().Name;
-            reportsVM.Add(firstRow);
-
-            List<Department> restOfDepartments = departments.Where(x => x.ParentDepartment != null).ToList();
-            foreach (Department department in restOfDepartments)
-            {
-                ReportsViewModel reportRow = new ReportsViewModel();
-                reportRow.TagName = department.Name;
-                reportsVM.Add(reportRow);
-
-                foreach (Employee employee in employees.Where(x => x.Department.Id == department.Id))
-                {
-                    if (userTaskDictionary.ContainsKey(employee.UserName))
-                    {
-                        if (isHeadOfDepartments || department.Manager.UserName == currentUserName || employee.Department == loggedInEmployee.Department)
-                        {
-                            ReportsViewModel newRow = new ReportsViewModel();
-                            newRow.TagName = employee.EmployeeName;
-                            newRow.TagCount = userTaskDictionary[employee.UserName].
-                                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.AllTasks)
-                                .SingleOrDefault().TaskCount;
-                            if (userTaskDictionary[employee.UserName].
-                                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.Cancelled).Count() > 0)
-                            {
-                                newRow.CancelledTasksCount = userTaskDictionary[employee.UserName].
-                                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.Cancelled).SingleOrDefault().TaskCount;
-                            }
-                            if (userTaskDictionary[employee.UserName].
-                                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.Completed).Count() > 0)
-                            {
-                                newRow.CompletedTasksCount = userTaskDictionary[employee.UserName].
-                                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.Completed).SingleOrDefault().TaskCount;
-                            }
-                            if (userTaskDictionary[employee.UserName].
-                                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.InProgress).Count() > 0)
-                            {
-                                newRow.InProgressTasksCount = userTaskDictionary[employee.UserName].
-                                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.InProgress).SingleOrDefault().TaskCount;
-                            }
-                            if (userTaskDictionary[employee.UserName].
-                                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.NotStarted).Count() > 0)
-                            {
-                                newRow.NotStartedTasksCount = userTaskDictionary[employee.UserName].
-                                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.NotStarted).SingleOrDefault().TaskCount;
-                            }
-                            if (userTaskDictionary[employee.UserName].
-                                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.OnHold).Count() > 0)
-                            {
-                                newRow.OnHoldTasksCount = userTaskDictionary[employee.UserName].
-                                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.OnHold).SingleOrDefault().TaskCount;
-                            }
-                            reportsVM.Add(newRow);
-                        }
-                    }
-                }
-            }
-            int recordsTotal = reportsVM.Count;
-
-            return Json(new { draw = "1", recordsFiltered = recordsTotal, recordsTotal = recordsTotal, data = reportsVM });
         }
-
-
     }
 }

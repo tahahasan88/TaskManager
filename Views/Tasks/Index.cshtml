@@ -40,6 +40,17 @@
         .select2-results__option[aria-selected=true] {
             display: none;
         }
+
+        #tasksTable th {
+          background-color: #343a40;
+          color: white;
+        }
+
+        table.dataTable tbody tr.selected {
+            color: white;
+            background-color: #7d91b0;
+        }
+
     </style>
 
 }
@@ -299,7 +310,7 @@
                 </div>
                 <!-- /.card-header -->
                 <div class="card-body">
-                    <table id="example2" class="table table-bordered table-hover">
+                    <table id="tasksTable" class="table table-bordered table-hover">
                         <thead>
                             <tr>
                                 <th></th>
@@ -838,15 +849,16 @@
             );
 
             var baseUrl = "@Html.Raw(this.Context.Request.Scheme + "://" + this.Context.Request.Host + this.Context.Request.Path)";
-            var tasksTable = $('#example2')
+            var tasksTable = $('#tasksTable')
                 .on('init.dt', function () {
-                    $(".knob").knob({});
+
+                    
                 }).on('page.dt', function () {
-                    //setTimeout(
-                    //function()
-                    //{
-                    //        $(".knob").knob({});
-                    //}, 100);
+                    setTimeout(
+                    function()
+                    {
+                            $(".knob").knob({});
+                    }, 100);
                 }).
                 DataTable({
                     paging: true,
@@ -854,6 +866,8 @@
                         $("a[name='employeeDetailLink']").click(function () {
                             showEmployeeDetails($(this).html());
                         });
+                        console.log("init complete");
+                        $(".knob").knob({});
                     },
                 columnDefs: [ {
                     orderable: false,
@@ -1032,7 +1046,9 @@
                     datatype: "json",
                     success: function (data) {
                         $.each(data, function (i, val) {
-                            tmpData = data[i];                            
+                            tmpData = data[i];   
+
+                            $(".knob").knob({});
                             $('#pendingTasksId').trigger(
                                 'configure',
                                 {
@@ -1076,7 +1092,8 @@
                                 }
                             );
                             $("#totalTasksId").val(tmpData.totalTasksCount).trigger('change');;
-                            $("input.knob").trigger('change');
+                            //$("input.knob").trigger('change');
+                            console.log("change complete");
                         });
                     },
                     error: function () {

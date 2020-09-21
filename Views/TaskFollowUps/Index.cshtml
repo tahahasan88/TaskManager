@@ -8,6 +8,18 @@
     <link rel="stylesheet" href="../../plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
     <link rel="stylesheet" href="../../plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
     <link rel="stylesheet" href="../../plugins/datatables-select/css/select.bootstrap4.min.css">
+
+    <style>
+        #inboxTable th {
+            background-color: #343a40;
+            color: white;
+        }
+        #outboxTable th {
+            background-color: #343a40;
+            color: white;
+        }
+    </style>
+
 }
 
 <div class="container-fluid">
@@ -163,13 +175,13 @@
                         }
                      },
                     { "data": "updatedDate", "name": "Date", "autoWidth": true }
-                    
+
                 ],
                 order: [[ 1, 'desc' ]]
              });
 
 
-            
+
                 var outboxTable = $('#outboxTable').DataTable( {
                 //scrollY:        300,
                 //scrollX:        true,
@@ -194,7 +206,7 @@
                             return '<a href="' + baseUrl.replace("taskfollowups", "") + 'tasks/Edit?id=' + full.taskInfo + '"><u>' + full.taskInfo +'</u> </a>';
                          }
                         },
-                        { "data": "remarks", "name": "Remarks", "autoWidth": true },                   
+                        { "data": "remarks", "name": "Remarks", "autoWidth": true },
                         {
                             "render": function (data, type, full, meta) {
                             if (full.status == "Not Started") {

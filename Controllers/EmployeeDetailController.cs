@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
+using Dapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using TaskManager.Data;
@@ -14,13 +16,14 @@ namespace TaskManager.Web.Controllers
     {
         public string currentUserName = "";
         private readonly TaskManagerContext _context;
+        private readonly IConfiguration _iconfiguration;
 
 
         public EmployeeDetailController(TaskManagerContext context, IConfiguration configuration)
         {
             _context = context;
             currentUserName = configuration.GetSection("TaskManagerUserName").Value;
-            
+            _iconfiguration = configuration;
         }
 
         private static int GetSortOrderOfStatus(int statusId)
@@ -56,52 +59,61 @@ namespace TaskManager.Web.Controllers
                 EmployeeViewModel employeeVM = new EmployeeViewModel();
                 employeeVM.TasksGridVMList = new List<TasksGridViewModel>();
 
-                var taskEmployees = (from e in _context.TaskEmployees
-                .Where(x => x.IsActive == true && x.UserName == userName)
-                                     join t in _context.Tasks
-                                     .Where(x => x.IsDeleted == false)
-                                     on e.Task.Id equals t.Id
-                                     select new
-                                     {
-                                         e.UserName,
-                                         t.TaskStatus.Status,
-                                         t.TaskProgress,
-                                         t.Title,
-                                         t.LastUpdatedAt,
-                                         t.Target,
-                                         t.Id,
-                                         SortId = GetSortOrderOfStatus(t.TaskStatus.Id) 
-                                     })
-                .OrderByDescending(m => m.LastUpdatedAt);
-
-                foreach (var taskEmployee in taskEmployees)
+                var connectionString = _iconfiguration.GetConnectionString("DefaultConnection");
+                using (SqlConnection conn = new SqlConnection(connectionString))
                 {
-                    employeeVM.TasksGridVMList.Add(new TasksGridViewModel()
-                    {
-                        Title = taskEmployee.Title,
-                        Status = taskEmployee.Status,
-                        TargetDate = taskEmployee.Target.ToString("dd-MMM-yyyy HH:mm:ss"),
-                        TaskId = taskEmployee.Id,
-                        SortId = taskEmployee.SortId
-                    });
-                }
-                int recordsTotal = taskEmployees.Count();
-                int pendingCount = taskEmployees.Where(x => x.Status != "Completed").Count();
-                int notStartedCount = taskEmployees.Where(x => x.Status == "Not Started").Count();
-                int completedCount = taskEmployees.Where(x => x.Status == "Completed").Count();
-                int onHoldCount = taskEmployees.Where(x => x.Status == "On Hold").Count();
-                int cancelledCount = taskEmployees.Where(x => x.Status == "Cancelled").Count();
-                int progressCount = taskEmployees.Where(x => x.Status == "In Progress").Count();
+                    string sqlQuery = "select distinct Tasks.Id," +
+                    "TaskEmployees.UserName," +
+                    "TaskStatus.Status," +
+                    "Tasks.TaskProgress," +
+                    "Tasks.Title," +
+                    "Tasks.LastUpdatedAt," +
+                    "Tasks.Target," +
+                    "TaskStatus.Id as TaskStatusId" +
+                    " from TaskEmployees" +
+                    " inner join Tasks on Tasks.Id = TaskEmployees.TaskId" +
+                    " inner join TaskStatus on TaskStatus.Id = Tasks.TaskStatusId" +
+                    " where TaskEmployees.UserName = '"+ userName + "'" +
+                    " and TaskEmployees.IsActive = 1" +
+                    " and Tasks.IsDeleted = 0" +
+                    " order by LastUpdatedAt desc";
 
-                //Returning Json Data
-                return Json(new { draw = "1",
-                    pendingCount = pendingCount,
-                    notStartedCount = notStartedCount,
-                    completedCount = completedCount,
-                    onHoldCount = onHoldCount,
-                    cancelledCount = cancelledCount,
-                    progressCount = progressCount,
-                    recordsFiltered = recordsTotal, recordsTotal = recordsTotal, data = employeeVM.TasksGridVMList });
+                    conn.Open();
+                    var taskEmployees = conn.Query(sqlQuery);
+                    foreach (var taskEmployee in taskEmployees)
+                    {
+                        employeeVM.TasksGridVMList.Add(new TasksGridViewModel()
+                        {
+                            Title = taskEmployee.Title,
+                            Status = taskEmployee.Status,
+                            TargetDate = taskEmployee.Target.ToString("dd-MMM-yyyy HH:mm:ss"),
+                            TaskId = taskEmployee.Id,
+                            SortId = GetSortOrderOfStatus(taskEmployee.TaskStatusId)
+                        });
+                    }
+                    int recordsTotal = employeeVM.TasksGridVMList.Count();
+                    int pendingCount = employeeVM.TasksGridVMList.Where(x => x.Status != "Completed").Count();
+                    int notStartedCount = employeeVM.TasksGridVMList.Where(x => x.Status == "Not Started").Count();
+                    int completedCount = employeeVM.TasksGridVMList.Where(x => x.Status == "Completed").Count();
+                    int onHoldCount = employeeVM.TasksGridVMList.Where(x => x.Status == "On Hold").Count();
+                    int cancelledCount = employeeVM.TasksGridVMList.Where(x => x.Status == "Cancelled").Count();
+                    int progressCount = employeeVM.TasksGridVMList.Where(x => x.Status == "In Progress").Count();
+
+                    return Json(new
+                    {
+                        draw = "1",
+                        pendingCount = pendingCount,
+                        notStartedCount = notStartedCount,
+                        completedCount = completedCount,
+                        onHoldCount = onHoldCount,
+                        cancelledCount = cancelledCount,
+                        progressCount = progressCount,
+                        recordsFiltered = recordsTotal,
+                        recordsTotal = recordsTotal,
+                        data = employeeVM.TasksGridVMList
+                    });
+
+                }
             }
             catch (Exception ex)
             {

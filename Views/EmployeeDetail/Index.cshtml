@@ -20,6 +20,16 @@
         overflow: scroll;
     }
 
+     #employeeTasksTable th {
+          background-color: #343a40;
+          color: white;
+     }
+
+     #employeefollowUpsTable th {
+         background-color: #343a40;
+         color: white;
+     }
+
 </style>
 
 
@@ -102,22 +112,26 @@
                                     <div class="tab-content" id="custom-content-below-tabContent">
                                         <div class="tab-pane fade show active" id="custom-content-below-home" role="tabpanel" aria-labelledby="custom-content-below-home-tab">
                                             <br />
-                                            <div class="row">
-                                                <div class="col-md-6">
+                                            <div class="row" id="piChartsDiv">
+                                                <div id="tasksPiDiv" class="col-md-6 d-flex justify-content-center">
                                                     <canvas id="pieChart" style="min-height: 250px; height: 250px; max-height: 250px; min-width:80%; max-width: 80%;"></canvas>
 
                                                 </div>
-                                                <div class="col-md-6">
+                                                <div id="followUpPiDiv" class="col-md-6 d-flex justify-content-center"  style="display:block">
                                                     <canvas id="pieChart2" style="min-height: 250px; height: 250px; max-height: 250px; min-width:80%; max-width: 80%;"></canvas>
-
                                                 </div>
                                             </div>
-                                            <div class="row">
-                                                <div class="col-md-6 d-flex justify-content-center">
+                                            <div class="row" id="textset1">
+                                                <div class="col-md-6 d-flex justify-content-center" id="piecharttaskId">
                                                     <span><b>Tasks</b></span>
                                                 </div>
-                                                <div class="col-md-6 d-flex justify-content-center">
-                                                    <span><b>Follow Ups</b></span>
+                                                <div class="col-md-6 d-flex justify-content-center" id="followUpTextDiv">
+                                                    <span id="followuptxtId"><b>Follow Ups</b></span>
+                                                </div>
+                                            </div>
+                                            <div class="row" id="textset2" style="display:none">
+                                                <div class="col-md-12 d-flex justify-content-center">
+                                                    <span><b>Tasks</b></span>
                                                 </div>
                                             </div>
                                         </div>
@@ -126,7 +140,6 @@
                                                 <div class="col-md-12">
                                                     <div class="card">
                                                         <div class="card-body">
-
                                                             <table id="employeeTasksTable" class="table table-bordered table-hover" style="width:80%">
                                                                 <thead>
                                                                     <tr>
