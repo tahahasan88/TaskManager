@@ -23,12 +23,13 @@ namespace TaskManager.Web.Controllers
                 _context.TaskEmployees.Where(x => x.Task.Id == taskId).ToList();
             List<string> listOfEmployeeEmailAddress = new List<string>();
 
-            EmployeeList employeeList = new EmployeeList();
+            //EmployeeList employeeList = new EmployeeList();
+            List<Employee> employees = _context.Employees.Include(x => x.Department).ToList();
             foreach (TaskEmployee employee in taskEmployees)
             {
                 if (employee.UserName != null && employee.UserName != currentUserName)
                 {
-                    listOfEmployeeEmailAddress.Add(employeeList.Employees.Where(x => x.UserName == employee.UserName)
+                    listOfEmployeeEmailAddress.Add(employees.Where(x => x.UserName == employee.UserName)
                         .SingleOrDefault().EmailAddress);
                 }
             }

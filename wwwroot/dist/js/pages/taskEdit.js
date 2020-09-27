@@ -383,7 +383,6 @@ function getSubTasksList() {
 
             $("#addSubtaskBtnId").click(function () {
                 //var taskId = taskId;
-                alert(taskId);
                 var description = $("#newTaskInputId").val();
                 var isCompleted = false;
                 var assignee = "";
@@ -450,7 +449,6 @@ function updateSubTask(subtaskId, taskId, description, assignee, isCompleted) {
 
 function addSubTask(taskId, description, isCompleted, assignee) {
 
-    alert(taskId);
     $.post(thisBaseUrl + "/subtasks/Create",
         { description: description, taskId: taskId, isCompleted: isCompleted, assignee: assignee },
         function (returnedData) {

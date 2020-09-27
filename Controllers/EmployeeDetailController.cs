@@ -178,18 +178,29 @@ namespace TaskManager.Web.Controllers
         }
 
 
-        public async Task<IActionResult> Index(string userName)
+        public IActionResult Index(string userName)
         {
             userName = userName == null ? currentUserName : userName;
             EmployeeViewModel employeeVM = new EmployeeViewModel();
             
-            EmployeeList employeeList = new EmployeeList();
-            InternalEmployee thisEmployee = employeeList.Employees.Where(x => x.UserName == userName).SingleOrDefault();
+            Employee thisEmployee = _context.Employees.Include(k => k.Department)
+                .Where(x => x.UserName == userName).SingleOrDefault();
+           
+            List<Department> departments = _context.Departments.Include(x => x.Manager).OrderBy(x => x.Id).ToList();
+
             employeeVM.EmployeeName = userName;
             employeeVM.EmailAddres = thisEmployee.EmailAddress;
             employeeVM.Phone = thisEmployee.PhoneNo;
-            employeeVM.Presence = "Present";
-            employeeVM.ReportsTo = "Haroon";
+            employeeVM.Presence = "Present"; //insert attendance here
+
+            if (thisEmployee.Department.ParentDepartment != null)
+            {
+                Department dept = departments.Where(x => x.Id == thisEmployee.Department.ParentDepartment.Id).SingleOrDefault(); //   thisEmployee.Department.ParentDepartment.Manager;
+                if (dept != null && dept.Manager != null)
+                {
+                    employeeVM.ReportsTo = dept.Manager.UserName;
+                }
+            }
 
             ViewData["UserName"] = userName;
             return PartialView("Index", employeeVM);

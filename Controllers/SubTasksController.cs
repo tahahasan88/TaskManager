@@ -59,8 +59,8 @@ namespace TaskManager.Web.Controllers
                 .Where(x => x.IsDeleted == false && x.Task.Id == id)
                 .ToListAsync();
 
-            EmployeeList employeeList = new EmployeeList();
-            foreach (InternalEmployee employee in employeeList.Employees)
+            List<Employee> employees = _context.Employees.ToList();
+            foreach (Employee employee in employees)
             {
                 emmployeeVMList.Add(new TaskEmployeeListViewModel()
                 {
@@ -305,11 +305,11 @@ namespace TaskManager.Web.Controllers
         private void PopulateSubTaskViewModel(SubTaskViewModel subTaskViewModel, string subTaskUserName = "")
         {
             List<SelectListItem> employeeDrpDwnList = new List<SelectListItem>();
-            EmployeeList employeeList = new EmployeeList();
             List<TaskEmployee> filteredTaskEmployees = _context.TaskEmployees.Where(x => x.TaskCapacity.Id == (int)Common.Common.TaskCapacity.Creator
                 || x.TaskCapacity.Id == (int)Common.Common.TaskCapacity.Assignee && x.Task.Id == currentTaskId).ToList();
 
-            foreach (InternalEmployee employee in employeeList.Employees)
+            List<Employee> employeeList = _context.Employees.ToList();
+            foreach (Employee employee in employeeList)
             {
                 if (filteredTaskEmployees.Where(x => x.UserName == employee.UserName).Count() == 0)
                 {
@@ -319,7 +319,7 @@ namespace TaskManager.Web.Controllers
             subTaskViewModel.EmployeeList = employeeDrpDwnList;
             if (!subTaskUserName.Equals(string.Empty))
             {
-                subTaskViewModel.SelectedEmployee = employeeList.Employees.Where(x => x.UserName == subTaskUserName).FirstOrDefault().EmployeeName;
+                subTaskViewModel.SelectedEmployee = employeeList.Where(x => x.UserName == subTaskUserName).FirstOrDefault().EmployeeName;
             }
         }
 
