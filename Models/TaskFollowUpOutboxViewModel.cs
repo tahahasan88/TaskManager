@@ -11,5 +11,6 @@ namespace TaskManager.Web.Models
         public string Remarks { get; set; }
         public string TaskInfo { get; set; }
         public string Status { get; set; }
+        public int TaskId { get; set; }
     }
 }

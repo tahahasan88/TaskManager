@@ -170,7 +170,8 @@ namespace TaskManager.Web.Controllers
                                               c.LastUpdatedAt,
                                               c.Remarks,
                                               c.Task.Title,
-                                              c.Task.TaskStatus.Status
+                                              c.Task.TaskStatus.Status,
+                                              c.Task.Id
                                           })
                                  .Where(x => x.FollowerUserName == currentUserName)
                                  .Distinct()
@@ -188,7 +189,8 @@ namespace TaskManager.Web.Controllers
                             FollowUpDate = outbox.LastUpdatedAt.ToString("dd-MMM-yyyy"),
                             Remarks = outbox.Remarks,
                             TaskInfo = outbox.Title,
-                            Status = outbox.Status
+                            Status = outbox.Status,
+                            TaskId = outbox.Id
                         }
                     );
                 }

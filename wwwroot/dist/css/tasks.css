@@ -1,0 +1,41 @@
+﻿th.progressCls {
+    width: 10px !important;
+}
+
+/*tr.selected
+        {background-color:#dee2e6 !important}*/
+
+table.dataTable tbody td.select-checkbox, table.dataTable tbody th.select-checkbox {
+    width: 2px !important;
+    /*height: 10px !important;*/
+    margin: 0px;
+    /*margin-top:10px !important;*/
+    margin-left: -20px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    -o-appearance: none;
+    appearance: none;
+    box-shadow: none;
+    font-size: 0.6em;
+    line-height: 6em;
+    /*text-align: left;
+          line-height: 1.9em;*/
+}
+
+td.select-checkbox:before {
+    margin-top: 10px !important;
+}
+
+.select2-results__option[aria-selected=true] {
+    display: none;
+}
+
+#tasksTable th {
+    background-color: #343a40;
+    color: white;
+}
+
+table.dataTable tbody tr.selected {
+    color: white;
+    background-color: #7d91b0;
+}
