@@ -61,13 +61,7 @@ namespace TaskManager.Web.Controllers
             bool isHeadOfDepartments = loggedInEmployee.Department.ParentDepartment == null ? true : false;
 
             List<ReportsViewModel> reportsVM = new List<ReportsViewModel>();
-            //ReportsViewModel firstRow = new ReportsViewModel();
-            //firstRow.TagId = ++tagCounter;
-            //firstRow.IsDeptName = true;
-            //firstRow.TagName = departments.FirstOrDefault().Name;
-            //reportsVM.Add(firstRow);
 
-            List<Department> restOfDepartments = departments.Where(x => x.ParentDepartment != null).ToList();
             foreach (Department department in departments)
             {
                 ReportsViewModel reportRow = new ReportsViewModel();

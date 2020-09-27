@@ -186,20 +186,29 @@ namespace TaskManager.Web.Controllers
             Employee thisEmployee = _context.Employees.Include(k => k.Department)
                 .Where(x => x.UserName == userName).SingleOrDefault();
            
-            List<Department> departments = _context.Departments.Include(x => x.Manager).OrderBy(x => x.Id).ToList();
+            List<Department> departments = _context.Departments.Include(x => x.Manager).ToList();
 
             employeeVM.EmployeeName = userName;
             employeeVM.EmailAddres = thisEmployee.EmailAddress;
             employeeVM.Phone = thisEmployee.PhoneNo;
             employeeVM.Presence = "Present"; //insert attendance here
 
-            if (thisEmployee.Department.ParentDepartment != null)
+            var employeeManager = (from c in _context.Employees
+                                    join o in _context.Departments
+                                    on c.Id equals o.Manager.Id
+                                    where o.ParentDepartment != null
+                                    && o.Id == c.Department.Id
+                                    && c.UserName == userName
+                                    select new
+                                    {
+                                        UserName = o.ParentDepartment == null ? "" : o.ParentDepartment.Manager.UserName
+                                    }
+                                    );
+
+
+            if (employeeManager != null && employeeManager.Any())
             {
-                Department dept = departments.Where(x => x.Id == thisEmployee.Department.ParentDepartment.Id).SingleOrDefault(); //   thisEmployee.Department.ParentDepartment.Manager;
-                if (dept != null && dept.Manager != null)
-                {
-                    employeeVM.ReportsTo = dept.Manager.UserName;
-                }
+                employeeVM.ReportsTo = employeeManager.FirstOrDefault().UserName;
             }
 
             ViewData["UserName"] = userName;
