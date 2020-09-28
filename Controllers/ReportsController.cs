@@ -47,6 +47,17 @@ namespace TaskManager.Web.Controllers
             return isThisUserManager;
         }
 
+        private int GetDeptLevel(Department thisDept)
+        {
+            int depthLevel = 0;
+            while (thisDept.ParentDepartment != null)
+            {
+                thisDept = thisDept.ParentDepartment;
+                ++depthLevel;
+            }
+            return depthLevel;
+        }
+
         public IActionResult LoadReportsData()
         {
             var connectionString = _iconfiguration.GetConnectionString("DefaultConnection");
@@ -55,28 +66,35 @@ namespace TaskManager.Web.Controllers
 
             GetTaskDatabyTaskStatus(connectionString, userTaskDictionary);
             List<Employee> employees = _context.Employees.Include(x => x.Department).ToList();
-            List<Department> departments = _context.Departments.Include(x => x.Manager).OrderBy(x => x.Id).ToList();
-            Employee loggedInEmployee = employees
-                .Where(x => x.UserName == currentUserName).FirstOrDefault();
-            bool isHeadOfDepartments = loggedInEmployee.Department.ParentDepartment == null ? true : false;
+            List<Department> departments = _context.Departments
+                .Include(x => x.ParentDepartment)
+                .Include(x => x.Manager).OrderBy(x => x.Id).ToList();
 
             List<ReportsViewModel> reportsVM = new List<ReportsViewModel>();
 
             foreach (Department department in departments)
             {
+                int gridViewUiDepthLevel = 0;
                 ReportsViewModel reportRow = new ReportsViewModel();
                 reportRow.TagName = department.Name;
                 reportRow.TagId = ++tagCounter;
                 reportRow.IsDeptName = true;
+                gridViewUiDepthLevel = GetDeptLevel(department);
+                reportRow.DepartmentLevel = gridViewUiDepthLevel;
                 reportsVM.Add(reportRow);
+                gridViewUiDepthLevel += 1;
 
                 foreach (Employee employee in employees.Where(x => x.Department.Id == department.Id))
                 {
                     if (userTaskDictionary.ContainsKey(employee.UserName))
                     {
-                        if (isHeadOfDepartments || IsThisUserManagingThisDepartment(department, currentUserName) || employee.Department == loggedInEmployee.Department)
+                        if (IsThisUserManagingThisDepartment(department, currentUserName) 
+                            || employee.UserName == currentUserName
+                            || department.Manager.UserName == currentUserName
+                            )
                         {
-                            CreateReportRows(userTaskDictionary, reportsVM, employee, ++tagCounter);
+                            CreateReportRows(userTaskDictionary, reportsVM, employee, ++tagCounter, gridViewUiDepthLevel);
+                            
                         }
                     }
                 }
@@ -86,11 +104,13 @@ namespace TaskManager.Web.Controllers
             return Json(new { draw = "1", recordsFiltered = recordsTotal, recordsTotal = recordsTotal, data = reportsVM });
         }
 
-        private void CreateReportRows(Dictionary<string, List<TaskData>> userTaskDictionary, List<ReportsViewModel> reportsVM, Employee employee, int tagId)
+        private void CreateReportRows(Dictionary<string, List<TaskData>> userTaskDictionary,
+            List<ReportsViewModel> reportsVM, Employee employee, int tagId, int deptLevel)
         {
             ReportsViewModel newRow = new ReportsViewModel();
             newRow.TagName = employee.EmployeeName;
             newRow.TagId = tagId;
+            newRow.DepartmentLevel = deptLevel;
             newRow.TagCount = userTaskDictionary[employee.UserName].
                 Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.AllTasks)
                 .SingleOrDefault().TaskCount;
@@ -176,5 +196,49 @@ namespace TaskManager.Web.Controllers
                 }
             }
         }
+
+        public IActionResult GetReportDetail()
+        {
+            return PartialView("_ReportUserDetail");
+        }
+
+        public IActionResult GetTaskList(string userName, int statusId)
+        {
+            try
+            {
+                List<TasksGridViewModel> tasksGridVMList = new List<TasksGridViewModel>();
+                var connectionString = _iconfiguration.GetConnectionString("DefaultConnection");
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    string sqlQuery = "select distinct tasks.Id, tasks.Title, tasks.TaskStatusId  from tasks" +
+                                    " inner join taskEmployees on taskEmployees.TaskId = tasks.Id" +
+                                    " and taskEmployees.IsActive = 1" +
+                                    " where taskEmployees.UserName = '" + userName + "'" +
+                                    " and tasks.IsDeleted = 0";
+
+                    sqlQuery = sqlQuery + ((statusId == 0) ? "" : (" and TaskStatusId = " + statusId + ""));
+
+                    conn.Open();
+                    var tasks = conn.Query(sqlQuery);
+                    foreach (var task in tasks)
+                    {
+                        tasksGridVMList.Add(new TasksGridViewModel()
+                        {
+                            TaskId = task.Id,
+                            Title = task.Title,
+                            Status = ((Common.Common.TaskStatus)(task.TaskStatusId)).ToString()
+                        });
+                    }
+                    int recordsTotal = tasksGridVMList.Count;
+
+                    return Json(new { draw = "1", recordsFiltered = recordsTotal, recordsTotal = recordsTotal, data = tasksGridVMList });
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
     }
 }

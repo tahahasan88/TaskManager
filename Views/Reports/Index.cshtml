@@ -41,6 +41,7 @@
                 }
             }
 
+            <div id="reportUserDetailDiv"></div>
             <div class="card">
                 <div id="modal-default">
                 </div>
@@ -87,6 +88,13 @@
     }
     var employeeDiv = $('#employeeDetailDiv');
     var baseUrl = "@Html.Raw(this.Context.Request.Scheme + "://" + this.Context.Request.Host)";
+
+    var cancelledTaskStatusId = @((int)TaskManager.Common.Common.TaskStatus.Cancelled);
+    var completedTaskStatusId = @((int)TaskManager.Common.Common.TaskStatus.Completed);
+    var inProgressTaskStatusId = @((int)TaskManager.Common.Common.TaskStatus.InProgress);
+    var notStartedTaskStatusId = @((int)TaskManager.Common.Common.TaskStatus.NotStarted);
+    var onHoldTaskStatusId = @((int)TaskManager.Common.Common.TaskStatus.OnHold);
+
 
     var thisPage = '../reports';
         $(".nav-sidebar .nav-item .nav-link").each(function () {
@@ -296,14 +304,81 @@
             .DataTable({
                 paging: false,
                 initComplete: function (settings, json) {
+                    var reportUserDetailDiv = $("#reportUserDetailDiv");
                     $("a[name='employeeDetailLink']").click(function () {
                         showEmployeeDetails($(this).attr("data-username"));
                     });
+
+                    $("span[name='totalTasks']").click(function () {
+                        //alert($(this).attr("data-username"));
+                        showReportDetails($(this).attr("data-username"), 0);
+                    });
+
+                    $("span[name='notStartedTasks']").click(function () {
+                        //alert($(this).attr("data-username"));
+                        showReportDetails($(this).attr("data-username"), notStartedTaskStatusId);
+                    });
+
+                    $("span[name='inProgressTasks']").click(function () {
+                        //alert($(this).attr("data-username"));
+                        showReportDetails($(this).attr("data-username"), inProgressTaskStatusId);
+                    });
+
+                    $("span[name='completedTasks']").click(function () {
+                        //alert($(this).attr("data-username"));
+                        showReportDetails($(this).attr("data-username"), completedTaskStatusId);
+                    });
+
+                    $("span[name='onHoldTasks']").click(function () {
+                        //alert($(this).attr("data-username"));
+                        showReportDetails($(this).attr("data-username"), onHoldTaskStatusId);
+                    });
+
+                    function showReportDetails(userName, statusId) {
+
+                        $.ajax({
+                            type: "GET",
+                            url: baseUrl + "/reports/GetReportDetail",
+                            contentType: "application/json; charset=utf-8",
+                            data: null, //{ userName: userName, statusId = statusId },
+                            datatype: "json",
+                            success: function (data) {
+
+                                reportUserDetailDiv.html(data);
+                                reportUserDetailDiv.find('.modal').modal('show');
+                                reportUserDetailDiv.show();
+
+                                var reportUserDetailTable = $('#reportUserDetailTable').
+                                    DataTable({
+                                        paging: false,
+                                        info: false,
+                                        searching: false,
+                                        //scrollY: 200,
+                                        scrollCollapse: true,
+                                        //search: { regex: true, caseInsensitive: true },
+                                        ajax: {
+                                            "url": baseUrl + "/reports/GetTaskList",
+                                            "type": "POST",
+                                            "datatype": "json",
+                                            "data": { userName: userName, statusId : statusId }
+                                        },
+                                        columns: [
+                                        {
+                                            "render": function (data, type, full, meta) {
+                                                return '<a href="' + baseUrl + '/tasks/Edit?id=' + full.taskId + '"><u>' + full.title + '</u> </a>';
+                                            }
+                                        },
+                                        { "data": "status", "name": "Status", "autoWidth": true, "visible": true, "searchable": true }
+                                        ]
+                                    });
+                            },
+                            error: function () {
+                                alert("Dynamic content load failed.");
+                            }
+                        });
+                    }
+
                 },
-            //select: {
-            //    style:    'multiple',
-            //    selector: 'td:first-child'
-            //    },
             search: {regex: true, caseInsensitive: true},
                 ajax: {
                 "url": baseUrl + "/reports/LoadReportsData",
@@ -320,16 +395,16 @@
                 {
                     "render": function (data, type, full, meta) {
                         if (full.isDeptName == false) {
-                            return '<a href="javascript:void(null);" data-username="'+full.tagUserName+'" name="employeeDetailLink">' + full.tagName + '</span>';
+                            return '<a style="padding-left:'+full.departmentLevel+'em" href="javascript:void(null);" data-username="' + full.tagUserName + '" name="employeeDetailLink">' + full.tagName + '</span>';
                         }
                         else
-                            return full.tagName;
+                            return '<span style="padding-left:'+full.departmentLevel+'em">'+ full.tagName +'</span>';
                         }
                 },
                 {
                         "render": function (data, type, full, meta) {
                             if (full.tagCount != "0") {
-                                return '<span class="badge badge-light">' + full.tagCount + '</span>';
+                                return '<span name="totalTasks" data-username="'+full.tagUserName+'" class="badge badge-light">' + full.tagCount + '</span>';
                             }
                             else {
                                 return '';
@@ -339,7 +414,7 @@
                 {
                         "render": function (data, type, full, meta) {
                             if (full.notStartedTasksCount != "0") {
-                                return '<span class="badge badge-secondary">' + full.notStartedTasksCount + '</span>';
+                                return '<span style="" name="notStartedTasks" data-username="'+full.tagUserName+'" class="badge badge-secondary">' + full.notStartedTasksCount + '</span>';
                             }
                             else {
                                 return '';
@@ -349,7 +424,7 @@
                 {
                         "render": function (data, type, full, meta) {
                             if (full.inProgressTasksCount != "0") {
-                                return '<span class="badge badge-warning">' + full.inProgressTasksCount + '</span>';
+                                return '<span name="inProgressTasks" data-username="'+full.tagUserName+'" class="badge badge-warning">' + full.inProgressTasksCount + '</span>';
                             }
                             else {
                                 return '';
@@ -359,7 +434,7 @@
                 {
                         "render": function (data, type, full, meta) {
                             if (full.completedTasksCount != "0") {
-                                return '<span class="badge badge-success">' + full.completedTasksCount + '</span>';
+                                return '<span name="completedTasks" data-username="'+full.tagUserName+'" class="badge badge-success">' + full.completedTasksCount + '</span>';
                             }
                             else {
                                 return '';
@@ -369,7 +444,7 @@
                 {
                         "render": function (data, type, full, meta) {
                             if (full.onHoldTasksCount != "0") {
-                                return '<span class="badge badge-onhold">' + full.onHoldTasksCount + '</span>';
+                                return '<span name="onHoldTasks" data-username="'+full.tagUserName+'" class="badge badge-onhold">' + full.onHoldTasksCount + '</span>';
                             }
                             else {
                                 return '';
@@ -380,7 +455,7 @@
                 {
                         "render": function (data, type, full, meta) {
                             if (full.cancelledTasksCount != "0") {
-                                return '<span class="badge badge-cancelledtask">' + full.cancelledTasksCount + '</span>';
+                                return '<span name="cancelledTasks" data-username="'+full.tagUserName+'" class="badge badge-cancelledtask">' + full.cancelledTasksCount + '</span>';
                             }
                             else {
                                 return '';

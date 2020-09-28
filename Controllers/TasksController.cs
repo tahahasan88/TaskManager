@@ -70,33 +70,56 @@ namespace TaskManager.Web.Controllers
                 var tasks = _context.Tasks
                             .Include(x => x.TaskStatus)
                             .Where(x => x.IsDeleted != true).OrderByDescending(x => x.LastUpdatedAt).ToList();
-                var taskEmployees = _context.TaskEmployees.Include(x => x.Task)
-                                    .Include(x => x.TaskCapacity)
-                                    .ToList();
+                var taskEmployees = (from c in _context.TaskEmployees
+                                     join o in _context.Employees
+                                     on c.UserName equals o.UserName
+                                     join tc in _context.TaskCapacities
+                                     on c.TaskCapacity.Id equals tc.Id
+                                     join dept in _context.Departments
+                                     on o.Department.Id equals dept.Id
+                                     select new
+                                     {
+                                         UserName = o.UserName,
+                                         EmployeeName = o.EmployeeName,
+                                         TaskId = c.Task.Id,
+                                         CapacityId = tc.Id,
+                                         DeptId = o.Department.Id,
+                                         ManagerUserName = o.Department.Manager.UserName
+                                     }).ToList();
+
+                List<Department> departments = _context.Departments
+                    .Include(x => x.ParentDepartment)
+                    .Include(x => x.Manager).OrderBy(x => x.Id).ToList();
 
                 //total number of rows count 
                 int recordsTotal = tasks.Count;
                 List<TasksGridViewModel> tasksGridVMList = new List<TasksGridViewModel>();
                 foreach (TaskManager.Data.Task task in tasks)
                 {
-                    TasksGridViewModel taskGridVM = new TasksGridViewModel();
+                    if (taskEmployees.Where(x => x.TaskId == task.Id && x.UserName == currentUserName).Any()
+                        || taskEmployees.Where(x => x.TaskId == task.Id && x.ManagerUserName == currentUserName).Any()
+                        || IsThisUserManagingThisDepartment(taskEmployees.Where(x => x.TaskId == task.Id).FirstOrDefault().DeptId,
+                            departments, currentUserName))
+                    {
+                        TasksGridViewModel taskGridVM = new TasksGridViewModel();
 
-                    taskGridVM.TaskId = task.Id;
-                    taskGridVM.Progress = task.TaskProgress;
-                    taskGridVM.TargetDate = task.Target.ToString("dd-MMM-yyyy HH:mm:ss");
-                    taskGridVM.LastUpdated = task.LastUpdatedAt.ToString("dd-MMM-yyyy HH:mm:ss");
-                    taskGridVM.Status = task.TaskStatus.Status;
-                    taskGridVM.Title = task.Title;
-                    //taskGridVM.CreatedBy = tas
-                    TaskEmployee assignee = taskEmployees.Where(x => x.TaskCapacity.Id == (int)Common.Common.TaskCapacity.Assignee
-                        && x.Task.Id == task.Id).FirstOrDefault();
+                        taskGridVM.TaskId = task.Id;
+                        taskGridVM.Progress = task.TaskProgress;
+                        taskGridVM.TargetDate = task.Target.ToString("dd-MMM-yyyy HH:mm:ss");
+                        taskGridVM.LastUpdated = task.LastUpdatedAt.ToString("dd-MMM-yyyy HH:mm:ss");
+                        taskGridVM.Status = task.TaskStatus.Status;
+                        taskGridVM.Title = task.Title;
 
-                    TaskEmployee creator = taskEmployees.Where(x => x.TaskCapacity.Id == (int)Common.Common.TaskCapacity.Creator
-                        && x.Task.Id == task.Id).FirstOrDefault();
+                        string assigneeUserName = taskEmployees.Where(x => x.CapacityId == (int)Common.Common.TaskCapacity.Assignee
+                            && x.TaskId == task.Id).FirstOrDefault().UserName;
 
-                    taskGridVM.CreatedBy = creator.UserName;
-                    taskGridVM.AssignedTo = assignee.UserName;
-                    tasksGridVMList.Add(taskGridVM);
+                        string creatorUserName = taskEmployees.Where(x => x.CapacityId == (int)Common.Common.TaskCapacity.Creator
+                            && x.TaskId == task.Id).FirstOrDefault().UserName;
+
+                        taskGridVM.CreatedBy = creatorUserName;
+                        taskGridVM.AssignedTo = assigneeUserName;
+                        tasksGridVMList.Add(taskGridVM);
+                    }
                 }
                 //Returning Json Data
                 return Json(new { draw = "1", recordsFiltered = recordsTotal, recordsTotal = recordsTotal, data = tasksGridVMList });
@@ -107,6 +130,22 @@ namespace TaskManager.Web.Controllers
                 throw;
             }
 
+        }
+
+        public bool IsThisUserManagingThisDepartment(int thisDepartmentId, List<Department> departments, string userName)
+        {
+            bool isThisUserManager = false;
+            Department thisDepartment = departments.Where(x => x.Id == thisDepartmentId).SingleOrDefault().ParentDepartment;
+            while (thisDepartment != null)
+            {
+                if (thisDepartment.Manager.UserName == userName)
+                {
+                    isThisUserManager = true;
+                    break;
+                }
+                thisDepartment = thisDepartment.ParentDepartment;
+            }
+            return isThisUserManager;
         }
 
 

@@ -195,13 +195,13 @@ namespace TaskManager.Web.Controllers
 
             var employeeManager = (from c in _context.Employees
                                     join o in _context.Departments
-                                    on c.Id equals o.Manager.Id
-                                    where o.ParentDepartment != null
-                                    && o.Id == c.Department.Id
-                                    && c.UserName == userName
+                                    on c.Department.Id equals o.Id
+                                    where c.UserName == userName
                                     select new
                                     {
-                                        UserName = o.ParentDepartment == null ? "" : o.ParentDepartment.Manager.UserName
+                                        UserName = o.ParentDepartment == null ? "" :
+                                        c.Department.Manager.Id == c.Id ? o.ParentDepartment.Manager.UserName
+                                        : c.Department.Manager.UserName
                                     }
                                     );
 
