@@ -94,7 +94,6 @@ namespace TaskManager.Web.Controllers
                             )
                         {
                             CreateReportRows(userTaskDictionary, reportsVM, employee, ++tagCounter, gridViewUiDepthLevel);
-                            
                         }
                     }
                 }

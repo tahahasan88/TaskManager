@@ -54,7 +54,8 @@ namespace TaskManager.Common
             SubTaskEdit = 5,
             SubTaskDelete = 6,
             TaskFollowUp = 7,
-            ProgressUpdate = 8
+            ProgressUpdate = 8,
+            AssigneeUpdate = 9
         }
 
         public enum AuditType

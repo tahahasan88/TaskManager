@@ -7,51 +7,14 @@
 
 @section HeaderScripts {
     <link rel="stylesheet" href="../../dist/css/tasks.css">
+    <style>
+        .select2 {
+            width:100%!important;
+        }
+    </style>
 }
 
 <div class="container-fluid">
-
-    <div class="row">
-        <div class="col-12">
-            <!-- Default box -->
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Summary</h3>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
-                            <i class="fas fa-minus"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="row" id="summaryRow">
-                        <div class="col-6 col-md-3 text-center">
-                            <input id="totalTasksId" type="text" class="knob" value="30" data-width="120" data-height="120"
-                                   data-fgColor="#3c8dbc">
-                            <div class="knob-label">Total</div>
-                        </div>
-                        <div class="col-6 col-md-3 text-center">
-                            <input id="pendingTasksId" type="text" class="knob" value="30" data-width="120" data-height="120"
-                                   data-fgColor="#3c8dbc">
-
-                            <div class="knob-label">Pending</div>
-                        </div>
-                        <div class="col-6 col-md-3 text-center">
-                            <input id="completedTasksId" type="text" class="knob" value="30" data-width="120" data-height="120"
-                                   data-fgColor="#3c8dbc">
-                            <div class="knob-label">Completed</div>
-                        </div>
-                        <div class="col-6 col-md-3 text-center">
-                            <input id="onHoldTaskId" type="text" class="knob" value="30" data-width="120" data-height="120"
-                                   data-fgColor="#3c8dbc">
-                            <div class="knob-label">On Hold</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- /.card -->
-        </div>
-    </div>
 
     <div class="row">
         <div class="col-12">
@@ -78,7 +41,7 @@
                                 <input id="taskNameId" type="text" class="form-control">
                             </div>
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-4">
                             <div class="form-group">
                                 <button id="clearTaskNameId" class="btn btn-default"><i class="fa fa-close"></i>Clear</button>
                             </div>
@@ -92,7 +55,7 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <select id="statusSelectValuesId" class="select2" multiple="multiple" data-placeholder="Select status" style="width: 100%;">
+                                <select id="statusSelectValuesId" class="select2" multiple="multiple" data-placeholder="Select status">
                                     <option>Not Started</option>
                                     <option>In Progress</option>
                                     <option>On Hold</option>
@@ -126,7 +89,6 @@
                             <div class="form-group">
                                 <button id="clearAssignId" class="btn btn-default"><i class="fa fa-close"></i>Clear</button>
                                 <button id="defaultAssignUserId" class="btn btn-default"><i class="fas fa-user"></i>Me</button>
-
                             </div>
                         </div>
                     </div>
@@ -236,6 +198,48 @@
             </div>
         </div>
         <!-- /.card -->
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <!-- Default box -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Summary</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row" id="summaryRow">
+                        <div class="col-6 col-md-3 text-center">
+                            <input id="totalTasksId" type="text" class="knob" value="30" data-width="120" data-height="120"
+                                   data-fgColor="#3c8dbc">
+                            <div class="knob-label">Total</div>
+                        </div>
+                        <div class="col-6 col-md-3 text-center">
+                            <input id="pendingTasksId" type="text" class="knob" value="30" data-width="120" data-height="120"
+                                   data-fgColor="#3c8dbc">
+
+                            <div class="knob-label">Pending</div>
+                        </div>
+                        <div class="col-6 col-md-3 text-center">
+                            <input id="completedTasksId" type="text" class="knob" value="30" data-width="120" data-height="120"
+                                   data-fgColor="#3c8dbc">
+                            <div class="knob-label">Completed</div>
+                        </div>
+                        <div class="col-6 col-md-3 text-center">
+                            <input id="onHoldTaskId" type="text" class="knob" value="30" data-width="120" data-height="120"
+                                   data-fgColor="#3c8dbc">
+                            <div class="knob-label">On Hold</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /.card -->
+        </div>
     </div>
 
     <div class="row">

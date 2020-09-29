@@ -5,6 +5,51 @@ $(document).ready(function () {
     var disabled = false;
     $(".knob").knob({});
     //alert(taskId);
+    var assigneePlaceHolder = $("#assignee-placeholder");
+
+    $("#updateAssigneeBtnId").click(function () {
+        var options = { "backdrop": "static", keyboard: true };
+        $.ajax({
+            type: "GET",
+            url: thisBaseUrl + "/tasks/AllAssignees",
+            contentType: "application/json; charset=utf-8",
+            data: { userName: currentUserName },
+            datatype: "json",
+            success: function (data) {
+                assigneePlaceHolder.html(data);
+                assigneePlaceHolder.find('.modal').modal(options);
+                assigneePlaceHolder.find('.modal').modal('show');
+            },
+            error: function () {
+                alert("Dynamic content load failed.");
+            }
+        });
+
+    });
+
+    assigneePlaceHolder.on('click', '[data-save="modal"]', function (event) {
+        event.preventDefault();
+
+        var form = $(this).parents('.modal').find('form');
+        var actionUrl = form.attr('action');
+        $("#AssigneeTaskId").val(taskId);
+        $("#spinnerAssignee").show();
+        var dataToSend = form.serialize();
+        $.post(actionUrl, dataToSend).done(function (data) {
+            var newBody = $('.modal-body', data);
+            $("#spinnerAssignee").hide();
+            console.log('here');
+            assigneePlaceHolder.find('.modal-body').replaceWith(newBody);
+            var isValid = newBody.find('[name="IsValid"]').val() == 'True';
+            if (isValid) {
+                alert("Assignee Updated");
+                assigneePlaceHolder.find('.modal').modal('hide');
+                setFormState();
+                appendEmployeeList();
+            }
+        });
+
+    });
 
 function setFormState() {
 
@@ -45,13 +90,17 @@ function setFormState() {
                 });
             }
             else {
-                $("#deleteTaskBtnId").removeClass();
-                $("#deleteTaskBtnId").addClass('btn btn-block btn-secondary btn-sm');
+                $("#deleteBtnDiv").hide();
+                //$("#deleteTaskBtnId").removeClass();
+                //$("#deleteTaskBtnId").addClass('btn btn-block btn-secondary btn-sm');
+            }
+            if (tmpData.isAssigneeUpdateAllowed == false) {
+                $("#updateAssigneeDiv").hide();
             }
 
             if (tmpData.isTaskEditAllowed == true) {
-                $("#updateTaskBtnId").removeClass();
-                $("#updateTaskBtnId").addClass('btn  btn-primary btn-sm');
+                //$("#updateTaskBtnId").removeClass();
+                //$("#updateTaskBtnId").addClass('btn  btn-primary btn-sm');
 
                 $("#updateTaskBtnId").click(function () {
                     var $buttonClicked = $(this);
@@ -95,8 +144,9 @@ function setFormState() {
                 });
             }
             else {
-                $("#updateTaskBtnId").removeClass();
-                $("#updateTaskBtnId").addClass('btn  btn-secondary btn-sm');
+                //$("#updateTaskBtnId").removeClass();
+                //$("#updateTaskBtnId").addClass('btn  btn-secondary btn-sm');
+                $("#updateTaskBtnId").hide();
             }
             if (tmpData.isSubTaskEditAllowed == true) {
                 disabled = false;

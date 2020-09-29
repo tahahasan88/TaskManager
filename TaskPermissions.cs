@@ -15,11 +15,11 @@ namespace TaskManager.Web
             {
                 isAllowed = true;
             }
-            else if (taskAction == TaskAction.TaskDelete && capacity == TaskCapacity.Creator)
+            else if (taskAction == TaskAction.TaskDelete && (capacity == TaskCapacity.Creator || capacity == TaskCapacity.Assignee))
             {
                 isAllowed = true;
             }
-            else if (taskAction == TaskAction.TaskEdit && capacity == TaskCapacity.Assignee)
+            else if (taskAction == TaskAction.TaskEdit && (capacity == TaskCapacity.Creator || capacity == TaskCapacity.Assignee))
             {
                 isAllowed = true;
             }
@@ -37,6 +37,10 @@ namespace TaskManager.Web
                 isAllowed = true;
             }
             else if (taskAction == TaskAction.ProgressUpdate && capacity == TaskCapacity.Assignee)
+            {
+                isAllowed = true;
+            }
+            else if (taskAction == TaskAction.AssigneeUpdate && (capacity == TaskCapacity.Assignee || capacity == TaskCapacity.Creator))
             {
                 isAllowed = true;
             }

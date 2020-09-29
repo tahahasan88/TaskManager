@@ -24,6 +24,7 @@ namespace TaskManager.Web.Controllers
         public IActionResult TasksSummary()
         {
             TaskSummaryViewModel taskSummaryVM = new TaskSummaryViewModel();
+
             taskSummaryVM.PendingTasksCount = _context.Tasks.Where(x => x.TaskStatus.Id
                 != (int)TaskManager.Common.Common.TaskStatus.Completed
                 && x.IsDeleted != true
@@ -89,7 +90,8 @@ namespace TaskManager.Web.Controllers
 
                 List<Department> departments = _context.Departments
                     .Include(x => x.ParentDepartment)
-                    .Include(x => x.Manager).OrderBy(x => x.Id).ToList();
+                    .Include(x => x.Manager).OrderBy(x => x.Id)
+                    .ToList();
 
                 //total number of rows count 
                 int recordsTotal = tasks.Count;
@@ -132,7 +134,7 @@ namespace TaskManager.Web.Controllers
 
         }
 
-        public bool IsThisUserManagingThisDepartment(int thisDepartmentId, List<Department> departments, string userName)
+        private bool IsThisUserManagingThisDepartment(int thisDepartmentId, List<Department> departments, string userName)
         {
             bool isThisUserManager = false;
             Department thisDepartment = departments.Where(x => x.Id == thisDepartmentId).SingleOrDefault().ParentDepartment;
@@ -146,6 +148,73 @@ namespace TaskManager.Web.Controllers
                 thisDepartment = thisDepartment.ParentDepartment;
             }
             return isThisUserManager;
+        }
+
+        private AssigneeViewModel PopulateAllAssignee(string userName)
+        {
+            AssigneeViewModel assigneeVM = new AssigneeViewModel();
+            List<Employee> employeeList = _context.Employees.ToList();
+            assigneeVM.Assignees = new List<SelectListItem>();
+
+            foreach (Employee employee in employeeList)
+            {
+                assigneeVM.Assignees.Add(new SelectListItem()
+                {
+                    Text = employee.UserName,
+                    Value = employee.UserName,
+                    Selected = userName == employee.UserName ? true : false
+                });
+            }
+            return assigneeVM;
+        }
+
+        public IActionResult AllAssignees(string userName)
+        {
+            AssigneeViewModel assigneeVM = PopulateAllAssignee(userName);
+            return PartialView("_Assignee", assigneeVM);
+        }
+
+
+        [HttpPost]
+        public async Task<ActionResult> UpdateAssignee(AssigneeViewModel assigneeVM)
+        {
+            Data.Task thisTask = _context.Tasks.Where(x => x.Id == assigneeVM.AssigneeTaskId).SingleOrDefault();
+            if (thisTask != null)
+            {
+                TaskEmployee employee = _context.TaskEmployees.Where(x =>
+                   x.Task.Id == assigneeVM.AssigneeTaskId
+                   && x.TaskCapacity.Id == (int)TaskManager.Common.Common.TaskCapacity.Assignee
+                   ).FirstOrDefault();
+                if (employee != null)
+                {
+                    if (employee.UserName != assigneeVM.SelectedAssignee)
+                    {
+                        employee.UserName = assigneeVM.SelectedAssignee;
+                        employee.IsActive = true;
+                        _context.TaskEmployees.Attach(employee);
+                        _context.Entry(employee).State = EntityState.Modified;
+
+                        TaskAudit assigneeAudit = new TaskAudit();
+                        assigneeAudit.ActionDate = DateTime.Now;
+                        assigneeAudit.ActionBy = currentUserName;
+                        assigneeAudit.Description = "Task Assignment updated. Assigned to " + assigneeVM.SelectedAssignee;
+                        assigneeAudit.Task = thisTask;
+                        assigneeAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.Assignment).SingleOrDefault();
+                        _context.Add(assigneeAudit);
+
+                        thisTask.LastUpdatedBy = currentUserName;
+                        thisTask.LastUpdatedAt = DateTime.Now;
+
+                        _context.Tasks.Attach(thisTask);
+                        _context.Entry(thisTask).State = EntityState.Modified;
+
+                        await _context.SaveChangesAsync();
+                    }
+                }
+            }
+
+            assigneeVM = PopulateAllAssignee(assigneeVM.SelectedAssignee);
+            return PartialView("_Assignee", assigneeVM);
         }
 
 

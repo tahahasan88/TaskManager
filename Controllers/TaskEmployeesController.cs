@@ -103,9 +103,12 @@ namespace TaskManager.Web.Controllers
             bool isSubTaskDeletionAllowed = TaskPermissions.IsAllowed(Common.Common.TaskAction.SubTaskDelete, (Common.Common.TaskCapacity)employeeProfile.TaskCapacity.Id);
             bool isTaskEditAllowed = TaskPermissions.IsAllowed(Common.Common.TaskAction.TaskEdit, (Common.Common.TaskCapacity)employeeProfile.TaskCapacity.Id);
             bool isSubTaskEditAllowed = TaskPermissions.IsAllowed(Common.Common.TaskAction.SubTaskEdit, (Common.Common.TaskCapacity)employeeProfile.TaskCapacity.Id);
+            bool isAssigneeUpdateAllowed = TaskPermissions.IsAllowed(Common.Common.TaskAction.AssigneeUpdate, (Common.Common.TaskCapacity)employeeProfile.TaskCapacity.Id);
 
             return new JsonResult(new { isTaskDeletionAllowed = isTaskDeletionAllowed, isSubTaskDeletionAllowed  = isSubTaskDeletionAllowed , isTaskEditAllowed  = isTaskEditAllowed,
-                isSubTaskEditAllowed = isSubTaskEditAllowed });
+                isSubTaskEditAllowed = isSubTaskEditAllowed,
+                isAssigneeUpdateAllowed = isAssigneeUpdateAllowed
+            });
         }
 
         // GET: TaskEmployees/Details/5
