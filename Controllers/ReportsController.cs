@@ -53,7 +53,7 @@ namespace TaskManager.Web.Controllers
             while (thisDept.ParentDepartment != null)
             {
                 thisDept = thisDept.ParentDepartment;
-                ++depthLevel;
+                depthLevel = depthLevel + 2;
             }
             return depthLevel;
         }
@@ -82,7 +82,7 @@ namespace TaskManager.Web.Controllers
                 gridViewUiDepthLevel = GetDeptLevel(department);
                 reportRow.DepartmentLevel = gridViewUiDepthLevel;
                 reportsVM.Add(reportRow);
-                gridViewUiDepthLevel += 1;
+                gridViewUiDepthLevel += 2;
 
                 foreach (Employee employee in employees.Where(x => x.Department.Id == department.Id))
                 {
