@@ -85,9 +85,11 @@
     <script>
     $(document).ready(function () {
 
+    var currentUserName = '';
         @if (ViewData["UserName"] != null)
     {
         <text>
+            currentUserName = "@ViewData["UserName"]";
             $("#employeeDetailId").html("@ViewData["UserName"]");
         </text>
     }
@@ -426,7 +428,7 @@
                 },
             search: {regex: true, caseInsensitive: true},
                 ajax: {
-                "url": baseUrl + "/reports/LoadReportsData",
+                "url": baseUrl + "/reports/LoadReportsData?username=" + currentUserName,
                 "type": "POST",
                 "datatype": "json"
                 },

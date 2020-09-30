@@ -85,7 +85,7 @@
                         columns: [
                             {
                                 "render": function (data, type, full, meta) {
-                                    return '<a href="' + thisBaseUrl + '/tasks/Edit?id=' + full.taskId + '"><u>' + full.title + '</u> </a>';
+                                    return '<a href="' + thisBaseUrl + '/tasks/Edit?id=' + full.taskId + '&username='+ currentUserName +'"><u>' + full.title + '</u> </a>';
                                 }
                             },
                             {
@@ -162,7 +162,7 @@
                         columns: [
                             {
                                 "render": function (data, type, full, meta) {
-                                    return '<a href="' + thisBaseUrl + '/tasks/Edit?id=' + full.taskId + '"><u>' + full.taskInfo + '</u> </a>';
+                                    return '<a href="' + thisBaseUrl + '/tasks/Edit?id=' + full.taskId + '&username=' + currentUserName +'"><u>' + full.taskInfo + '</u> </a>';
                                 }
                             },
                             { "data": "followUpFrom", "name": "Follow Up From", "autoWidth": true, "visible": true, "searchable": true },
@@ -509,7 +509,7 @@
             },
             search: { regex: true, caseInsensitive: true },
             ajax: {
-                "url": thisBaseUrl + "/tasks/LoadTasksData",
+                "url": thisBaseUrl + "/tasks/LoadTasksData?username=" + currentUserName,
                 "type": "POST",
                 "datatype": "json"
             },
@@ -580,7 +580,7 @@
                     }
                 },
                 {
-                    "render": function (data, type, full, meta) { return '<a class="btn btn-info" href="' + thisBaseUrl + '/tasks/Edit?id=' + full.taskId + '">Edit</a>'; }
+                    "render": function (data, type, full, meta) { return '<a class="btn btn-info" href="' + thisBaseUrl + '/tasks/Edit?id=' + full.taskId + '&username='+ currentUserName + '">Edit</a>'; }
                 },
                 { "data": "createdBy", "name": "Created By", "autoWidth": true, "visible": false, "searchable": true },
                 { "data": "targetDate", "name": "Target Date", "autoWidth": true, "visible": false, "searchable": true },
@@ -665,7 +665,7 @@
 
         $.ajax({
             type: "GET",
-            url: thisBaseUrl + "/TaskSummary/list",
+            url: thisBaseUrl + "/TaskSummary/list?username=" + currentUserName,
             contentType: "application/json; charset=utf-8",
             data: null,
             datatype: "json",

@@ -12,21 +12,19 @@ using TaskManager.Web.Models;
 
 namespace TaskManager.Web.Controllers
 {
-    public class ReportsController : Controller
+    public class ReportsController : BaseController
     {
-        private readonly TaskManagerContext _context;
         private readonly IConfiguration _iconfiguration;
-        public string currentUserName;
 
-        public ReportsController(IConfiguration configuration, TaskManagerContext context)
+        public ReportsController(IConfiguration configuration, TaskManagerContext context) : base(context)
         {
             currentUserName = configuration.GetSection("TaskManagerUserName").Value;
             _iconfiguration = configuration;
-            _context = context;
         }
 
         public IActionResult Index()
         {
+            SetUserName();
             ViewData["UserName"] = currentUserName;
             return View();
         }
@@ -58,8 +56,12 @@ namespace TaskManager.Web.Controllers
             return depthLevel;
         }
 
-        public IActionResult LoadReportsData()
+        public IActionResult LoadReportsData(string username)
         {
+            if (!String.IsNullOrEmpty(username))
+            {
+                currentUserName = username;
+            }
             var connectionString = _iconfiguration.GetConnectionString("DefaultConnection");
             Dictionary<string, List<TaskData>> userTaskDictionary = new Dictionary<string, List<TaskData>>();
             int tagCounter = 0;

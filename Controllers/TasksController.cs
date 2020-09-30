@@ -14,8 +14,6 @@ namespace TaskManager.Web.Controllers
 {
     public class TasksController : BaseController
     {
-        public string currentUserName;
-
         public TasksController(TaskManagerContext context, IConfiguration configuration) : base(context)
         {
             currentUserName =configuration.GetSection("TaskManagerUserName").Value;
@@ -48,10 +46,12 @@ namespace TaskManager.Web.Controllers
             return new JsonResult(new { records = taskSummaryVM });
         }
 
+       
 
         // GET: Tasks
         public IActionResult Index()
         {
+            SetUserName();
             if (TempData.ContainsKey("deletionId"))
             {
                 TaskManager.Data.Task deletedTask = _context.Tasks.Where(x => x.Id == Convert.ToInt32(TempData["deletionId"])).SingleOrDefault();
@@ -64,10 +64,14 @@ namespace TaskManager.Web.Controllers
             return View(taskVM);
         }
 
-        public IActionResult LoadTasksData()
+        public IActionResult LoadTasksData(string username)
         {
             try
             {
+                if (!String.IsNullOrEmpty(username))
+                {
+                    currentUserName = username;
+                }
                 var tasks = _context.Tasks
                             .Include(x => x.TaskStatus)
                             .Where(x => x.IsDeleted != true).OrderByDescending(x => x.LastUpdatedAt).ToList();
@@ -585,13 +589,16 @@ namespace TaskManager.Web.Controllers
             taskVm.EmployeeList = employeeDrpDwnList;
         }
 
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int? id, string username)
         {
             if (id == null)
             {
                 return NotFound();
             }
-
+            if (!String.IsNullOrEmpty(username))
+            {
+                currentUserName = username;
+            }
             var task = await _context.Tasks
                 .Include(x => x.TaskPriority)
                 .Include(x => x.TaskStatus)

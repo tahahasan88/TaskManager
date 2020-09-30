@@ -15,7 +15,6 @@ namespace TaskManager.Web.Controllers
 {
     public class TaskFollowUpsController : BaseController
     {
-        private string currentUserName = "";
 
         public TaskFollowUpsController(TaskManagerContext context, IConfiguration configuration) : base(context)
         {
@@ -30,6 +29,7 @@ namespace TaskManager.Web.Controllers
 
         public async Task<IActionResult> Index()
         {
+            SetUserName();
             ViewData["UserName"] = currentUserName;
             return View(await _context.TaskFollowUps.ToListAsync());
         }
@@ -106,10 +106,14 @@ namespace TaskManager.Web.Controllers
             return View(taskFollowUpMailBoxVM);
         }
 
-        public IActionResult LoadTaskInBoxData()
+        public IActionResult LoadTaskInBoxData(string username)
         {
             try
             {
+                if (!String.IsNullOrEmpty(username))
+                {
+                    currentUserName = username;
+                }
                 var filteredTaskInbox = (from c in _context.TaskFollowUps
                                          join o in _context.TaskEmployees
                                          .Where(x => x.UserName == currentUserName &&
@@ -156,10 +160,14 @@ namespace TaskManager.Web.Controllers
 
         }
 
-        public IActionResult LoadTaskOutBoxData()
+        public IActionResult LoadTaskOutBoxData(string username)
         {
             try
             {
+                if (!String.IsNullOrEmpty(username))
+                {
+                    currentUserName = username;
+                }
                 var filteredTaskOutbox = (from c in _context.TaskFollowUps
                                           join o in _context.TaskEmployees
                                           .Where(x => x.IsActive == true && x.Task.IsDeleted == false)

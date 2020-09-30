@@ -92,8 +92,12 @@ namespace TaskManager.Web.Controllers
             return View(taskSummaryVM);
         }
 
-        public IActionResult List()
+        public IActionResult List(string username)
         {
+            if (!String.IsNullOrEmpty(HttpContext.Request.Query["username"]))
+            {
+                currentUserName = HttpContext.Request.Query["username"];
+            }
             try
             {
                 TaskSummaryViewModel taskSummaryVM = new TaskSummaryViewModel();

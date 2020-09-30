@@ -12,9 +12,19 @@ namespace TaskManager.Web.Controllers
     public class BaseController : Controller
     {
         public readonly TaskManagerContext _context;
+        protected string currentUserName;
+
         public BaseController(TaskManagerContext context)
         {
             _context = context;
+        }
+
+        protected void SetUserName()
+        {
+            if (!String.IsNullOrEmpty(HttpContext.Request.Query["username"]))
+            {
+                currentUserName = HttpContext.Request.Query["username"];
+            }
         }
 
         public List<string> GetTaskEmployeeEmailAddresses(int taskId, string currentUserName)

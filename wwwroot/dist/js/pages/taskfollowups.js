@@ -17,7 +17,7 @@
         selector: 'td:first-child'
     },
     ajax: {
-        "url": thisBaseUrl + "/taskfollowups/LoadTaskInBoxData",
+        "url": thisBaseUrl + "/taskfollowups/LoadTaskInBoxData?username=" + currentUserName,
         "type": "POST",
         "datatype": "json"
     },
@@ -72,7 +72,7 @@ var outboxTable = $('#outboxTable').DataTable({
         selector: 'td:first-child'
     },
     ajax: {
-        "url": thisBaseUrl + "/taskfollowups/LoadTaskOutBoxData",
+        "url": thisBaseUrl + "/taskfollowups/LoadTaskOutBoxData?username=" + currentUserName,
         "type": "POST",
         "datatype": "json"
     },
