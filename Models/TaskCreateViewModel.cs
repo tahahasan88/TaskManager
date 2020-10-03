@@ -36,7 +36,7 @@ namespace TaskManager.Web.Models
         public int PriorityId { get; set; }
         public string AssigneeCode { get; set; }
         public List<SelectListItem> PriorityList { get; set; }
-        public List<SelectListItem> EmployeeList { get; set; }
+        public List<AssigneeDropDownViewModel> EmployeeList { get; set; }
     }
 
 

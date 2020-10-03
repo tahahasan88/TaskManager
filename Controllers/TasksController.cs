@@ -14,9 +14,9 @@ namespace TaskManager.Web.Controllers
 {
     public class TasksController : BaseController
     {
-        public TasksController(TaskManagerContext context, IConfiguration configuration) : base(context)
+        public TasksController(TaskManagerContext context, IConfiguration configuration) : base(context, configuration)
         {
-            currentUserName =configuration.GetSection("TaskManagerUserName").Value;
+            currentUserName = configuration.GetSection("TaskManagerUserName").Value;
         }
 
         public IActionResult TasksSummary()
@@ -250,8 +250,29 @@ namespace TaskManager.Web.Controllers
         {
             TaskCreateViewModel taskVM = new TaskCreateViewModel();
             List<Employee> employees = _context.Employees.ToList();
-            popuLateTaskViewDropDowns(taskVM, employees);
+            popuLateTaskViewDropDowns(taskVM, currentUserName);
             return PartialView("_Create", taskVM);
+        }
+
+        public async Task<ActionResult> EditTask(int taskId)
+        {
+            TaskCreateViewModel taskVM = new TaskCreateViewModel();
+            List<Employee> employees = _context.Employees.ToList();
+
+            var task = await _context.Tasks
+               .Include(x => x.TaskPriority)
+               .Include(x => x.TaskStatus)
+               .Where(x => x.Id == taskId).SingleOrDefaultAsync();
+
+            taskVM.PriorityId = task.TaskPriority.Id;
+            TaskEmployee currentEmployee = _context.TaskEmployees.Where(x => x.Task.Id == taskId
+                && x.TaskCapacity.Id == (int)Common.Common.TaskCapacity.Assignee).FirstOrDefault();
+            popuLateTaskViewDropDowns(taskVM, currentUserName);
+            taskVM.Description = task.Description;
+            taskVM.Title = task.Title;
+            taskVM.Target = task.Target;
+
+            return PartialView("_Edit", taskVM);
         }
 
         public ActionResult CreateMultiple()
@@ -260,9 +281,8 @@ namespace TaskManager.Web.Controllers
             return PartialView("_CreateMultiple", taskVM);
         }
 
-        private void popuLateTaskViewDropDowns(TaskCreateViewModel taskVm, List<Employee> employeeList)
+        private void popuLateTaskViewDropDowns(TaskCreateViewModel taskVm, string userName)
         {
-            List<SelectListItem> employeeDrpDwnList = new List<SelectListItem>();
             List<SelectListItem> taskPriorityDrpDwnList = new List<SelectListItem>();
             var taskPriorityEnumsList = Enum.GetValues(typeof(Common.Common.TaskPriority));
             foreach (Common.Common.TaskPriority priority in taskPriorityEnumsList)
@@ -271,14 +291,7 @@ namespace TaskManager.Web.Controllers
             }
             taskVm.PriorityList = taskPriorityDrpDwnList;
 
-            foreach (Employee employee in employeeList)
-            {
-                //if (employee.UserName != currentUserName)
-                //{
-                    employeeDrpDwnList.Add(new SelectListItem() { Text = employee.EmployeeName, Value = employee.UserName.ToString() });
-                //}
-            }
-            taskVm.EmployeeList = employeeDrpDwnList;
+            taskVm.EmployeeList = this.LoadAssigneeDrpDwnData(userName);
             taskVm.Target = DateTime.Now;
         }
 
@@ -341,12 +354,12 @@ namespace TaskManager.Web.Controllers
                     await _context.SaveChangesAsync();
 
                     List<Employee> employeeList = _context.Employees.ToList();
-                    popuLateTaskViewDropDowns(taskCreateVM, employeeList);
+                    popuLateTaskViewDropDowns(taskCreateVM, currentUserName);
                 }
                 else
                 {
                     List<Employee> employeeList = _context.Employees.ToList();
-                    popuLateTaskViewDropDowns(taskCreateVM, employeeList);
+                    popuLateTaskViewDropDowns(taskCreateVM, currentUserName);
                 }
             }
             catch (Exception ex)

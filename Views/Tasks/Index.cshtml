@@ -11,6 +11,11 @@
         .select2 {
             width:100%!important;
         }
+
+        /*input[type="range"]:disabled {
+            background: #ffc107 !important;
+            color: #ffc107 !important;
+        }*/
     </style>
 }
 
@@ -214,27 +219,37 @@
                 </div>
                 <div class="card-body">
                     <div class="row" id="summaryRow">
-                        <div class="col-6 col-md-3 text-center">
-                            <input id="totalTasksId" type="text" class="knob" value="30" data-width="120" data-height="120"
-                                   data-fgColor="#3c8dbc">
-                            <div class="knob-label">Total</div>
-                        </div>
-                        <div class="col-6 col-md-3 text-center">
-                            <input id="pendingTasksId" type="text" class="knob" value="30" data-width="120" data-height="120"
-                                   data-fgColor="#3c8dbc">
+                            <div class="col-md-2  text-center">
+                                <input id="totalTasksId" type="text" class="knob" value="30" data-width="120" data-height="120"
+                                       data-fgColor="#3c8dbc">
+                                <div class="knob-label">Total</div>
+                            </div>
+                            <div class="col-md-2 text-center">
+                                <input id="notStartedTaskId" type="text" class="knob" value="30" data-width="120" data-height="120"
+                                       data-fgColor="#6c757d">
+                                <div class="knob-label">Not Started</div>
+                            </div>
+                            <div class="col-md-2 text-center">
+                                <input id="inProgressTaskId" type="text" class="knob" value="30" data-width="120" data-height="120"
+                                       data-fgColor="#f39c12">
+                                <div class="knob-label">In Progress</div>
+                            </div>
+                            <div class="col-md-2 text-center">
+                                <input id="cancelledTasksId" type="text" class="knob" value="30" data-width="120" data-height="120"
+                                       data-fgColor="#343a40">
 
-                            <div class="knob-label">Pending</div>
-                        </div>
-                        <div class="col-6 col-md-3 text-center">
-                            <input id="completedTasksId" type="text" class="knob" value="30" data-width="120" data-height="120"
-                                   data-fgColor="#3c8dbc">
-                            <div class="knob-label">Completed</div>
-                        </div>
-                        <div class="col-6 col-md-3 text-center">
-                            <input id="onHoldTaskId" type="text" class="knob" value="30" data-width="120" data-height="120"
-                                   data-fgColor="#3c8dbc">
-                            <div class="knob-label">On Hold</div>
-                        </div>
+                                <div class="knob-label">Cancelled</div>
+                            </div>
+                            <div class="col-md-2 text-center">
+                                <input id="completedTasksId" type="text" class="knob" value="30" data-width="120" data-height="120"
+                                       data-fgColor="#00a65a">
+                                <div class="knob-label">Completed</div>
+                            </div>
+                            <div class="col-md-2 text-center">
+                                <input id="onHoldTaskId" type="text" class="knob" value="30" data-width="120" data-height="120"
+                                       data-fgColor="#6f42c1">
+                                <div class="knob-label">On Hold</div>
+                            </div>
                     </div>
                 </div>
             </div>
@@ -287,6 +302,9 @@
                         </table>
                     </div>
                 </div>
+
+
+
                 <!-- /.card-body -->
             </div>
             <!-- /.card -->

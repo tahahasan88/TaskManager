@@ -14,6 +14,9 @@ namespace TaskManager.Web.Models
         public int TotalTasksCount { get; set; }
         public int CompletedTasksCount { get; set; }
         public int OnHoldTasksCount { get; set; }
+        public int CancelledTasksCount { get; set; }
+        public int InProgressTasksCount { get; set; }
+        public int NotStartedTasksCount { get; set; }
 
     }
 }

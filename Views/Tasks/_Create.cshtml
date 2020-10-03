@@ -27,12 +27,34 @@
                     </div>
                     <div class="form-group">
                         <b><label class="control-label">Assignee</label></b>
-                        @Html.DropDownListFor(x => x.AssigneeCode,
-                                Model.EmployeeList,
-                                new
-                                                {
-                                                    @class = "chosen-select form-control input-form",
-                                                })
+                        @{ 
+                            foreach (TaskManager.Web.Models.AssigneeDropDownViewModel assignee in Model.EmployeeList)
+                            {
+                                <text>
+                                    <script>
+                                        var spacing = '';
+                                        if ("@assignee.DepartmentLevel" != 0) {
+                                            for (i = 0; i < "@assignee.DepartmentLevel"; i++) {
+                                                spacing += "&nbsp;";
+                                            }
+                                        }
+                                        var o = new Option("@assignee.TagName", "@assignee.TagUserName");
+                                        if ("@assignee.IsDeptName" == "True") {
+                                             $(o).html(spacing + "@assignee.TagName");
+                                             $("#assigneeDrpDown").append(o);
+                                             o.disabled = true;
+                                        }
+                                        else {
+                                            $(o).html(spacing + "&nbsp;&nbsp;" + "@assignee.TagName");
+                                            $("#assigneeDrpDown").append(o);
+                                            o.selected = true;
+                                        }
+                                    </script>
+                                </text>
+                            }
+                        }
+                        @Html.HiddenFor(x => x.AssigneeCode, new { id = "AssigneeCode"})
+                        <select id="assigneeDrpDown" class="chosen-select form-control input-form"></select>
                     </div>
                     <div class="form-group">
                         <label asp-for="@Model.Target" class="control-label"></label>

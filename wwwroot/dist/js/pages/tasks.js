@@ -41,6 +41,9 @@
                         //scrollCollapse: true,
                         initComplete: function (settings, json) {
                             var response = settings.json;
+                            if (response.pendingCount == 0) {
+                                $("#taskCount").hide();
+                            }
                             $("#taskCount").html(response.pendingCount);
 
                             var taskDonutData = {
@@ -65,6 +68,9 @@
                             var pieOptions = {
                                 maintainAspectRatio: false,
                                 responsive: true,
+                                legend: {
+                                    display: false
+                                }
                             }
                             //Create pie or douhnut chart
                             // You can switch between pie and douhnut using the method below.
@@ -123,6 +129,9 @@
                         //pageLength: 10,
                         //"scrollY": 200,
                         initComplete: function (settings, json) {
+                            if (this.api().data().length == 0) {
+                                $("#followupCount").hide();
+                            }
                             $("#followupCount").html(this.api().data().length);
                             var response = settings.json;
                             var followupsDonutData = {
@@ -143,6 +152,9 @@
                             var pieOptions = {
                                 maintainAspectRatio: false,
                                 responsive: true,
+                                legend: {
+                                    display: false
+                                }
                             }
                             //Create pie or douhnut chart
                             // You can switch between pie and douhnut using the method below.
@@ -346,8 +358,47 @@
                 .column(5).search(assignedToValues, true, false)
                 .column(8).search(createdBy, true, false)
                 .draw();
+            updateTasksSummaryGraph();
         }
     });
+
+    function updateTasksSummaryGraph() {
+
+        var completedTasks = 0;
+        var notStartedTasks = 0;
+        var inProgressTasks = 0;
+        var cancelledTasks = 0;
+        var totalTasks = 0;
+        var onHoldTasks = 0;
+
+        var data = tasksTable.rows({ page: 'current' }).data();
+        data.each(function (value, index) {
+            if (value.status == 'Not Started') {
+                notStartedTasks = notStartedTasks + 1;
+            }
+            else if (value.status == 'Completed') {
+                completedTasks = completedTasks + 1;
+            }
+            else if (value.status == 'In Progress') {
+                inProgressTasks = inProgressTasks + 1;
+            }
+            else if (value.status == 'On Hold') {
+                onHoldTasks = onHoldTasks + 1;
+            }
+            else if (value.status == 'Cancelled') {
+                cancelledTasks = cancelledTasks + 1;
+            }
+            totalTasks = totalTasks + 1;
+        });
+
+        console.log(notStartedTasks);
+        $("#notStartedTaskId").val(notStartedTasks).trigger('change');
+        $("#inProgressTaskId").val(inProgressTasks).trigger('change');
+        $("#cancelledTasksId").val(cancelledTasks).trigger('change');
+        $("#completedTasksId").val(completedTasks).trigger('change');
+        $("#onHoldTaskId").val(onHoldTasks).trigger('change');
+        $("#totalTasksId").val(totalTasks).trigger('change');
+    }
 
 
     $("#filter-reset-id").click(function () {
@@ -372,6 +423,7 @@
             .column(5).search('', true, false)
             .column(8).search('', true, false)
             .draw();
+        updateTasksSummaryGraph();
     });
 
 
@@ -469,6 +521,7 @@
     /* Custom filtering function which will search data in column four between two values */
     $.fn.dataTable.ext.search.push(
         function (settings, data, dataIndex) {
+            
             var isValid = validateProgressFilter(data[10]);
             if (isValid) {
                 isValid = validateTargetDateFilter(data[9]);
@@ -494,7 +547,6 @@
                 $("a[name='employeeDetailLink']").click(function () {
                     showEmployeeDetails($(this).html());
                 });
-                console.log("init complete");
                 $(".knob").knob({});
             },
             columnDefs: [{
@@ -565,13 +617,14 @@
                                     else
                                         color = '28a745';
 
-                        return '<input type =\"text\" class=\"knob gridknob\" value=\"' + full.progress + '%' + '\" data-width=\"50\" data-height=\"50\"' +
-                            "data-fgColor=\"#" + color + "\">";
+                        return '<input type="range" max="100" style="background:#ffc107;color:#ffc107;" value=\"' + full.progress + '' + '\"' +
+                            "\" width=\"70%\" disabled></input> <output id=\"taskProgressId\">" + full.progress + "</output>";
                     }
                 },
                 {
                     "render": function (data, type, full, meta) {
-                        return '<a href="javascript:void(null);"  name="employeeDetailLink">' + full.assignedTo + '</span>';
+                        return '<img name="employeeAvatar" src="../dist/img/user2-160x160.jpg" width="20%" height="20%" class="img-circle elevation-2" alt="User Image"></img>'
+                            + '&nbsp;&nbsp;<a href="javascript:void(null);" name="employeeDetailLink">' + full.assignedTo + '</a>';
                     }
                 },
                 {
@@ -606,6 +659,19 @@
                 taskCreationPlaceHolder.html(data);
                 taskCreationPlaceHolder.find('.modal').modal(options);
                 taskCreationPlaceHolder.find('.modal').modal('show');
+                //console.log($("#employeelistId").val());
+                //console.log(data);
+                //var employeeListData = @Html.Raw(Json.Encode($("#employeelistId").val()));
+                //alert(employeeListData.length);
+                //$.each(employeeListData, function (i, val) {
+                //    console.log(employeeListData[i]);
+                //});
+
+                //var o = new Option('test', 'test');
+                ///// jquerify the DOM object 'o' so we can use the html method
+                //$(o).html('&nbsp;&nbsp;&nbsp;&nbsp;test');
+                //$("#assigneeDrpDown").append(o);
+                //o.disabled = true;
 
                 $("#addMultipleCreationLink").click(function () {
                     $.ajax({
@@ -674,22 +740,43 @@
                     tmpData = data[i];
 
                     $(".knob").knob({});
-                    $('#pendingTasksId').trigger(
+                    $('#notStartedTaskId').trigger(
                         'configure',
                         {
                             "min": 0,
                             "max": tmpData.totalTasksCount,
-                            "fgColor": "#ffc107",
+                            "fgColor": "#6c757d",
                             "cursor": false
                         }
                     );
-                    $("#pendingTasksId").val(tmpData.pendingTasksCount).trigger('change');
+                    $("#notStartedTaskId").val(tmpData.notStartedTasksCount).trigger('change');
+                    $('#inProgressTaskId').trigger(
+                        'configure',
+                        {
+                            "min": 0,
+                            "max": tmpData.totalTasksCount,
+                            "fgColor": "#f39c12",
+                            "cursor": false
+                        }
+                    );
+                    $("#inProgressTaskId").val(tmpData.inProgressTasksCount).trigger('change');
+                    $('#cancelledTasksId').trigger(
+                        'configure',
+                        {
+                            "min": 0,
+                            "max": tmpData.totalTasksCount,
+                            "fgColor": "#343a40",
+                            "cursor": false
+                        }
+                    );
+                    $("#cancelledTasksId").val(tmpData.cancelledTasksCount).trigger('change');
+
                     $('#completedTasksId').trigger(
                         'configure',
                         {
                             "min": 0,
                             "max": tmpData.totalTasksCount,
-                            "fgColor": "#28a745",
+                            "fgColor": "#00a65a",
                             "cursor": false
                         }
                     );
@@ -700,11 +787,10 @@
                         {
                             "min": 0,
                             "max": tmpData.totalTasksCount,
-                            "fgColor": "#6c757d",
+                            "fgColor": "#6f42c1",
                             "cursor": false
                         }
                     );
-
                     $("#onHoldTaskId").val(tmpData.onHoldTasksCount).trigger('change');
 
                     $('#totalTasksId').trigger(
@@ -716,9 +802,8 @@
                             "cursor": false
                         }
                     );
-                    $("#totalTasksId").val(tmpData.totalTasksCount).trigger('change');;
+                    $("#totalTasksId").val(tmpData.totalTasksCount).trigger('change');
                     //$("input.knob").trigger('change');
-                    console.log("change complete");
                 });
             },
             error: function () {
@@ -836,10 +921,11 @@
 
         var form = $(this).parents('.modal').find('form');
         var actionUrl = form.attr('action');
+        $(this).parents('.modal').find('#AssigneeCode').val($("#assigneeDrpDown").val());
         var dataToSend = form.serialize();
         var buttonClickedId = $(this).attr('id');
         $("#spinnerCreate").show();
-
+        
         $.post(actionUrl, dataToSend).done(function (data) {
             var newbody = $('.modal-body', data);
             taskCreationPlaceHolder.find('.modal-body').replaceWith(newbody);

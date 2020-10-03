@@ -6,6 +6,205 @@ $(document).ready(function () {
     $(".knob").knob({});
     //alert(taskId);
     var assigneePlaceHolder = $("#assignee-placeholder");
+    var employeeDiv = $('#employeeDetailDiv');
+    var taskEditPlaceHolder = $('#modal-default');
+
+    function showEmployeeDetails(userName) {
+
+        $.ajax({
+            type: "GET",
+            url: thisBaseUrl + "/employeeDetail/Index",
+            contentType: "application/json; charset=utf-8",
+            data: { userName: userName },
+            datatype: "json",
+            success: function (data) {
+                employeeDiv.html(data);
+                employeeDiv.find('.modal').modal('show');
+                employeeDiv.show();
+
+                var employeeTasksTable = $('#employeeTasksTable').
+                    DataTable({
+                        paging: false,
+                        info: false,
+                        searching: false,
+                        //scrollY:        300,
+                        //scrollX:        true,
+                        //scrollCollapse: true,
+                        initComplete: function (settings, json) {
+                            var response = settings.json;
+                            if (response.pendingCount == 0) {
+                                $("#taskCount").hide();
+                            }
+                            $("#taskCount").html(response.pendingCount);
+
+                            var taskDonutData = {
+                                labels: [
+                                    'Completed',
+                                    'Not Started Yet',
+                                    'In Progress',
+                                    'On Hold',
+                                    'Cancelled'
+                                ],
+                                datasets: [
+                                    {
+                                        data: [response.completedCount, response.notStartedCount,
+                                        response.progressCount, response.onHoldCount, response.cancelledCount],
+                                        backgroundColor: ['#00a65a', '#6c757d', '#f39c12', '#6f42c1', '#343a40'],
+                                    }
+                                ]
+                            }
+
+                            var pieChartCanvas = $('#pieChart').get(0).getContext('2d');
+                            var pieData = taskDonutData;
+                            var pieOptions = {
+                                maintainAspectRatio: false,
+                                responsive: true,
+                                legend: {
+                                    display: false
+                                }
+                            }
+                            //Create pie or douhnut chart
+                            // You can switch between pie and douhnut using the method below.
+                            var tasksPieChart = new Chart(pieChartCanvas, {
+                                type: 'pie',
+                                data: pieData,
+                                options: pieOptions
+                            });
+
+                        },
+                        search: { regex: true, caseInsensitive: true },
+                        ajax: {
+                            "url": thisBaseUrl + "/employeeDetail/LoadEmployeeTasksData",
+                            "type": "POST",
+                            "datatype": "json",
+                            "data": { userName: userName }
+                        },
+                        columns: [
+                            {
+                                "render": function (data, type, full, meta) {
+                                    return '<a href="' + thisBaseUrl + '/tasks/Edit?id=' + full.taskId + '&username=' + currentUserName + '"><u>' + full.title + '</u> </a>';
+                                }
+                            },
+                            {
+                                "render": function (data, type, full, meta) {
+                                    if (full.status == "Not Started") {
+                                        return '<span class="badge badge-secondary">Not Started</span>';
+                                    }
+                                    else
+                                        if (full.status == "In Progress") {
+                                            return '<span class="badge badge-warning text-white"> In Progress</span > ';
+                                        }
+                                        else
+                                            if (full.status == "On Hold") {
+                                                return '<span class="badge badge-secondary">On Hold</span>';
+                                            }
+                                            else
+                                                if (full.status == "Cancelled") {
+                                                    return '<span class="badge badge-secondary">Cancelled</span>';
+                                                }
+                                                else
+                                                    return '<span class="badge badge-success">Completed</span>';
+                                }
+                            },
+                            { "data": "sortId", "name": "SortId", "autoWidth": true, "visible": false, "searchable": false },
+
+                        ],
+                        order: [[2, 'asc']]
+                    });
+
+                var employeefollowUpsTable = $('#employeefollowUpsTable').
+                    DataTable({
+                        paging: false,
+                        info: false,
+                        searching: false,
+                        //pageLength: 10,
+                        //"scrollY": 200,
+                        initComplete: function (settings, json) {
+                            if (this.api().data().length == 0) {
+                                $("#followupCount").hide();
+                            }
+                            $("#followupCount").html(this.api().data().length);
+                            var response = settings.json;
+                            var followupsDonutData = {
+                                labels: [
+                                    'Pending',
+                                    'Completed'
+                                ],
+                                datasets: [
+                                    {
+                                        data: [response.pendingFollowUps, response.completedFollowUps],
+                                        backgroundColor: ['#f39c12', '#00a65a'],
+                                    }
+                                ]
+                            }
+
+                            var pieChartCanvas2 = $('#pieChart2').get(0).getContext('2d');
+                            var pieData = followupsDonutData;
+                            var pieOptions = {
+                                maintainAspectRatio: false,
+                                responsive: true,
+                                legend: {
+                                    display: false
+                                }
+                            }
+                            //Create pie or douhnut chart
+                            // You can switch between pie and douhnut using the method below.
+                            var followupPieChart = new Chart(pieChartCanvas2, {
+                                type: 'pie',
+                                data: pieData,
+                                options: pieOptions
+                            });
+                        },
+                        search: { regex: true, caseInsensitive: true },
+                        ajax: {
+                            "url": thisBaseUrl + "/employeeDetail/LoadEmployeeFollowUps",
+                            "type": "POST",
+                            "datatype": "json",
+                            "data": { userName: userName }
+                        },
+                        columns: [
+                            {
+                                "render": function (data, type, full, meta) {
+                                    return '<a href="' + thisBaseUrl + '/tasks/Edit?id=' + full.taskId + '&username=' + currentUserName + '"><u>' + full.taskInfo + '</u> </a>';
+                                }
+                            },
+                            { "data": "followUpFrom", "name": "Follow Up From", "autoWidth": true, "visible": true, "searchable": true },
+                            {
+                                "render": function (data, type, full, meta) {
+                                    if (full.status == "Not Started") {
+                                        return '<span class="badge badge-secondary">Not Started</span>';
+                                    }
+                                    else
+                                        if (full.status == "In Progress") {
+                                            return '<span class="badge badge-warning text-white"> In Progress</span > ';
+                                        }
+                                        else
+                                            if (full.status == "On Hold") {
+                                                return '<span class="badge badge-secondary">On Hold</span>';
+                                            }
+                                            else
+                                                if (full.status == "Cancelled") {
+                                                    return '<span class="badge badge-secondary">Cancelled</span>';
+                                                }
+                                                else
+                                                    return '<span class="badge badge-success">Completed</span>';
+                                }
+                            },
+                            { "data": "sortId", "name": "SortId", "autoWidth": true, "visible": false, "searchable": false }
+                        ],
+                        order: [[3, 'asc']]
+                    });
+
+                $("#employee-closePopup-icon").click(function () {
+                    $('.modal-backdrop').removeClass("modal-backdrop");
+                    employeeDiv.hide();
+                });
+            },
+            error: function () {
+                alert("Dynamic content load failed.");
+            }
+        });
+    }
 
     $("#updateAssigneeBtnId").click(function () {
         var options = { "backdrop": "static", keyboard: true };
@@ -161,8 +360,54 @@ function setFormState() {
         }
     });
 
+    }
 
-}
+    
+    $("#editTaskBtnId").click(function () {
+        var $buttonClicked = $(this);
+        var options = { "backdrop": "static", keyboard: true };
+        $.ajax({
+            type: "GET",
+            url: thisBaseUrl + "/tasks/EditTask?taskId=" + taskId,
+            contentType: "application/json; charset=utf-8",
+            data: null,
+            datatype: "json",
+            success: function (data) {
+                taskEditPlaceHolder.html(data);
+                taskEditPlaceHolder.find('.modal').modal(options);
+                taskEditPlaceHolder.find('.modal').modal('show');
+            },
+            error: function () {
+                alert("Dynamic content load failed.");
+            }
+        });
+    });
+
+    taskEditPlaceHolder.on('click', '[data-save="modal"]', function (event) {
+        event.preventDefault();
+
+        var form = $(this).parents('.modal').find('form');
+        var actionUrl = form.attr('action');
+        var dataToSend = form.serialize();
+        var buttonClickedId = $(this).attr('id');
+        $("#spinnerCreate").show();
+
+        $.post(actionUrl, dataToSend).done(function (data) {
+            var newbody = $('.modal-body', data);
+            taskEditPlaceHolder.find('.modal-body').replaceWith(newbody);
+            var isValid = newbody.find('[name="IsValid"]').val() == 'True';
+            $("#spinnerCreate").hide();
+            if (isValid) {
+                if (buttonClickedId == "task-submit-btnId") {
+                    taskEditPlaceHolder.find('.modal').modal('hide');
+                }
+                else {
+                    //getSummaryInfo();
+                    alert("Task updated");
+                }
+            }
+        });
+    });
 
 
 function setBadgeStyle() {
@@ -564,8 +809,8 @@ function appendEmployeeList() {
 
     var cardBody = "<div class=\"d-flex justify-content-between\">" +
         "<div class=\"d-flex align-items-center\">" +
-        "<i class=\"far fa-user-circle\" style=\"font-size:24px\" aria-hidden=\"true\">" +
-        "</i>&nbsp;userName&nbsp" +
+        "<img name=\"employeeAvatar\" src=\"../dist/img/user2-160x160.jpg\" width=\"15%\" height=\"50%\" class=\"img-circle elevation-2\" alt=\"User Image\"></img>" +
+        "&nbsp;<a href=\"javascript: void(null); \"name=\"employeeDetailLink\">userName</a>&nbsp" +
         "<i class=\"fas fa-wifi\" aria-hidden=\"true\"></i>" +
         "</div>" +
         "<span class=\"float-right text-md\">capacity</span>" +
@@ -594,6 +839,10 @@ function appendEmployeeList() {
             });
             $("#people-placeholder").html('');
             $("#people-placeholder").html(employeeHtmlBody);
+
+            $("a[name='employeeDetailLink']").click(function () {
+                showEmployeeDetails($(this).html());
+            });
         },
         error: function () {
             alert("Dynamic content load failed.");

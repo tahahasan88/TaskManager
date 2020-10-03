@@ -16,7 +16,7 @@ namespace TaskManager.Web.Controllers
     public class TaskFollowUpsController : BaseController
     {
 
-        public TaskFollowUpsController(TaskManagerContext context, IConfiguration configuration) : base(context)
+        public TaskFollowUpsController(TaskManagerContext context, IConfiguration configuration) : base(context, configuration)
         {
             currentUserName = configuration.GetSection("TaskManagerUserName").Value;
         }

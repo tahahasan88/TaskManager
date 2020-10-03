@@ -30,6 +30,18 @@
          color: white;
      }
 
+     .profile-usertitle-name {
+        color: #5a7391;
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 0px; 
+    }
+
+     .profile-usertitle {
+        text-align: center;
+        margin-top: 0px; 
+    }
+
 </style>
 
 
@@ -73,6 +85,8 @@
                                         </div>
                                         <div class="profile-usertitle">
                                             <div class="profile-usertitle-name">@Model.EmployeeName</div>
+                                            <div class="profile-usertitle-name">@Model.Title</div>
+                                            <div class="profile-usertitle-name">@Model.Department</div>
                                         </div>
                                         <div class="table-responsive">
                                             <table class="table table-bordered table-hover">

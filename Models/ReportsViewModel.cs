@@ -18,5 +18,7 @@ namespace TaskManager.Web.Models
         public int CancelledTasksCount { get; set; }
         public bool IsDeptName { get; set; }
         public int DepartmentLevel { get; set; }
+        public bool IsBaseDepartment { get; set; }
+        public bool IsNonBaseDepartment { get; set; }
     }
 }

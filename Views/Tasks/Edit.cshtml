@@ -28,6 +28,8 @@
 }
 
 <div id="assignee-placeholder"></div>
+<div id="modal-default">
+</div>
 
 <div class="container-fluid">
     <div class="row">
@@ -38,7 +40,7 @@
         </div>
         <div class="col-sm-4 col-md-2">
             <div class="color-palette-set mb-1">
-                <button type="button" class="btn btn-block btn-primary btn-sm">Edit</button>
+                <button type="button" id="editTaskBtnId" class="btn btn-block btn-primary btn-sm">Edit</button>
             </div>
         </div>
         <div class="col-sm-4 col-md-2" id="deleteBtnDiv">
@@ -166,7 +168,7 @@
     </div>
 
     <div class="row">
-        <div class="col-sm-10">
+        <div class="col-sm-12">
             <!-- Default box -->
             <div class="card">
                 <div class="card-header">
@@ -177,7 +179,8 @@
                         </button>
                     </div>
                 </div>
-                <div class="btn-group-toggle flex-wrap mt-3 ml-3" data-toggle="buttons">
+                <br />
+                <div class="btn-group btn-group-toggle" style="padding-left:10px; width:60%;" data-toggle="buttons">
                     <label class="btn btn-info multi-btn active">
                         <input type="checkbox" class="historyType" value="progress" checked autocomplete="off"> Progress
                     </label>

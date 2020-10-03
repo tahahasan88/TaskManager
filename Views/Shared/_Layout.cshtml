@@ -255,6 +255,9 @@
                                //scrollCollapse: true,
                                initComplete: function (settings, json) {
                                    var response = settings.json;
+                                   if (response.pendingCount == 0) {
+                                        $("#taskCount").hide();
+                                   }
                                    $("#taskCount").html(response.pendingCount);
 
                                    var taskDonutData = {
@@ -279,6 +282,9 @@
                                    var pieOptions = {
                                        maintainAspectRatio: false,
                                        responsive: true,
+                                       legend: {
+                                        display: false
+                                    }
                                    }
                                    //Create pie or douhnut chart
                                    // You can switch between pie and douhnut using the method below.
@@ -336,6 +342,9 @@
                                //pageLength: 10,
                                //"scrollY": 200,
                                initComplete: function (settings, json) {
+                                   if (this.api().data().length == 0) {
+                                        $("#followupCount").hide();
+                                   }
                                    $("#followupCount").html(this.api().data().length);
                                    var response = settings.json;
                                    var followupsDonutData = {
@@ -356,6 +365,9 @@
                                    var pieOptions = {
                                        maintainAspectRatio: false,
                                        responsive: true,
+                                       legend: {
+                                        display: false
+                                    }
                                    }
                                    //Create pie or douhnut chart
                                    // You can switch between pie and douhnut using the method below.

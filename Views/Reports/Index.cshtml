@@ -13,8 +13,13 @@
         }
 
         table.dataTable tbody tr.selected {
+            color: black;
+            background-color: #C0C0C0;
+        }
+
+         table.dataTable tbody tr.selected1 {
             color: white;
-            background-color: #7d91b0;
+            background-color: #94908a;
         }
 
         #reportTable th {
@@ -135,6 +140,9 @@
                             //scrollCollapse: true,
                             initComplete: function (settings, json) {
                                 var response = settings.json;
+                                if (response.pendingCount == 0) {
+                                    $("#taskCount").hide();
+                                }
                                 $("#taskCount").html(response.pendingCount);
                                 
                                 var taskDonutData = {
@@ -159,6 +167,9 @@
                                 var pieOptions = {
                                     maintainAspectRatio: false,
                                     responsive: true,
+                                    legend: {
+                                        display: false
+                                    }
                                 }
                                 //Create pie or douhnut chart
                                 // You can switch between pie and douhnut using the method below.
@@ -217,6 +228,9 @@
                             //pageLength: 10,
                             //"scrollY": 200,
                             initComplete: function (settings, json) {
+                                if (this.api().data().length == 0) {
+                                    $("#followupCount").hide();
+                                }
                                 $("#followupCount").html(this.api().data().length);
                                   var x = document.getElementById("pieDiv");
 
@@ -239,6 +253,9 @@
                                 var pieOptions = {
                                     maintainAspectRatio: false,
                                     responsive: true,
+                                    legend: {
+                                        display: false
+                                    }
                                 }
                                 //Create pie or douhnut chart
                                 // You can switch between pie and douhnut using the method below.
@@ -442,7 +459,9 @@
                 {
                     "render": function (data, type, full, meta) {
                         if (full.isDeptName == false) {
-                            return '<a style="padding-left:'+full.departmentLevel+'em" href="javascript:void(null);" data-username="' + full.tagUserName + '" name="employeeDetailLink">' + full.tagName + '</span>';
+                            return '<span style="padding-left:' + full.departmentLevel + 'em"></span>'
+                                + '<img name="employeeAvatar" src="../dist/img/user2-160x160.jpg" width="10%" height="20%" class="img-circle elevation-2" alt = "User Image" ></img>'
+                                + '&nbsp;&nbsp;<a href="javascript:void(null);" data-username="' + full.tagUserName + '" name = "employeeDetailLink" > ' + full.tagName + '</span >';
                         }
                         else
                             return '<span style="padding-left:'+full.departmentLevel+'em">'+ full.tagName +'</span>';
@@ -513,9 +532,14 @@
                 ],
                 order: [[0, 'asc']],
                 rowCallback: function (row, data) {
+                    console.log(data.isBaseDepartment);
                     if (data.isDeptName == true) {
                         $(row).addClass('selected');
                     }
+                    //if (data.isBaseDepartment == true) {
+                    //        console.log("here now");
+                    //        $(row).addClass('selected1');
+                    //} 
                 }
         });
 

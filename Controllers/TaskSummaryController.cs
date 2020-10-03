@@ -12,9 +12,8 @@ namespace TaskManager.Web.Controllers
 {
     public class TaskSummaryController : BaseController
     {
-        public string currentUserName;
 
-        public TaskSummaryController(TaskManagerContext context, IConfiguration configuration) : base(context)
+        public TaskSummaryController(TaskManagerContext context, IConfiguration configuration) : base(context, configuration)
         {
             currentUserName = configuration.GetSection("TaskManagerUserName").Value;
         }
@@ -134,13 +133,21 @@ namespace TaskManager.Web.Controllers
                         || IsThisUserManagingThisDepartment(taskEmployees.Where(x => x.TaskId == task.Id).FirstOrDefault().DeptId,
                             departments, currentUserName))
                     {
-                        if (task.StatusId != (int)TaskManager.Common.Common.TaskStatus.Completed)
+                        if (task.StatusId == (int)TaskManager.Common.Common.TaskStatus.Cancelled)
                         {
-                            taskSummaryVM.PendingTasksCount += 1;
+                            taskSummaryVM.CancelledTasksCount += 1;
                         }
                         else if (task.StatusId == (int)TaskManager.Common.Common.TaskStatus.Completed)
                         {
                             taskSummaryVM.CompletedTasksCount += 1;
+                        }
+                        else if (task.StatusId == (int)TaskManager.Common.Common.TaskStatus.InProgress)
+                        {
+                            taskSummaryVM.InProgressTasksCount += 1;
+                        }
+                        else if (task.StatusId == (int)TaskManager.Common.Common.TaskStatus.NotStarted)
+                        {
+                            taskSummaryVM.NotStartedTasksCount += 1;
                         }
                         else if (task.StatusId == (int)TaskManager.Common.Common.TaskStatus.OnHold)
                         {

@@ -192,6 +192,8 @@ namespace TaskManager.Web.Controllers
             employeeVM.EmailAddres = thisEmployee.EmailAddress;
             employeeVM.Phone = thisEmployee.PhoneNo;
             employeeVM.Presence = "Present"; //insert attendance here
+            employeeVM.Department = thisEmployee.Department.Name;
+            employeeVM.Title = thisEmployee.JobTitle;
 
             var employeeManager = (from c in _context.Employees
                                     join o in _context.Departments

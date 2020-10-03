@@ -1,0 +1,86 @@
+﻿@model TaskManager.Web.Models.TaskCreateViewModel
+
+<div class="modal fade" id="modal-task">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Update Task</h4>
+                <div class="">
+                    <button type="button" class="close" id="task-closePopup-icon" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <form asp-action="EditTask">
+                    <input name="IsValid" type="hidden" value="@ViewData.ModelState.IsValid.ToString()" />
+                    <div class="form-group">
+                        <label asp-for="@Model.Title" class="control-label"></label>
+                        <input asp-for="@Model.Title" class="form-control" />
+                        <span asp-validation-for="@Model.Title" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="@Model.Description" class="control-label"></label>
+                        <input asp-for="@Model.Description" class="form-control" />
+                        <span asp-validation-for="@Model.Description" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <b><label class="control-label">Assignee</label></b>
+                        @{
+                            foreach (TaskManager.Web.Models.AssigneeDropDownViewModel assignee in Model.EmployeeList)
+                            {
+                                <text>
+                                    <script>
+                                        var spacing = '';
+                                        if ("@assignee.DepartmentLevel" != 0) {
+                                            for (i = 0; i < "@assignee.DepartmentLevel"; i++) {
+                                                spacing += "&nbsp;";
+                                            }
+                                        }
+                                        var o = new Option("@assignee.TagName", "@assignee.TagUserName");
+                                        if ("@assignee.IsDeptName" == "True") {
+                                             $(o).html(spacing + "@assignee.TagName");
+                                             $("#assigneeDrpDown").append(o);
+                                             o.disabled = true;
+                                        }
+                                        else {
+                                            $(o).html(spacing + "&nbsp;&nbsp;" + "@assignee.TagName");
+                                            $("#assigneeDrpDown").append(o);
+                                            o.selected = true;
+                                        }
+                                    </script>
+                                </text>
+                            }
+                        }
+                        @Html.HiddenFor(x => x.AssigneeCode, new { id = "AssigneeCode" })
+                        <select id="assigneeDrpDown" class="chosen-select form-control input-form"></select>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="@Model.Target" class="control-label"></label>
+                        <input asp-for="@Model.Target" asp-format="{0:dd/MM/yyyy HH:mm}" class="form-control" />
+                        <span asp-validation-for="@Model.Target" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <b><label class="control-label">Priority</label></b>
+                        @Html.DropDownListFor(x => x.PriorityId,
+                                Model.PriorityList,
+                                new
+                                                {
+                                                    @class = "chosen-select form-control input-form",
+                                                })
+                    </div>
+                    <div id="spinnerCreate" style="display:none;" class="spinner-border text-primary" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+
+                </form>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" id="task-submit-btnId" data-save="modal" class="btn btn-primary">Update</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>

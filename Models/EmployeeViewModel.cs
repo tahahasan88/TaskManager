@@ -12,6 +12,8 @@ namespace TaskManager.Web.Models
         public string Presence { get; set; }
         public string Phone { get; set; }
         public string EmailAddres { get; set; }
+        public string Title { get; set; }
+        public string Department { get; set; }
         public List<TaskFollowUpInboxViewModel> TasksFollowUpVMList { get; set; }
         public List<TasksGridViewModel> TasksGridVMList { get; set; }
 

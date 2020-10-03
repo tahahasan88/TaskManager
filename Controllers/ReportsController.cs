@@ -14,12 +14,9 @@ namespace TaskManager.Web.Controllers
 {
     public class ReportsController : BaseController
     {
-        private readonly IConfiguration _iconfiguration;
-
-        public ReportsController(IConfiguration configuration, TaskManagerContext context) : base(context)
+        public ReportsController(IConfiguration configuration, TaskManagerContext context) : base(context, configuration)
         {
             currentUserName = configuration.GetSection("TaskManagerUserName").Value;
-            _iconfiguration = configuration;
         }
 
         public IActionResult Index()
@@ -29,32 +26,7 @@ namespace TaskManager.Web.Controllers
             return View();
         }
 
-        public bool IsThisUserManagingThisDepartment(Department thisDepartment, string userName)
-        {
-            bool isThisUserManager = false;
-            thisDepartment = thisDepartment.ParentDepartment;
-            while (thisDepartment != null)
-            {
-                if (thisDepartment.Manager.UserName == userName)
-                {
-                    isThisUserManager = true;
-                    break;
-                }
-                thisDepartment = thisDepartment.ParentDepartment;
-            }
-            return isThisUserManager;
-        }
 
-        private int GetDeptLevel(Department thisDept)
-        {
-            int depthLevel = 0;
-            while (thisDept.ParentDepartment != null)
-            {
-                thisDept = thisDept.ParentDepartment;
-                depthLevel = depthLevel + 2;
-            }
-            return depthLevel;
-        }
 
         public IActionResult LoadReportsData(string username)
         {
@@ -83,8 +55,10 @@ namespace TaskManager.Web.Controllers
                 reportRow.IsDeptName = true;
                 gridViewUiDepthLevel = GetDeptLevel(department);
                 reportRow.DepartmentLevel = gridViewUiDepthLevel;
+
                 reportsVM.Add(reportRow);
                 gridViewUiDepthLevel += 2;
+                bool baseDept = false;
 
                 foreach (Employee employee in employees.Where(x => x.Department.Id == department.Id))
                 {
@@ -95,6 +69,11 @@ namespace TaskManager.Web.Controllers
                             || department.Manager.UserName == currentUserName
                             )
                         {
+                            if (!baseDept)
+                            {
+                                baseDept = true;
+                                reportsVM[reportsVM.Count - 1].IsBaseDepartment = true;
+                            }
                             CreateReportRows(userTaskDictionary, reportsVM, employee, ++tagCounter, gridViewUiDepthLevel);
                         }
                     }
@@ -149,54 +128,6 @@ namespace TaskManager.Web.Controllers
             reportsVM.Add(newRow);
         }
 
-        private void GetTaskDatabyTaskStatus(string connectionString, Dictionary<string, List<TaskData>> userTaskDictionary)
-        {
-            using (SqlConnection conn = new SqlConnection(connectionString))
-            {
-                string sqlQuery = "select taskdata.UserName, taskdata.TaskStatusId, count(taskdata.id) as taskCount from " +
-                    "(select distinct Tasks.id, Tasks.TaskStatusId, TaskEmployees.UserName from Tasks " +
-                    "inner join TaskEmployees on TaskEmployees.TaskId = Tasks.Id " +
-                    "where TaskEmployees.IsActive = 1 " +
-                    "and Tasks.isdeleted = 0) " +
-                    "as taskdata " +
-                    "group by taskdata.TaskStatusId,taskdata.UserName";
-
-                conn.Open();
-                var queryResult = conn.Query(sqlQuery);
-                foreach (var result in queryResult)
-                {
-                    if (userTaskDictionary.ContainsKey(result.UserName))
-                    {
-                        userTaskDictionary[result.UserName].Add(new TaskData()
-                        {
-                            TaskCount = result.taskCount,
-                            TaskStatusId = result.TaskStatusId
-                        });
-                    }
-                    else
-                    {
-                        userTaskDictionary.Add(result.UserName, new List<TaskData>() { new TaskData()
-                        {   TaskStatusId = result.TaskStatusId,
-                            TaskCount = result.taskCount
-                        } });
-                    }
-                    List<TaskData> existingUserTaskList = userTaskDictionary[result.UserName];
-                    if (existingUserTaskList.Any(x => x.TaskStatusId == (int)Common.Common.TaskStatus.AllTasks))
-                    {
-                        TaskData thisTaskData = existingUserTaskList.Where(x => x.TaskStatusId == 0).SingleOrDefault();
-                        thisTaskData.TaskCount += result.taskCount;
-                    }
-                    else
-                    {
-                        userTaskDictionary[result.UserName].Add(new TaskData()
-                        {
-                            TaskStatusId = (int)Common.Common.TaskStatus.AllTasks,
-                            TaskCount = result.taskCount
-                        });
-                    }
-                }
-            }
-        }
 
         public IActionResult GetReportDetail()
         {
