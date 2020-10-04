@@ -8,6 +8,12 @@ $(document).ready(function () {
     var assigneePlaceHolder = $("#assignee-placeholder");
     var employeeDiv = $('#employeeDetailDiv');
     var taskEditPlaceHolder = $('#modal-default');
+    if (isReadOnlyMode == "True") {
+        $("#editBtnDiv").hide();
+        $("#deleteBtnDiv").hide();
+        $("#updateTaskBtnDiv").hide();
+    }
+    $('#Quality').slider('disable');
 
     function showEmployeeDetails(userName) {
 
@@ -82,7 +88,7 @@ $(document).ready(function () {
                         columns: [
                             {
                                 "render": function (data, type, full, meta) {
-                                    return '<a href="' + thisBaseUrl + '/tasks/Edit?id=' + full.taskId + '&username=' + currentUserName + '"><u>' + full.title + '</u> </a>';
+                                    return '<a href="' + thisBaseUrl + '/tasks/Edit?id=' + full.taskId + '&username=' + currentUserName + '&viewMode=1"><u>' + full.title + '</u> </a>';
                                 }
                             },
                             {
@@ -165,10 +171,15 @@ $(document).ready(function () {
                         columns: [
                             {
                                 "render": function (data, type, full, meta) {
-                                    return '<a href="' + thisBaseUrl + '/tasks/Edit?id=' + full.taskId + '&username=' + currentUserName + '"><u>' + full.taskInfo + '</u> </a>';
+                                    return '<a href="' + thisBaseUrl + '/tasks/Edit?id=' + full.taskId + '&username=' + currentUserName + '&viewMode=1"><u>' + full.taskInfo + '</u> </a>';
                                 }
                             },
-                            { "data": "followUpFrom", "name": "Follow Up From", "autoWidth": true, "visible": true, "searchable": true },
+                            {
+                                "render": function (data, type, full, meta) {
+                                    return '<img name="employeeAvatar" src="../dist/img/user2-160x160.jpg" width="20%" height="20%" class="img-circle elevation-2" alt="User Image"></img>'
+                                        + '&nbsp;&nbsp;<span>' + full.followUpFrom + '</span>';
+                                }
+                            },
                             {
                                 "render": function (data, type, full, meta) {
                                     if (full.status == "Not Started") {
@@ -206,25 +217,6 @@ $(document).ready(function () {
         });
     }
 
-    $("#updateAssigneeBtnId").click(function () {
-        var options = { "backdrop": "static", keyboard: true };
-        $.ajax({
-            type: "GET",
-            url: thisBaseUrl + "/tasks/AllAssignees",
-            contentType: "application/json; charset=utf-8",
-            data: { userName: currentUserName },
-            datatype: "json",
-            success: function (data) {
-                assigneePlaceHolder.html(data);
-                assigneePlaceHolder.find('.modal').modal(options);
-                assigneePlaceHolder.find('.modal').modal('show');
-            },
-            error: function () {
-                alert("Dynamic content load failed.");
-            }
-        });
-
-    });
 
     assigneePlaceHolder.on('click', '[data-save="modal"]', function (event) {
         event.preventDefault();
@@ -294,7 +286,7 @@ function setFormState() {
                 //$("#deleteTaskBtnId").addClass('btn btn-block btn-secondary btn-sm');
             }
             if (tmpData.isAssigneeUpdateAllowed == false) {
-                $("#updateAssigneeDiv").hide();
+                //$("#updateAssigneeDiv").hide();
             }
 
             if (tmpData.isTaskEditAllowed == true) {
@@ -376,6 +368,19 @@ function setFormState() {
                 taskEditPlaceHolder.html(data);
                 taskEditPlaceHolder.find('.modal').modal(options);
                 taskEditPlaceHolder.find('.modal').modal('show');
+
+                var month = $("#TargetVal").val().split("/")[0];
+                var date = $("#TargetVal").val().split("/")[1];
+                var remaining = $("#TargetVal").val().split("/")[2];
+                month = month.length == 1 ? ("0" + month) : month;
+                date = date.length == 1 ? ("0" + date) : date;
+                var year = remaining.split(" ")[0];
+
+                var dt = new Date($("#TargetVal").val());
+                var hours = dt.getHours();
+                var mins = dt.getMinutes();
+
+                $("#Target").val(year + "-" + month + "-" + date + "T" + hours + ":" + mins + ":00.000");
             },
             error: function () {
                 alert("Dynamic content load failed.");
@@ -388,9 +393,13 @@ function setFormState() {
 
         var form = $(this).parents('.modal').find('form');
         var actionUrl = form.attr('action');
+        $(this).parents('.modal').find('#AssigneeCode').val($("#assigneeDrpDown").val());
+        $("#Id").val(taskId);
+        $("#TargetVal").val($("#Target").val());
         var dataToSend = form.serialize();
         var buttonClickedId = $(this).attr('id');
         $("#spinnerCreate").show();
+       
 
         $.post(actionUrl, dataToSend).done(function (data) {
             var newbody = $('.modal-body', data);
@@ -398,13 +407,31 @@ function setFormState() {
             var isValid = newbody.find('[name="IsValid"]').val() == 'True';
             $("#spinnerCreate").hide();
             if (isValid) {
-                if (buttonClickedId == "task-submit-btnId") {
-                    taskEditPlaceHolder.find('.modal').modal('hide');
-                }
-                else {
-                    //getSummaryInfo();
-                    alert("Task updated");
-                }
+                alert("Task updated");
+
+                var month = $("#TargetVal").val().split("-")[1];
+                var date = $("#TargetVal").val().split("-")[2];
+                var year = $("#TargetVal").val().split("-")[0];
+                splitDate = date.split("T");
+                date = date.split("T")[0];
+                console.log(splitDate);
+                var hour = splitDate[1].split(":")[0];
+                var ampm = (hour >= 12) ? "PM" : "AM";
+                var min = splitDate[1].split(":")[1];
+                hour = hour - 12;
+
+                console.log($("#TargetVal").val());
+                $("#taskTarget").html(month + "/" + date + "/" + year + " " + hour + ":" + min + ":00" + " " + ampm);
+                $("#taskPriority").html($("#PriorityId option:selected").text());
+
+                $("#taskTitle").html($("#Title").val());
+                $("#taskDescription").html($("#Description").val());
+
+                taskEditPlaceHolder.find('.modal').modal('hide');
+                appendEmployeeList();
+                getHistoryList();
+                
+
             }
         });
     });
@@ -569,7 +596,8 @@ function getSubTasksList() {
         "</div>";
 
     var addSubTaskButtonHtml = "<div class=\"row\">" +
-        "<div class=\"input-group mb-2\">" +
+        "<span id=\"noSubTaskSpan\" style=\"display: none;\">There are no sub tasks.</span>" +
+        "<div id=\"subTaskAddDiv\" class=\"input-group mb-2\">" +
         "<input type=\"text\" id=\"newTaskInputId\" class=\"form-control\">" +
         "<span class=\"input-group-append\">" +
         "<button " + disableThis + " id=\"addSubtaskBtnId\" type=\"button\" class=\"btn btn-info btn-flat\">Add Sub Task</button>" +
@@ -674,6 +702,12 @@ function getSubTasksList() {
             else {
                 newBody += addSubTaskButtonHtml;
                 subTaskPlaceHolder.html(newBody);
+                if (isReadOnlyMode == "True") {
+                    $("#noSubTaskSpan").show();
+                }
+            }
+            if (isReadOnlyMode == "True") {
+                $("#subTaskAddDiv").hide();
             }
 
             $("#addSubtaskBtnId").click(function () {
@@ -809,7 +843,7 @@ function appendEmployeeList() {
 
     var cardBody = "<div class=\"d-flex justify-content-between\">" +
         "<div class=\"d-flex align-items-center\">" +
-        "<img name=\"employeeAvatar\" src=\"../dist/img/user2-160x160.jpg\" width=\"15%\" height=\"50%\" class=\"img-circle elevation-2\" alt=\"User Image\"></img>" +
+        "<img name=\"employeeAvatar\" src=\"../dist/img/user2-160x160.jpg\" width=\"15%\" height=\"60%\" class=\"img-circle elevation-2\" alt=\"User Image\"></img>" +
         "&nbsp;<a href=\"javascript: void(null); \"name=\"employeeDetailLink\">userName</a>&nbsp" +
         "<i class=\"fas fa-wifi\" aria-hidden=\"true\"></i>" +
         "</div>" +
@@ -867,6 +901,9 @@ function getHistoryType(historyType) {
     else if (historyType == "subtasks") {
         historyTypeId = subTaskAuditType;
     }
+    else if (historyType == "update") {
+        historyTypeId = updateAuditType;
+    }
     return historyTypeId;
 }
 
@@ -886,6 +923,9 @@ function getHistoryTypeDescription(historyTypeId) {
     }
     else if (historyTypeId == subTaskAuditType) {
         historyType = "Sub tasks";
+    }
+    else if (historyTypeId == updateAuditType) {
+        historyType = "Update";
     }
     return historyType;
 }

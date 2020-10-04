@@ -14,5 +14,6 @@ namespace TaskManager.Web.Models
         public string CurrentUserName { get; set; }
         public List<SelectListItem> PriorityList { get; set; }
         public List<SelectListItem> EmployeeList { get; set; }
+        public bool IsReadOnly { get; set; }
     }
 }

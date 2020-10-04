@@ -9,6 +9,7 @@ namespace TaskManager.Data
         public string TaskProgress { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
+        public string ProgressRemarks { get; set; }
         public DateTime Target { get; set; }  
         public virtual TaskStatus TaskStatus { get; set; }
         public bool IsDeleted { get; set; }

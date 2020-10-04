@@ -11,12 +11,43 @@
         .select2 {
             width:100%!important;
         }
+        .slider {
+            width: 60%;
+        }
 
-        /*input[type="range"]:disabled {
-            background: #ffc107 !important;
-            color: #ffc107 !important;
-        }*/
+        input[type="range"]:disabled {
+            background: #28a745 !important;
+            color: #28a745 !important;
+        }
+
+        input[type="range"]:disabled {
+            /* Disabled Element */
+            color: #28a745 !important;
+        }
+
+        input[type="range"]:disabled::-webkit-slider-runnable-track {
+            /* Disabled slider-runnable-track */
+            color: #28a745 !important;
+        }
+
+        input[type="range"]:disabled::-moz-range-track {
+              /* Disabled slider-range-track */
+              color: #28a745 !important;
+        }
+
+        input[type="range"]:disabled::-webkit-slider-thumb {
+            /* Disabled slider-thumb */
+            color: #28a745 !important;
+        }
+
+        input[type="range"]:disabled::-moz-range-thumb {
+            /* Disabled slider-thumb */
+            color: #28a745 !important;
+        }
+
+
     </style>
+
 }
 
 <div class="container-fluid">
@@ -293,7 +324,7 @@
                                     <th class="progressCls">Progress</th>
                                     <th>Assigned To</th>
                                     <th>Last Updated</th>
-                                    <th>Update</th>
+                                    <th>Action</th>
                                     <th>Created By</th>
                                     <th>Target Date</th>
                                     <th>ProgressVal</th>

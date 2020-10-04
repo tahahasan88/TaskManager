@@ -64,7 +64,8 @@ namespace TaskManager.Common
             Assignment = 2,
             FollowUp = 3,
             FollowUpResponse = 4,
-            SubTasks = 5
+            SubTasks = 5,
+            Update = 6
         }
 
         public class ValidateDateRange : ValidationAttribute

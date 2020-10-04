@@ -155,10 +155,10 @@
         </div>
         <!-- /.content-wrapper -->
         <footer class="main-footer">
-            <strong>Copyright &copy; 2014-2020 <a href="https://adminlte.io">AdminLTE.io</a>.</strong>
+            <strong>Copyright Adnoc Distribution.</strong>
             All rights reserved.
             <div class="float-right d-none d-sm-inline-block">
-                <b>Version</b> 3.1.0-pre
+                @*<b>Version</b> 3.1.0-pre*@
             </div>
         </footer>
 
@@ -304,7 +304,7 @@
                                columns: [
                                    {
                                        "render": function (data, type, full, meta) {
-                                           return '<a href="' + baseUrl + '/tasks/Edit?id=' + full.taskId + '"><u>' + full.title + '</u> </a>';
+                                           return '<a href="' + baseUrl + '/tasks/Edit?id=' + full.taskId + '&viewMode=1"><u>' + full.title + '</u> </a>';
                                        }
                                    },
                                    {
@@ -395,7 +395,7 @@
                                columns: [
                                    {
                                        "render": function (data, type, full, meta) {
-                                           return '<a href="' + baseUrl + '/tasks/Edit?id=' + full.taskId + '"><u>' + full.taskInfo + '</u> </a>';
+                                           return '<a href="' + baseUrl + '/tasks/Edit?id=' + full.taskId + '&viewMode=1"><u>' + full.taskInfo + '</u> </a>';
                                        }
                                    },
                                    { "data": "followUpFrom", "name": "Follow Up From", "autoWidth": true, "visible": true, "searchable": true },

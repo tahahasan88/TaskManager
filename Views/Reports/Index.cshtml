@@ -190,7 +190,7 @@
                             columns: [
                                 {
                                     "render": function (data, type, full, meta) {
-                                        return '<a href="' + baseUrl + '/tasks/Edit?id=' + full.taskId + '"><u>' + full.title + '</u> </a>';
+                                        return '<a href="' + baseUrl + '/tasks/Edit?id=' + full.taskId + '&username=' + currentUserName + '&viewMode=1"><u>' + full.title + '</u> </a>';
                                     }
                                 },
                                 {
@@ -283,10 +283,15 @@
                             columns: [
                                 {
                                     "render": function (data, type, full, meta) {
-                                        return '<a href="' + baseUrl + '/tasks/Edit?id=' + full.taskId + '"><u>' + full.taskInfo + '</u> </a>';
+                                        return '<a href="' + baseUrl + '/tasks/Edit?id=' + full.taskId + '&username=' + currentUserName + '&viewMode=1"><u>' + full.taskInfo + '</u> </a>';
                                     }
                                 },
-                                { "data": "followUpFrom", "name": "Follow Up From", "autoWidth": true, "visible": true, "searchable": true },
+                                 {
+                                    "render": function (data, type, full, meta) {
+                                        return '<img name="employeeAvatar" src="../dist/img/user2-160x160.jpg" width="20%" height="20%" class="img-circle elevation-2" alt="User Image"></img>'
+                                            + '&nbsp;&nbsp;<span>' + full.followUpFrom + '</span>';
+                                    }
+                                },
                                 {
                                     "render": function (data, type, full, meta) {
                                         if (full.status == "Not Started") {
@@ -407,7 +412,7 @@
                                         columns: [
                                         {
                                             "render": function (data, type, full, meta) {
-                                                return '<a href="' + baseUrl + '/tasks/Edit?id=' + full.taskId + '"><u>' + full.title + '</u> </a>';
+                                                return '<a href="' + baseUrl + '/tasks/Edit?id=' + full.taskId + '&username=' + currentUserName + '&viewMode=1"><u>' + full.title + '</u> </a>';
                                             }
                                         },
                                         //{ "data": "status", "name": "Status", "autoWidth": true, "visible": true, "searchable": true },

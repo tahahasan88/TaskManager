@@ -26,6 +26,54 @@ namespace TaskManager.Web.Controllers
             return View();
         }
 
+        protected void GetUserData(string connectionString, Dictionary<string, List<TaskData>> userTaskDictionary)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string sqlQuery = "select taskdata.UserName, taskdata.TaskStatusId, count(taskdata.id) as taskCount from " +
+                    "(select distinct Tasks.id, Tasks.TaskStatusId, TaskEmployees.UserName from Tasks " +
+                    "inner join TaskEmployees on TaskEmployees.TaskId = Tasks.Id " +
+                    "where TaskEmployees.IsActive = 1 " +
+                    "and Tasks.isdeleted = 0) " +
+                    "as taskdata " +
+                    "group by taskdata.TaskStatusId,taskdata.UserName";
+
+                conn.Open();
+                var queryResult = conn.Query(sqlQuery);
+                foreach (var result in queryResult)
+                {
+                    if (userTaskDictionary.ContainsKey(result.UserName))
+                    {
+                        userTaskDictionary[result.UserName].Add(new TaskData()
+                        {
+                            TaskCount = result.taskCount,
+                            TaskStatusId = result.TaskStatusId
+                        });
+                    }
+                    else
+                    {
+                        userTaskDictionary.Add(result.UserName, new List<TaskData>() { new TaskData()
+                        {   TaskStatusId = result.TaskStatusId,
+                            TaskCount = result.taskCount
+                        } });
+                    }
+                    List<TaskData> existingUserTaskList = userTaskDictionary[result.UserName];
+                    if (existingUserTaskList.Any(x => x.TaskStatusId == (int)Common.Common.TaskStatus.AllTasks))
+                    {
+                        TaskData thisTaskData = existingUserTaskList.Where(x => x.TaskStatusId == 0).SingleOrDefault();
+                        thisTaskData.TaskCount += result.taskCount;
+                    }
+                    else
+                    {
+                        userTaskDictionary[result.UserName].Add(new TaskData()
+                        {
+                            TaskStatusId = (int)Common.Common.TaskStatus.AllTasks,
+                            TaskCount = result.taskCount
+                        });
+                    }
+                }
+            }
+        }
 
 
         public IActionResult LoadReportsData(string username)
@@ -38,7 +86,7 @@ namespace TaskManager.Web.Controllers
             Dictionary<string, List<TaskData>> userTaskDictionary = new Dictionary<string, List<TaskData>>();
             int tagCounter = 0;
 
-            GetTaskDatabyTaskStatus(connectionString, userTaskDictionary);
+            GetUserData(connectionString, userTaskDictionary);
             List<Employee> employees = _context.Employees.Include(x => x.Department).ToList();
             List<Department> departments = _context.Departments
                 .Include(x => x.ParentDepartment)

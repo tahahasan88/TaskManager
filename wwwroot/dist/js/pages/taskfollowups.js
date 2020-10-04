@@ -73,7 +73,7 @@ function showEmployeeDetails(userName) {
                     columns: [
                         {
                             "render": function (data, type, full, meta) {
-                                return '<a href="' + thisBaseUrl + '/tasks/Edit?id=' + full.taskId + '&username=' + currentUserName + '"><u>' + full.title + '</u> </a>';
+                                return '<a href="' + thisBaseUrl + '/tasks/Edit?id=' + full.taskId + '&username=' + currentUserName + '&viewMode=1"><u>' + full.title + '</u> </a>';
                             }
                         },
                         {
@@ -156,10 +156,15 @@ function showEmployeeDetails(userName) {
                     columns: [
                         {
                             "render": function (data, type, full, meta) {
-                                return '<a href="' + thisBaseUrl + '/tasks/Edit?id=' + full.taskId + '&username=' + currentUserName + '"><u>' + full.taskInfo + '</u> </a>';
+                                return '<a href="' + thisBaseUrl + '/tasks/Edit?id=' + full.taskId + '&username=' + currentUserName + '&viewMode=1"><u>' + full.taskInfo + '</u> </a>';
                             }
                         },
-                        { "data": "followUpFrom", "name": "Follow Up From", "autoWidth": true, "visible": true, "searchable": true },
+                        {
+                            "render": function (data, type, full, meta) {
+                                return '<img name="employeeAvatar" src="../dist/img/user2-160x160.jpg" width="20%" height="20%" class="img-circle elevation-2" alt="User Image"></img>'
+                                    + '&nbsp;&nbsp;<span>' + full.followUpFrom + '</span>';
+                            }
+                        },
                         {
                             "render": function (data, type, full, meta) {
                                 if (full.status == "Not Started") {
@@ -229,14 +234,14 @@ var inboxTable = $('#inboxTable').DataTable({
         },
         {
             "render": function (data, type, full, meta) {
-                return '<a href="' + thisBaseUrl + '/tasks/Edit?id=' + full.taskId + '"><u>' + full.taskInfo + '</u> </a>';
+                return '<a href="' + thisBaseUrl + '/tasks/Edit?id=' + full.taskId + '&username=' + currentUserName + '&viewMode=1"><u>' + full.taskInfo + '</u> </a>';
             }
         },
         { "data": "remarks", "name": "Remarks", "autoWidth": true },
         {
             "render": function (data, type, full, meta) {
                 if (full.status == "Not Started") {
-                    return '<span class="badge badge-danger">Not Started</span>';
+                    return '<span class="badge badge-secondary">Not Started</span>';
                 }
                 else
                 if (full.status == "In Progress") {
@@ -283,14 +288,14 @@ var outboxTable = $('#outboxTable').DataTable({
     columns: [
         {
             "render": function (data, type, full, meta) {
-                return '<a href="' + thisBaseUrl + '/tasks/Edit?id=' + full.taskId + '"><u>' + full.taskInfo + '</u> </a>';
+                return '<a href="' + thisBaseUrl + '/tasks/Edit?id=' + full.taskId + '&username=' + currentUserName + '&viewMode=1"><u>' + full.taskInfo + '</u> </a>';
             }
         },
         { "data": "remarks", "name": "Remarks", "autoWidth": true },
         {
             "render": function (data, type, full, meta) {
                 if (full.status == "Not Started") {
-                    return '<span class="badge badge-danger">Not Started</span>';
+                    return '<span class="badge badge-secondary">Not Started</span>';
                 }
                 else
                 if (full.status == "In Progress") {

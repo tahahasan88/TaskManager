@@ -6,7 +6,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Update Progress</h4>
+                <h4 class="modal-title">Update Task Progress</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -26,7 +26,7 @@
                                                     })
                         </div>
                         <div class="form-group">
-                            <label asp-for="@Model.TaskProgress" class="control-label"></label>
+                            <label class="control-label">Task Progress</label>
                             <input id="taskProgressInput" type="range" value="@Model.TaskProgress" max="100" class="form-control" oninput="taskProgressId.value = this.value">
                             <output id="taskProgressId">@Model.TaskProgress</output>
                             <span asp-validation-for="@Model.TaskProgress" class="text-danger"></span>
@@ -50,7 +50,7 @@
             <div class="card-body pt-0">
                 <div class="row">
                     <div class="col-sm-5">
-                        <button type="button" id="task-submit-btnId" data-save="modal" class="btn btn-primary">Save changes</button>
+                        <button type="button" id="task-submit-btnId" data-save="modal" class="btn btn-primary">Save</button>
                      </div>
                     <div class="col-sm-7" style="height:60px; overflow-y:auto;">
 
@@ -64,9 +64,6 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer text-center d-block">
-                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-             </div>
 
             </div>
             <!-- /.modal-content -->

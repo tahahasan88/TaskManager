@@ -78,50 +78,37 @@ namespace TaskManager.Web.Controllers
             return depthLevel;
         }
 
-        protected void GetTaskDatabyTaskStatus(string connectionString, Dictionary<string, List<TaskData>> userTaskDictionary)
+        protected void GetUserData(string connectionString, bool isManager, int deptId, Dictionary<string, string> userDataDictionary)
         {
+            string sqlQuery = string.Empty;
+
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
-                string sqlQuery = "select taskdata.UserName, taskdata.TaskStatusId, count(taskdata.id) as taskCount from " +
-                    "(select distinct Tasks.id, Tasks.TaskStatusId, TaskEmployees.UserName from Tasks " +
-                    "inner join TaskEmployees on TaskEmployees.TaskId = Tasks.Id " +
-                    "where TaskEmployees.IsActive = 1 " +
-                    "and Tasks.isdeleted = 0) " +
-                    "as taskdata " +
-                    "group by taskdata.TaskStatusId,taskdata.UserName";
+                if (isManager)
+                {
+                    sqlQuery = "select UserName, EmployeeName from employees where DepartmentId = " + deptId +  
+                    "union " +
+                    "select UserName, EmployeeName from employees where id in (select managerId from Departments where ParentDepartmentId = " + deptId + ") " +
+                    "union " +
+                    "select UserName, EmployeeName from employees where id in (select managerId from Departments where ParentDepartmentId = " +
+                    "(select ParentDepartmentId from Departments where Id = " + deptId + "))";
+                }
+                else
+                {
+                    sqlQuery = "select UserName, EmployeeName from employees where DepartmentId = " + deptId + "";
+                }
 
                 conn.Open();
                 var queryResult = conn.Query(sqlQuery);
                 foreach (var result in queryResult)
                 {
-                    if (userTaskDictionary.ContainsKey(result.UserName))
+                    if (userDataDictionary.ContainsKey(result.UserName))
                     {
-                        userTaskDictionary[result.UserName].Add(new TaskData()
-                        {
-                            TaskCount = result.taskCount,
-                            TaskStatusId = result.TaskStatusId
-                        });
+                        userDataDictionary[result.UserName].Add(result.EmployeeName);
                     }
                     else
                     {
-                        userTaskDictionary.Add(result.UserName, new List<TaskData>() { new TaskData()
-                        {   TaskStatusId = result.TaskStatusId,
-                            TaskCount = result.taskCount
-                        } });
-                    }
-                    List<TaskData> existingUserTaskList = userTaskDictionary[result.UserName];
-                    if (existingUserTaskList.Any(x => x.TaskStatusId == (int)Common.Common.TaskStatus.AllTasks))
-                    {
-                        TaskData thisTaskData = existingUserTaskList.Where(x => x.TaskStatusId == 0).SingleOrDefault();
-                        thisTaskData.TaskCount += result.taskCount;
-                    }
-                    else
-                    {
-                        userTaskDictionary[result.UserName].Add(new TaskData()
-                        {
-                            TaskStatusId = (int)Common.Common.TaskStatus.AllTasks,
-                            TaskCount = result.taskCount
-                        });
+                        userDataDictionary.Add(result.UserName, result.EmployeeName);
                     }
                 }
             }
@@ -130,89 +117,49 @@ namespace TaskManager.Web.Controllers
         protected List<AssigneeDropDownViewModel> LoadAssigneeDrpDwnData(string username)
         {
             var connectionString = _iconfiguration.GetConnectionString("DefaultConnection");
-            Dictionary<string, List<TaskData>> userTaskDictionary = new Dictionary<string, List<TaskData>>();
+            Dictionary<string, string> userDataDictionary = new Dictionary<string, string>();
             int tagCounter = 0;
 
             List<Employee> employees = _context.Employees.Include(x => x.Department).ToList();
             List<Department> departments = _context.Departments
                 .Include(x => x.ParentDepartment)
                 .Include(x => x.Manager).OrderBy(x => x.Id).ToList();
-            GetTaskDatabyTaskStatus(connectionString, userTaskDictionary);
+
+            bool isManager = employees.Where(x => x.UserName == username && x.Department.Manager.Id == x.Id).Any();
+            int deptId = employees.Where(x => x.UserName == username).Select(x=>x.Department.Id).FirstOrDefault();
+
+            GetUserData(connectionString, isManager, deptId, userDataDictionary);
 
             List<AssigneeDropDownViewModel> assigneeVM = new List<AssigneeDropDownViewModel>();
 
             foreach (Department department in departments)
             {
-                int gridViewUiDepthLevel = 0;
                 AssigneeDropDownViewModel assigneeRow = new AssigneeDropDownViewModel();
                 assigneeRow.TagName = department.Name;
                 assigneeRow.TagId = ++tagCounter;
                 assigneeRow.IsDeptName = true;
-                gridViewUiDepthLevel = GetDeptLevel(department);
-                assigneeRow.DepartmentLevel = gridViewUiDepthLevel;
-
+                assigneeRow.DepartmentLevel = GetDeptLevel(department);
                 assigneeVM.Add(assigneeRow);
-                gridViewUiDepthLevel += 2;
 
                 foreach (Employee employee in employees.Where(x => x.Department.Id == department.Id))
                 {
-                    if (userTaskDictionary.ContainsKey(employee.UserName))
+                    if (userDataDictionary.ContainsKey(employee.UserName))
                     {
-                        if (IsThisUserManagingThisDepartment(department, username)
-                            || employee.UserName == username
-                            || department.Manager.UserName == username
-                            )
-                        {
-                            CreateAssigneeRows(userTaskDictionary, assigneeVM, employee, ++tagCounter, gridViewUiDepthLevel);
-                        }
+                        CreateAssigneeRows(assigneeVM, employee, ++tagCounter, assigneeRow.DepartmentLevel);
                     }
                 }
             }
-            int recordsTotal = assigneeVM.Count;
+
 
             return assigneeVM;
         }
 
-        private void CreateAssigneeRows(Dictionary<string, List<TaskData>> userTaskDictionary,
-            List<AssigneeDropDownViewModel> assigneeVM, Employee employee, int tagId, int deptLevel)
+        private void CreateAssigneeRows(List<AssigneeDropDownViewModel> assigneeVM, Employee employee, int tagId, int deptLevel)
         {
             AssigneeDropDownViewModel newRow = new AssigneeDropDownViewModel();
             newRow.TagName = employee.EmployeeName;
             newRow.TagId = tagId;
             newRow.DepartmentLevel = deptLevel;
-            newRow.TagCount = userTaskDictionary[employee.UserName].
-                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.AllTasks)
-                .SingleOrDefault().TaskCount;
-            if (userTaskDictionary[employee.UserName].
-                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.Cancelled).Count() > 0)
-            {
-                newRow.CancelledTasksCount = userTaskDictionary[employee.UserName].
-                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.Cancelled).SingleOrDefault().TaskCount;
-            }
-            if (userTaskDictionary[employee.UserName].
-                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.Completed).Count() > 0)
-            {
-                newRow.CompletedTasksCount = userTaskDictionary[employee.UserName].
-                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.Completed).SingleOrDefault().TaskCount;
-            }
-            if (userTaskDictionary[employee.UserName].
-                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.InProgress).Count() > 0)
-            {
-                newRow.InProgressTasksCount = userTaskDictionary[employee.UserName].
-                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.InProgress).SingleOrDefault().TaskCount;
-            }
-            if (userTaskDictionary[employee.UserName].
-                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.NotStarted).Count() > 0)
-            {
-                newRow.NotStartedTasksCount = userTaskDictionary[employee.UserName].
-                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.NotStarted).SingleOrDefault().TaskCount;
-            }
-            if (userTaskDictionary[employee.UserName].
-                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.OnHold).Count() > 0)
-            {
-                newRow.OnHoldTasksCount = userTaskDictionary[employee.UserName].
-                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.OnHold).SingleOrDefault().TaskCount;
-            }
             newRow.TagUserName = employee.UserName;
             assigneeVM.Add(newRow);
         }

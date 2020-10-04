@@ -122,6 +122,11 @@ namespace TaskManager.Web.Controllers
                         string creatorUserName = taskEmployees.Where(x => x.CapacityId == (int)Common.Common.TaskCapacity.Creator
                             && x.TaskId == task.Id).FirstOrDefault().UserName;
 
+
+                        taskGridVM.IsEditable = taskEmployees.Where(x => x.TaskId == task.Id && x.UserName == currentUserName
+                        && (x.CapacityId == (int)Common.Common.TaskCapacity.Creator
+                         || x.CapacityId == (int)Common.Common.TaskCapacity.Assignee)
+                        ).Any();
                         taskGridVM.CreatedBy = creatorUserName;
                         taskGridVM.AssignedTo = assigneeUserName;
                         tasksGridVMList.Add(taskGridVM);
@@ -246,17 +251,17 @@ namespace TaskManager.Web.Controllers
             return View(task);
         }
 
-        public ActionResult Create()
+        public ActionResult Create(string userName)
         {
             TaskCreateViewModel taskVM = new TaskCreateViewModel();
             List<Employee> employees = _context.Employees.ToList();
-            popuLateTaskViewDropDowns(taskVM, currentUserName);
+            popuLateTaskViewDropDowns(taskVM, userName);
             return PartialView("_Create", taskVM);
         }
 
         public async Task<ActionResult> EditTask(int taskId)
         {
-            TaskCreateViewModel taskVM = new TaskCreateViewModel();
+            TaskUpdateViewModel taskVM = new TaskUpdateViewModel();
             List<Employee> employees = _context.Employees.ToList();
 
             var task = await _context.Tasks
@@ -271,6 +276,8 @@ namespace TaskManager.Web.Controllers
             taskVM.Description = task.Description;
             taskVM.Title = task.Title;
             taskVM.Target = task.Target;
+            taskVM.TargetVal = task.Target;
+            taskVM.AssigneeCode = currentEmployee.UserName;
 
             return PartialView("_Edit", taskVM);
         }
@@ -295,7 +302,21 @@ namespace TaskManager.Web.Controllers
             taskVm.Target = DateTime.Now;
         }
 
-  
+        private void popuLateTaskViewDropDowns(TaskUpdateViewModel taskVm, string userName)
+        {
+            List<SelectListItem> taskPriorityDrpDwnList = new List<SelectListItem>();
+            var taskPriorityEnumsList = Enum.GetValues(typeof(Common.Common.TaskPriority));
+            foreach (Common.Common.TaskPriority priority in taskPriorityEnumsList)
+            {
+                taskPriorityDrpDwnList.Add(new SelectListItem() { Text = priority.ToString(), Value = ((int)priority).ToString() });
+            }
+            taskVm.PriorityList = taskPriorityDrpDwnList;
+
+            taskVm.EmployeeList = this.LoadAssigneeDrpDwnData(userName);
+            taskVm.Target = DateTime.Now;
+        }
+
+
         [HttpPost]
         public async Task<ActionResult> Create(TaskCreateViewModel taskCreateVM)
         {
@@ -368,6 +389,113 @@ namespace TaskManager.Web.Controllers
             }
 
             return PartialView("_Create", taskCreateVM);
+        }
+
+
+        [HttpPost]
+        public async Task<ActionResult> EditTask(TaskUpdateViewModel taskCreateVM)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+
+                    Data.Task task = _context.Tasks
+                        .Include(x =>x.TaskPriority)
+                        .Where(x => x.Id == taskCreateVM.Id).SingleOrDefault();
+                    task.LastUpdatedAt = DateTime.Now;
+                    task.LastUpdatedBy = currentUserName;
+
+                    string previousTitle = task.Title;
+                    if (taskCreateVM.Title != previousTitle)
+                    {
+                        task.Title = taskCreateVM.Title;
+                        TaskAudit titleAudit = new TaskAudit();
+                        titleAudit.ActionDate = DateTime.Now;
+                        titleAudit.ActionBy = currentUserName;
+                        titleAudit.Description = "Task Updated. Title changed from " + previousTitle + " to " + taskCreateVM.Title;
+                        titleAudit.Task = task;
+                        titleAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.Update).SingleOrDefault();
+                        _context.Add(titleAudit);
+                    }
+                    DateTime previousTarget = task.Target;
+                    if (taskCreateVM.Target != previousTarget)
+                    {
+                        task.Target = taskCreateVM.Target;
+                        TaskAudit targetAudit = new TaskAudit();
+                        targetAudit.ActionDate = DateTime.Now;
+                        targetAudit.ActionBy = currentUserName;
+                        targetAudit.Description = "Task Updated. Target changed from " + previousTarget + " to " + taskCreateVM.Target;
+                        targetAudit.Task = task;
+                        targetAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.Update).SingleOrDefault();
+                        _context.Add(targetAudit);
+                    }
+                    string previousDescription = task.Description;
+                    if (taskCreateVM.Description != previousDescription)
+                    {
+                        task.Description = taskCreateVM.Description;
+                        TaskAudit descriptionAudit = new TaskAudit();
+                        descriptionAudit.ActionDate = DateTime.Now;
+                        descriptionAudit.ActionBy = currentUserName;
+                        descriptionAudit.Description = "Task Updated. Description changed from " + previousDescription + " to " + taskCreateVM.Description;
+                        descriptionAudit.Task = task;
+                        descriptionAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.Update).SingleOrDefault();
+                        _context.Add(descriptionAudit);
+                    }
+                    TaskPriority modifiedPriority = _context.TaskPriority.Where(x => x.Id == taskCreateVM.PriorityId).SingleOrDefault();
+                    if (task.TaskPriority.Id != modifiedPriority.Id)
+                    {
+                        task.Description = taskCreateVM.Description;
+                        TaskAudit descriptionAudit = new TaskAudit();
+                        descriptionAudit.ActionDate = DateTime.Now;
+                        descriptionAudit.ActionBy = currentUserName;
+                        descriptionAudit.Description = "Task Updated. Priority changed from " + task.TaskPriority.Priority + " to " + modifiedPriority.Priority;
+                        task.TaskPriority = modifiedPriority;
+                        descriptionAudit.Task = task;
+                        descriptionAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.Update).SingleOrDefault();
+                        _context.Add(descriptionAudit);
+                    }
+
+                   TaskEmployee employee = _context.TaskEmployees.Where(x =>
+                   x.Task.Id == taskCreateVM.Id
+                   && x.TaskCapacity.Id == (int)TaskManager.Common.Common.TaskCapacity.Assignee
+                   ).FirstOrDefault();
+                    if (employee != null)
+                    {
+                        if (employee.UserName != taskCreateVM.AssigneeCode)
+                        {
+                            employee.UserName = taskCreateVM.AssigneeCode;
+                            employee.IsActive = true;
+                            _context.TaskEmployees.Attach(employee);
+                            _context.Entry(employee).State = EntityState.Modified;
+
+                            TaskAudit assigneeAudit = new TaskAudit();
+                            assigneeAudit.ActionDate = DateTime.Now;
+                            assigneeAudit.ActionBy = currentUserName;
+                            assigneeAudit.Description = "Task Assignment updated. Assigned to " + taskCreateVM.AssigneeCode;
+                            assigneeAudit.Task = task;
+                            assigneeAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.Assignment).SingleOrDefault();
+                            _context.Add(assigneeAudit);
+                        }
+                    }
+
+                    _context.Tasks.Attach(task);
+                    _context.Entry(task).State = EntityState.Modified;
+                    await _context.SaveChangesAsync();
+
+                    popuLateTaskViewDropDowns(taskCreateVM, currentUserName);
+                }
+                else
+                {
+                    popuLateTaskViewDropDowns(taskCreateVM, currentUserName);
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+            return PartialView("_Edit", taskCreateVM);
         }
 
 
@@ -470,7 +598,7 @@ namespace TaskManager.Web.Controllers
             }
             TaskUpdateProgressViewModel updateProgressVM = new TaskUpdateProgressViewModel();
             updateProgressVM.Id = task.Id;
-            updateProgressVM.Remarks = task.Description;
+            updateProgressVM.Remarks = task.ProgressRemarks;
             updateProgressVM.Status = task.TaskStatus.Status;
             updateProgressVM.TaskProgress = task.TaskProgress;
             populateUpdateProgressVMDropDowns(updateProgressVM);
@@ -517,7 +645,7 @@ namespace TaskManager.Web.Controllers
                         thisTask.LastUpdatedAt = DateTime.Now;
                         thisTask.LastUpdatedBy = currentUserName;
                         thisTask.TaskProgress = taskProgress;
-                        thisTask.Description = updateVM.Remarks;
+                        thisTask.ProgressRemarks = updateVM.Remarks;
                         thisTask.TaskStatus = _context.TaskStatus.Where(x => x.Id == Convert.ToInt32(updateVM.Status)).SingleOrDefault();
                         _context.Update(thisTask);
 
@@ -602,7 +730,7 @@ namespace TaskManager.Web.Controllers
             taskVm.EmployeeList = employeeDrpDwnList;
         }
 
-        public async Task<IActionResult> Edit(int? id, string username)
+        public async Task<IActionResult> Edit(int? id, string username, int viewMode)
         {
             if (id == null)
             {
@@ -631,6 +759,7 @@ namespace TaskManager.Web.Controllers
             taskVM.AssigneeCode = currentEmployee.UserName;
             taskVM.CurrentUserName = currentUserName;
             ViewData["UserName"] = currentUserName;
+            taskVM.IsReadOnly = viewMode == 1 ? true : false;
             return View(taskVM);
         }
 

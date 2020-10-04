@@ -13,6 +13,7 @@
     $('.select2bs4').select2({
         theme: 'bootstrap4'
     });
+    //$(".slider").slider('enable');
 
     var employeeDiv = $('#employeeDetailDiv');
 
@@ -91,7 +92,7 @@
                         columns: [
                             {
                                 "render": function (data, type, full, meta) {
-                                    return '<a href="' + thisBaseUrl + '/tasks/Edit?id=' + full.taskId + '&username='+ currentUserName +'"><u>' + full.title + '</u> </a>';
+                                    return '<a href="' + thisBaseUrl + '/tasks/Edit?id=' + full.taskId + '&username=' + currentUserName + '&viewMode=1"><u>' + full.title + '</u> </a>';
                                 }
                             },
                             {
@@ -174,10 +175,15 @@
                         columns: [
                             {
                                 "render": function (data, type, full, meta) {
-                                    return '<a href="' + thisBaseUrl + '/tasks/Edit?id=' + full.taskId + '&username=' + currentUserName +'"><u>' + full.taskInfo + '</u> </a>';
+                                    return '<a href="' + thisBaseUrl + '/tasks/Edit?id=' + full.taskId + '&username=' + currentUserName + '&viewMode=1"><u>' + full.taskInfo + '</u> </a>';
                                 }
                             },
-                            { "data": "followUpFrom", "name": "Follow Up From", "autoWidth": true, "visible": true, "searchable": true },
+                            {
+                                "render": function (data, type, full, meta) {
+                                    return '<img name="employeeAvatar" src="../dist/img/user2-160x160.jpg" width="20%" height="20%" class="img-circle elevation-2" alt="User Image"></img>'
+                                        + '&nbsp;&nbsp;<span>' + full.followUpFrom + '</span>';
+                                }
+                            },
                             {
                                 "render": function (data, type, full, meta) {
                                     if (full.status == "Not Started") {
@@ -572,7 +578,11 @@
                     }
                 },
                 { "data": "taskId", "name": "TaskId", "autoWidth": true, "visible": false, "searchable": true },
-                { "data": "title", "name": "Title", "autoWidth": true },
+                {
+                    "render": function (data, type, full, meta) {
+                        return '<a href="' + thisBaseUrl + '/tasks/Edit?id=' + full.taskId + '&username=' + currentUserName + '&viewMode=1"><u>' + full.title + '</u> </a>';
+                    }
+                },
                 {
                     "render": function (data, type, full, meta) {
                         if (full.status == "Not Started") {
@@ -618,7 +628,7 @@
                                         color = '28a745';
 
                         return '<input type="range" max="100" style="background:#ffc107;color:#ffc107;" value=\"' + full.progress + '' + '\"' +
-                            "\" width=\"70%\" disabled></input> <output id=\"taskProgressId\">" + full.progress + "</output>";
+                            " class=\"slider\"></input> <output id=\"taskProgressId\">" + full.progress + "</output>";
                     }
                 },
                 {
@@ -633,7 +643,14 @@
                     }
                 },
                 {
-                    "render": function (data, type, full, meta) { return '<a class="btn btn-info" href="' + thisBaseUrl + '/tasks/Edit?id=' + full.taskId + '&username='+ currentUserName + '">Edit</a>'; }
+                    "render": function (data, type, full, meta) {
+                        if (full.isEditable == true) {
+                            return '<a class="btn btn-info" href="' + thisBaseUrl + '/tasks/Edit?id=' + full.taskId + '&username=' + currentUserName + '">Edit</a>';
+                        }
+                        else {
+                            return "";
+                        }
+                    }
                 },
                 { "data": "createdBy", "name": "Created By", "autoWidth": true, "visible": false, "searchable": true },
                 { "data": "targetDate", "name": "Target Date", "autoWidth": true, "visible": false, "searchable": true },
@@ -653,25 +670,12 @@
             type: "GET",
             url: thisBaseUrl + "/tasks/Create",
             contentType: "application/json; charset=utf-8",
-            data: null,
+            data: { userName: currentUserName },
             datatype: "json",
             success: function (data) {
                 taskCreationPlaceHolder.html(data);
                 taskCreationPlaceHolder.find('.modal').modal(options);
                 taskCreationPlaceHolder.find('.modal').modal('show');
-                //console.log($("#employeelistId").val());
-                //console.log(data);
-                //var employeeListData = @Html.Raw(Json.Encode($("#employeelistId").val()));
-                //alert(employeeListData.length);
-                //$.each(employeeListData, function (i, val) {
-                //    console.log(employeeListData[i]);
-                //});
-
-                //var o = new Option('test', 'test');
-                ///// jquerify the DOM object 'o' so we can use the html method
-                //$(o).html('&nbsp;&nbsp;&nbsp;&nbsp;test');
-                //$("#assigneeDrpDown").append(o);
-                //o.disabled = true;
 
                 $("#addMultipleCreationLink").click(function () {
                     $.ajax({

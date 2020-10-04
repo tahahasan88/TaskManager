@@ -3,18 +3,19 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using TaskManager.Data;
 using static TaskManager.Common.Common;
 
 namespace TaskManager.Web.Models
 {
-    public class TaskCreateViewModel
+    public class TaskUpdateViewModel 
     {
         public int Id { get; set; }
         public string TaskProgress { get; set; }
         [Required]
-        [TaskUniqueValidation]
+        [TaskUpdateUniqueValidation]
         public virtual string Title { get; set; }
         [Required]
         public string Description { get; set; }
@@ -47,25 +48,32 @@ namespace TaskManager.Web.Models
         public List<AssigneeDropDownViewModel> EmployeeList { get; set; }
     }
 
-
-    public class TaskUniqueValidation : ValidationAttribute
+    public class TaskUpdateUniqueValidation : ValidationAttribute
     {
         private TaskManagerContext _context { get; set; }
 
-        public TaskUniqueValidation()
+        public TaskUpdateUniqueValidation()
         {
             _context = new TaskManagerContext();
         }
 
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
+            object instance = validationContext.ObjectInstance;
+            Type type = instance.GetType();
+            PropertyInfo property = type.GetProperty("Id");
+            object propertyValue = property.GetValue(instance);
+            int taskId = (int)propertyValue;
+
             string taskTitle = (string)value;
             // your validation logic
 
-            Data.Task existingTask = _context.Tasks.Where(x => x.Title == taskTitle && x.IsDeleted == false).SingleOrDefault();
-            bool isTaskAlreadyAdded = existingTask != null ? true : false;
+            Data.Task existingTask = _context.Tasks.Where(x => x.Title == taskTitle
+            && x.Id != taskId
+            && x.IsDeleted == false).SingleOrDefault();
+            bool isTaskValid = existingTask != null ? false : true;
 
-            if (!isTaskAlreadyAdded)
+            if (isTaskValid)
             {
                 return ValidationResult.Success;
             }

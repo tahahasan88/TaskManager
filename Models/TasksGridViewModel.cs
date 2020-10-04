@@ -16,5 +16,6 @@ namespace TaskManager.Web.Models
         public string CreatedBy { get; set; }
         public string TargetDate { get; set; }
         public int SortId { get; set; }
+        public bool IsEditable { get; set; }
     }
 }
