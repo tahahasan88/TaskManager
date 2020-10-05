@@ -14,6 +14,10 @@
        overflow: auto;
        overflow-y: auto;
     }
+    .employeemodal .modal-header { padding: 10px 15px 10px 15px;
+        display: flex;
+        align-items: center;}
+    .modal-header .close { font-size:32px; }
 
     /*this css trick is necessary to make a fake modal persist the scroll in the background*/ 
     .modal-open {
@@ -64,55 +68,54 @@
 </script>
 
 
-    <div class="modal employeemodal fade" id="employeeModalId" style="display:none">
-            <div class="container">
-                <div class="row">
-                    <div class="col-12">
-                        <!-- Default box -->
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="card-title">Employee Details : <span id="userinfoName"></span></h3>
-                                <div class="card-tools">
-                                    <button type="button" class="close" id="employee-closePopup-icon" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                            </div>
+<div class="modal employeemodal fade" id="employeeModalId" style="display:none">
+    <div class="modal-dialog modal-lg">
+       
+        <div class="modal-content">
+            <div class="row">
+                <div class="col-12">
+                    <!-- Default box -->
+                   
+                        <div class="modal-header mb-2">
+                            <h4 class="modal-title">Employee Details : <span id="userinfoName"></span></h4>
+                                <button type="button" class="close" id="employee-closePopup-icon" data-dismiss="modal">&times;</button>
+                        </div>
+                        <div class="modal-body">
                             <div class="row">
                                 <div class="col-md-4 employee-sidebar">
-                                    
-                                        <div class="portlet light profile-sidebar-portlet bordered">
-                                            <div class="profile-userpic" style="text-align:center">
-                                                <img id="employeeAvatarPic" class="img-responsive" alt="">
-                                            </div>
-                                            <div class="profile-usertitle">
-                                                <div class="profile-usertitle-name">@Model.EmployeeName</div>
-                                                <div class="profile-usertitle-name">@Model.Title</div>
-                                                <div class="profile-usertitle-name">@Model.Department</div>
-                                            </div>
-                                            <div class="table-responsive">
-                                                <table class="table table-bordered table-hover">
-                                                    <tbody>
-                                                        <tr>
-                                                            <td><b>Presence</b></td>
-                                                            <td>@Model.Presence</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td><b>Phone</b></td>
-                                                            <td>@Model.Phone</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td><b>Email</b></td>
-                                                            <td>@Model.EmailAddres</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td><b>Reports To</b></td>
-                                                            <td>@Model.ReportsTo</td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
+
+                                    <div class="portlet light profile-sidebar-portlet bordered">
+                                        <div class="profile-userpic" style="text-align:center">
+                                            <img id="employeeAvatarPic" class="img-responsive" alt="">
                                         </div>
+                                        <div class="profile-usertitle">
+                                            <div class="profile-usertitle-name">@Model.EmployeeName</div>
+                                            <div class="profile-usertitle-name">@Model.Title</div>
+                                            <div class="profile-usertitle-name">@Model.Department</div>
+                                        </div>
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered table-hover">
+                                                <tbody>
+                                                    <tr>
+                                                        <td><b>Presence</b></td>
+                                                        <td>@Model.Presence</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><b>Phone</b></td>
+                                                        <td>@Model.Phone</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><b>Email</b></td>
+                                                        <td>@Model.EmailAddres</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><b>Reports To</b></td>
+                                                        <td>@Model.ReportsTo</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
 
                                 </div>
                                 <div class="col-md-8">
@@ -129,14 +132,14 @@
                                         </li>
                                     </ul>
                                     <div class="tab-content" id="custom-content-below-tabContent">
-                                        <div class="tab-pane fade show active" id="custom-content-below-home" role="tabpanel" aria-labelledby="custom-content-below-home-tab">
+                                        <div class="tab-pane card pb-5 pt-3 fade show active" id="custom-content-below-home" role="tabpanel" aria-labelledby="custom-content-below-home-tab">
                                             <br />
                                             <div class="row" id="piChartsDiv">
                                                 <div id="tasksPiDiv" class="col-md-6 d-flex justify-content-center">
                                                     <canvas id="pieChart" style="min-height: 250px; height: 250px; max-height: 250px; min-width:80%; max-width: 80%;"></canvas>
 
                                                 </div>
-                                                <div id="followUpPiDiv" class="col-md-6 d-flex justify-content-center"  style="display:block">
+                                                <div id="followUpPiDiv" class="col-md-6 d-flex justify-content-center" style="display:block">
                                                     <canvas id="pieChart2" style="min-height: 250px; height: 250px; max-height: 250px; min-width:80%; max-width: 80%;"></canvas>
                                                 </div>
                                             </div>
@@ -199,7 +202,10 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                   
                 </div>
             </div>
+        </div>
+        
     </div>
+</div>
