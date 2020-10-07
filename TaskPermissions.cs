@@ -15,11 +15,11 @@ namespace TaskManager.Web
             {
                 isAllowed = true;
             }
-            else if (taskAction == TaskAction.TaskDelete && (capacity == TaskCapacity.Creator || capacity == TaskCapacity.Assignee))
+            else if (taskAction == TaskAction.TaskDelete && (capacity == TaskCapacity.Creator))
             {
                 isAllowed = true;
             }
-            else if (taskAction == TaskAction.TaskEdit && (capacity == TaskCapacity.Creator || capacity == TaskCapacity.Assignee))
+            else if (taskAction == TaskAction.TaskEdit && (capacity == TaskCapacity.Assignee))
             {
                 isAllowed = true;
             }

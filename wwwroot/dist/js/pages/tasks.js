@@ -19,8 +19,6 @@
 
     function showEmployeeDetails(userName) {
 
-
-
         $.ajax({
             type: "GET",
             url: thisBaseUrl + "/employeeDetail/Index",
@@ -627,8 +625,7 @@
                                     else
                                         color = '28a745';
 
-                        return '<input type="range" max="100" style="background:#ffc107;color:#ffc107;" value=\"' + full.progress + '' + '\"' +
-                            " class=\"slider\"></input> <output id=\"taskProgressId\">" + full.progress + "</output>";
+                        return '<div class="progress mb-3"><div class="progress-bar bg-info" role="progressbar" aria-valuenow="' + full.progress + '" aria-valuemin="0" aria - valuemax="100" style = "width: ' + full.progress+'%" ></div></div>';
                     }
                 },
                 {
@@ -740,6 +737,8 @@
             data: null,
             datatype: "json",
             success: function (data) {
+
+                summaryplaceHolder.show();
                 $.each(data, function (i, val) {
                     tmpData = data[i];
 

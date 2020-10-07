@@ -59,7 +59,7 @@
             {
                 <text>
                     $("#userinfoName").html("@ViewData["UserName"]");
-                    $("#employeeAvatarPic").attr("src", "https://cdn.flickeringmyth.com/wp-content/uploads/2020/08/The-Batman.jpg");    
+                    $("#employeeAvatarPic").attr("src", "@Model.AvatarImage");    
                 </text>
             }
 
@@ -86,7 +86,7 @@
 
                                     <div class="portlet light profile-sidebar-portlet bordered">
                                         <div class="profile-userpic" style="text-align:center">
-                                            <img id="employeeAvatarPic" class="img-responsive" alt="">
+                                            <img id="employeeAvatarPic" style="height:80px;" class="img-responsive" alt="">
                                         </div>
                                         <div class="profile-usertitle">
                                             <div class="profile-usertitle-name">@Model.EmployeeName</div>
@@ -183,16 +183,18 @@
                                                 <div class="col-md-12">
                                                     <div class="card">
                                                         <div class="card-body">
-                                                            <table id="employeefollowUpsTable" class="table table-bordered table-hover" style="width:80%">
-                                                                <thead>
-                                                                    <tr>
-                                                                        <th>Title</th>
-                                                                        <th>Follow Up From</th>
-                                                                        <th>Status</th>
-                                                                        <th>SortId</th>
-                                                                    </tr>
-                                                                </thead>
-                                                            </table>
+                                                            <div class="table-responsive">
+                                                                <table id="employeefollowUpsTable" class="table table-bordered table-hover" style="width:80%">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th>Title</th>
+                                                                            <th>Follow Up From</th>
+                                                                            <th>Status</th>
+                                                                            <th>SortId</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                </table>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>

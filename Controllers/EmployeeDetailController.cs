@@ -177,6 +177,47 @@ namespace TaskManager.Web.Controllers
             }
         }
 
+        public IActionResult GetEmployeeDetails(string userName)
+        {
+            userName = userName == null ? currentUserName : userName;
+            EmployeeViewModel employeeVM = new EmployeeViewModel();
+
+            Employee thisEmployee = _context.Employees.Include(k => k.Department)
+                .Where(x => x.UserName == userName).SingleOrDefault();
+
+            List<Department> departments = _context.Departments.Include(x => x.Manager).ToList();
+
+            employeeVM.EmployeeName = userName;
+            employeeVM.EmailAddres = thisEmployee.EmailAddress;
+            employeeVM.Phone = thisEmployee.PhoneNo;
+            employeeVM.Presence = "Present"; //insert attendance here
+            employeeVM.Department = thisEmployee.Department.Name;
+            employeeVM.Title = thisEmployee.JobTitle;
+            employeeVM.AvatarImage = thisEmployee.AvatarImage;
+
+            var employeeManager = (from c in _context.Employees
+                                   join o in _context.Departments
+                                   on c.Department.Id equals o.Id
+                                   where c.UserName == userName
+                                   select new
+                                   {
+                                       UserName = o.ParentDepartment == null ? "" :
+                                       c.Department.Manager.Id == c.Id ? o.ParentDepartment.Manager.UserName
+                                       : c.Department.Manager.UserName
+                                   }
+                                    );
+
+
+            if (employeeManager != null && employeeManager.Any())
+            {
+                employeeVM.ReportsTo = employeeManager.FirstOrDefault().UserName;
+            }
+
+            return new JsonResult(new { employeeName = employeeVM.EmployeeName, avatarImage = employeeVM.AvatarImage });
+
+        }
+
+
 
         public IActionResult Index(string userName)
         {
@@ -194,6 +235,7 @@ namespace TaskManager.Web.Controllers
             employeeVM.Presence = "Present"; //insert attendance here
             employeeVM.Department = thisEmployee.Department.Name;
             employeeVM.Title = thisEmployee.JobTitle;
+            employeeVM.AvatarImage = thisEmployee.AvatarImage;
 
             var employeeManager = (from c in _context.Employees
                                     join o in _context.Departments

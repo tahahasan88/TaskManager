@@ -13,6 +13,7 @@ $(document).ready(function () {
         $("#deleteBtnDiv").hide();
         $("#updateTaskBtnDiv").hide();
     }
+
     $('#Quality').slider('disable');
 
     function showEmployeeDetails(userName) {
@@ -254,8 +255,9 @@ function setFormState() {
         success: function (data) {
             tmpData = data;
             console.log(tmpData);
-            if (tmpData.isTaskDeletionAllowed == true) {
-                //disabled = true;
+            if (tmpData.isTaskDeletionAllowed == true && isReadOnlyMode != "True") {
+
+                $("#deleteBtnDiv").show();
                 $("#deleteTaskBtnId").removeClass();
                 $("#deleteTaskBtnId").addClass('btn btn-block btn-danger btn-sm');
 
@@ -282,17 +284,10 @@ function setFormState() {
             }
             else {
                 $("#deleteBtnDiv").hide();
-                //$("#deleteTaskBtnId").removeClass();
-                //$("#deleteTaskBtnId").addClass('btn btn-block btn-secondary btn-sm');
-            }
-            if (tmpData.isAssigneeUpdateAllowed == false) {
-                //$("#updateAssigneeDiv").hide();
             }
 
-            if (tmpData.isTaskEditAllowed == true) {
-                //$("#updateTaskBtnId").removeClass();
-                //$("#updateTaskBtnId").addClass('btn  btn-primary btn-sm');
-
+            if (tmpData.isProgressUpdateAllowed == true && isReadOnlyMode != "True") {
+                $("#updateTaskBtnId").show();
                 $("#updateTaskBtnId").click(function () {
                     var $buttonClicked = $(this);
                     //var id = $buttonClicked.attr('data-id');
@@ -335,10 +330,17 @@ function setFormState() {
                 });
             }
             else {
-                //$("#updateTaskBtnId").removeClass();
-                //$("#updateTaskBtnId").addClass('btn  btn-secondary btn-sm');
                 $("#updateTaskBtnId").hide();
             }
+
+            if (tmpData.isTaskEditAllowed == true && isReadOnlyMode != "True") {
+                $("#editBtnDiv").show();
+            }
+            else {
+                $("#editBtnDiv").hide();
+            }
+
+
             if (tmpData.isSubTaskEditAllowed == true) {
                 disabled = false;
             }
@@ -376,11 +378,7 @@ function setFormState() {
                 date = date.length == 1 ? ("0" + date) : date;
                 var year = remaining.split(" ")[0];
 
-                var dt = new Date($("#TargetVal").val());
-                var hours = dt.getHours();
-                var mins = dt.getMinutes();
-
-                $("#Target").val(year + "-" + month + "-" + date + "T" + hours + ":" + mins + ":00.000");
+                $("#Target").val(year + "-" + month + "-" + date);
             },
             error: function () {
                 alert("Dynamic content load failed.");
@@ -415,13 +413,12 @@ function setFormState() {
                 splitDate = date.split("T");
                 date = date.split("T")[0];
                 console.log(splitDate);
-                var hour = splitDate[1].split(":")[0];
-                var ampm = (hour >= 12) ? "PM" : "AM";
-                var min = splitDate[1].split(":")[1];
-                hour = hour - 12;
 
-                console.log($("#TargetVal").val());
-                $("#taskTarget").html(month + "/" + date + "/" + year + " " + hour + ":" + min + ":00" + " " + ampm);
+                const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+                ];
+
+                $("#taskTarget").html(date + "-" + monthNames[month - 1] + "-" + year);
                 $("#taskPriority").html($("#PriorityId option:selected").text());
 
                 $("#taskTitle").html($("#Title").val());
@@ -523,7 +520,10 @@ progressUpdatePlaceHolder.on('click', '[data-save="modal"]', function (event) {
         $("#taskStatusBadge").html("Completed");
         $("#taskStatusBadge").addClass('badge badge-success');
     }
-    $("#taskProgressUpdateId").val(taskProgress + '%');
+
+    $("#taskProgressDivId").attr("aria-valuenow", $("#TaskProgress").val());
+    $("#taskProgressDivId").css("width", $("#TaskProgress").val() + "%");
+
     $("#taskRemarks").html(remarks);
 
     $.post(actionUrl, dataToSend).done(function (data) {

@@ -14,6 +14,7 @@ namespace TaskManager.Web.Models
         public string EmailAddres { get; set; }
         public string Title { get; set; }
         public string Department { get; set; }
+        public string AvatarImage { get; set; }
         public List<TaskFollowUpInboxViewModel> TasksFollowUpVMList { get; set; }
         public List<TasksGridViewModel> TasksGridVMList { get; set; }
 

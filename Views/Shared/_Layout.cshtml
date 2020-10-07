@@ -70,7 +70,7 @@
                 </div>
 
                 <!-- SidebarSearch Form -->
-                <div class="form-inline">
+                @*<div class="form-inline">
                     <div class="input-group" data-widget="sidebar-search">
                         <input class="form-control form-control-sidebar" type="search" placeholder="Search" aria-label="Search">
                         <div class="input-group-append">
@@ -79,7 +79,7 @@
                             </button>
                         </div>
                     </div>
-                </div>
+                </div>*@
 
                 <!-- Sidebar Menu -->
                 <nav class="mt-2">
@@ -224,8 +224,6 @@
 
            var baseUrl = "@Html.Raw(this.Context.Request.Scheme + "://" + this.Context.Request.Host)";
            var employeeDiv = $('#employeeDetailDiv');
-           $("#employeeAvatarId").attr("src", "../dist/img/user2-160x160.jpg");
-           //var options = { "backdrop": "static", keyboard: true };
 
            $("#employeeDetailId").click(function () {
                showEmployeeDetails(null);

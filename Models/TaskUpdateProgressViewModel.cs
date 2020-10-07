@@ -11,7 +11,7 @@ namespace TaskManager.Web.Models
     {
         public int Id { get; set; }
         public string Status { get; set; }
-        [Required]
+        [Required(ErrorMessage ="*Remarks are required")]
         public string Remarks { get; set; }
         public string TaskProgress { get; set; }
         public List<string> TaskEmployees { get; set; }

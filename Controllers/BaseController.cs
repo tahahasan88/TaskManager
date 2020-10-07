@@ -54,15 +54,23 @@ namespace TaskManager.Web.Controllers
         protected bool IsThisUserManagingThisDepartment(Department thisDepartment, string userName)
         {
             bool isThisUserManager = false;
-            thisDepartment = thisDepartment.ParentDepartment;
-            while (thisDepartment != null)
+            Department parentDepartment = thisDepartment.ParentDepartment;
+            if (parentDepartment != null)
             {
-                if (thisDepartment.Manager.UserName == userName)
+                thisDepartment = parentDepartment;
+                while (thisDepartment != null)
                 {
-                    isThisUserManager = true;
-                    break;
+                    if (thisDepartment.Manager.UserName == userName)
+                    {
+                        isThisUserManager = true;
+                        break;
+                    }
+                    thisDepartment = thisDepartment.ParentDepartment;
                 }
-                thisDepartment = thisDepartment.ParentDepartment;
+            }
+            else
+            {
+                isThisUserManager = thisDepartment.Manager.UserName == userName;
             }
             return isThisUserManager;
         }

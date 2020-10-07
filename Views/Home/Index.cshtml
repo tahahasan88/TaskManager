@@ -72,32 +72,23 @@
 <script src="~/plugins/jquery/jquery.min.js"></script>
 <script>
 
+    var thisPage = '..';
+    var thisBaseUrl = "@Html.Raw(this.Context.Request.Scheme + "://" + this.Context.Request.Host)";
+    @if (ViewData["UserName"] != null)
+    {
+        <text>
+            currentUserName =  "@ViewData["UserName"]";
+            $("#employeeDetailId").html("@ViewData["UserName"].ToString()");
+        </text>
+    }
+
     $(document).ready(function () {
 
-
-        var thisPage = '..';
-        $(".nav-sidebar .nav-item .nav-link").each(function () {
-            $(this).removeClass("active");
-            var href = $(this).attr('href');
-            if (href == thisPage) {
-                $(this).addClass('active');
-            }
-        });
-        var baseUrl = "@Html.Raw(this.Context.Request.Scheme + "://" + this.Context.Request.Host + this.Context.Request.Path)";
-
-
-        @if (ViewData["UserName"] != null)
-        {
-            <text>
-                $("#employeeDetailId").html("@ViewData["UserName"].ToString()");
-            </text>
-        }
-        
         function getSummaryInfo() {
-
+                
                 $.ajax({
                     type: "GET",
-                    url: baseUrl + "home/list",
+                    url: thisBaseUrl + "/home/list",
                     contentType: "application/json; charset=utf-8",
                     data: null,
                     datatype: "json",
@@ -120,3 +111,4 @@
 
     });
 </script>
+<script src="../../dist/js/global.js"></script>

@@ -61,22 +61,24 @@
                 </div>
 
                 <div class="card-body">
-                    <table id="reportTable" class="table table-bordered table-hover" width="100%">
-                        <thead>
-                            <tr>
-                                <th>Tag Id</th>
-                                <th>Employee</th>
-                                <th>Total</th>
-                                <th>Not Started Yet</th>
-                                <th>In Progress</th>
-                                <th>Completed</th>
-                                <th>On Hold</th>
-                                <th>Cancelled</th>
-                            </tr>
-                        </thead>
-                    </table>
+                    <div class="table-responsive">
+                        <table id="reportTable" class="table table-bordered table-hover" width="100%">
+                            <thead>
+                                <tr>
+                                    <th>Tag Id</th>
+                                    <th>Employee</th>
+                                    <th>Total</th>
+                                    <th>Not Started Yet</th>
+                                    <th>In Progress</th>
+                                    <th>Completed</th>
+                                    <th>On Hold</th>
+                                    <th>Cancelled</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
                 </div>
-                <!-- /.card-body -->
+                    <!-- /.card-body -->
             </div>
             <!-- /.card -->
             <!-- /.card -->
@@ -88,18 +90,23 @@
 @section BodyScripts {
 
     <script>
-    $(document).ready(function () {
-
     var currentUserName = '';
-        @if (ViewData["UserName"] != null)
+    var thisPage = '../reports';
+    var thisBaseUrl = "@Html.Raw(this.Context.Request.Scheme + "://" + this.Context.Request.Host)";
+
+    @if (ViewData["UserName"] != null)
     {
         <text>
             currentUserName = "@ViewData["UserName"]";
             $("#employeeDetailId").html("@ViewData["UserName"]");
         </text>
     }
+
+    $(document).ready(function () {
+
+    var currentUserName = '';
     var employeeDiv = $('#employeeDetailDiv');
-    var baseUrl = "@Html.Raw(this.Context.Request.Scheme + "://" + this.Context.Request.Host)";
+    
 
     var cancelledTaskStatusId = @((int)TaskManager.Common.Common.TaskStatus.Cancelled);
     var completedTaskStatusId = @((int)TaskManager.Common.Common.TaskStatus.Completed);
@@ -108,7 +115,7 @@
     var onHoldTaskStatusId = @((int)TaskManager.Common.Common.TaskStatus.OnHold);
 
 
-    var thisPage = '../reports';
+    
         $(".nav-sidebar .nav-item .nav-link").each(function () {
             $(this).removeClass("active");
             var href = $(this).attr('href');
@@ -121,7 +128,7 @@
 
             $.ajax({
                 type: "GET",
-                url: baseUrl + "/employeeDetail/Index",
+                url: thisBaseUrl + "/employeeDetail/Index",
                 contentType: "application/json; charset=utf-8",
                 data: {userName : userName},
                 datatype: "json",
@@ -182,7 +189,7 @@
                             },
                             search: { regex: true, caseInsensitive: true },
                             ajax: {
-                                "url": baseUrl + "/employeeDetail/LoadEmployeeTasksData",
+                                "url": thisBaseUrl + "/employeeDetail/LoadEmployeeTasksData",
                                 "type": "POST",
                                 "datatype": "json",
                                 "data": { userName : userName }
@@ -190,7 +197,7 @@
                             columns: [
                                 {
                                     "render": function (data, type, full, meta) {
-                                        return '<a href="' + baseUrl + '/tasks/Edit?id=' + full.taskId + '&username=' + currentUserName + '&viewMode=1"><u>' + full.title + '</u> </a>';
+                                        return '<a href="' + thisBaseUrl + '/tasks/Edit?id=' + full.taskId + '&username=' + currentUserName + '&viewMode=1"><u>' + full.title + '</u> </a>';
                                     }
                                 },
                                 {
@@ -275,7 +282,7 @@
                             },
                             search: { regex: true, caseInsensitive: true },
                             ajax: {
-                                "url": baseUrl + "/employeeDetail/LoadEmployeeFollowUps",
+                                "url": thisBaseUrl + "/employeeDetail/LoadEmployeeFollowUps",
                                 "type": "POST",
                                 "datatype": "json",
                                 "data": { userName : userName }
@@ -283,7 +290,7 @@
                             columns: [
                                 {
                                     "render": function (data, type, full, meta) {
-                                        return '<a href="' + baseUrl + '/tasks/Edit?id=' + full.taskId + '&username=' + currentUserName + '&viewMode=1"><u>' + full.taskInfo + '</u> </a>';
+                                        return '<a href="' + thisBaseUrl + '/tasks/Edit?id=' + full.taskId + '&username=' + currentUserName + '&viewMode=1"><u>' + full.taskInfo + '</u> </a>';
                                     }
                                 },
                                  {
@@ -367,7 +374,7 @@
 
                         $.ajax({
                             type: "GET",
-                            url: baseUrl + "/reports/GetReportDetail",
+                            url: thisBaseUrl + "/reports/GetReportDetail",
                             contentType: "application/json; charset=utf-8",
                             data: null, //{ userName: userName, statusId = statusId },
                             datatype: "json",
@@ -404,7 +411,7 @@
                                         },
                                         //search: { regex: true, caseInsensitive: true },
                                         ajax: {
-                                            "url": baseUrl + "/reports/GetTaskList",
+                                            "url": thisBaseUrl + "/reports/GetTaskList",
                                             "type": "POST",
                                             "datatype": "json",
                                             "data": { userName: userName, statusId : statusId }
@@ -412,7 +419,7 @@
                                         columns: [
                                         {
                                             "render": function (data, type, full, meta) {
-                                                return '<a href="' + baseUrl + '/tasks/Edit?id=' + full.taskId + '&username=' + currentUserName + '&viewMode=1"><u>' + full.title + '</u> </a>';
+                                                return '<a href="' + thisBaseUrl + '/tasks/Edit?id=' + full.taskId + '&username=' + currentUserName + '&viewMode=1"><u>' + full.title + '</u> </a>';
                                             }
                                         },
                                         //{ "data": "status", "name": "Status", "autoWidth": true, "visible": true, "searchable": true },
@@ -450,7 +457,7 @@
                 },
             search: {regex: true, caseInsensitive: true},
                 ajax: {
-                "url": baseUrl + "/reports/LoadReportsData?username=" + currentUserName,
+                "url": thisBaseUrl + "/reports/LoadReportsData?username=" + currentUserName,
                 "type": "POST",
                 "datatype": "json"
                 },
@@ -550,7 +557,7 @@
 
 
 });
-
     </script>
+    <script src="../../dist/js/global.js"></script>
 
 }

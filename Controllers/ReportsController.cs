@@ -110,9 +110,10 @@ namespace TaskManager.Web.Controllers
 
                 foreach (Employee employee in employees.Where(x => x.Department.Id == department.Id))
                 {
+                    bool isThisEmployeeManager = IsThisUserManagingThisDepartment(department, currentUserName);
                     if (userTaskDictionary.ContainsKey(employee.UserName))
                     {
-                        if (IsThisUserManagingThisDepartment(department, currentUserName) 
+                        if (isThisEmployeeManager
                             || employee.UserName == currentUserName
                             || department.Manager.UserName == currentUserName
                             )
@@ -124,6 +125,10 @@ namespace TaskManager.Web.Controllers
                             }
                             CreateReportRows(userTaskDictionary, reportsVM, employee, ++tagCounter, gridViewUiDepthLevel);
                         }
+                    }
+                    else if (isThisEmployeeManager || employee.UserName == currentUserName)
+                    {
+                        CreateReportRows(userTaskDictionary, reportsVM, employee, ++tagCounter, gridViewUiDepthLevel);
                     }
                 }
             }
@@ -139,39 +144,53 @@ namespace TaskManager.Web.Controllers
             newRow.TagName = employee.EmployeeName;
             newRow.TagId = tagId;
             newRow.DepartmentLevel = deptLevel;
-            newRow.TagCount = userTaskDictionary[employee.UserName].
+            if (userTaskDictionary.ContainsKey(employee.UserName))
+            {
+                newRow.TagCount = userTaskDictionary[employee.UserName].
                 Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.AllTasks)
                 .SingleOrDefault().TaskCount;
-            if (userTaskDictionary[employee.UserName].
-                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.Cancelled).Count() > 0)
-            {
-                newRow.CancelledTasksCount = userTaskDictionary[employee.UserName].
-                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.Cancelled).SingleOrDefault().TaskCount;
+
+                if (userTaskDictionary[employee.UserName].
+               Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.Cancelled).Count() > 0)
+                {
+                    newRow.CancelledTasksCount = userTaskDictionary[employee.UserName].
+                    Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.Cancelled).SingleOrDefault().TaskCount;
+                }
+                if (userTaskDictionary[employee.UserName].
+                    Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.Completed).Count() > 0)
+                {
+                    newRow.CompletedTasksCount = userTaskDictionary[employee.UserName].
+                    Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.Completed).SingleOrDefault().TaskCount;
+                }
+                if (userTaskDictionary[employee.UserName].
+                    Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.InProgress).Count() > 0)
+                {
+                    newRow.InProgressTasksCount = userTaskDictionary[employee.UserName].
+                    Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.InProgress).SingleOrDefault().TaskCount;
+                }
+                if (userTaskDictionary[employee.UserName].
+                    Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.NotStarted).Count() > 0)
+                {
+                    newRow.NotStartedTasksCount = userTaskDictionary[employee.UserName].
+                    Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.NotStarted).SingleOrDefault().TaskCount;
+                }
+                if (userTaskDictionary[employee.UserName].
+                    Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.OnHold).Count() > 0)
+                {
+                    newRow.OnHoldTasksCount = userTaskDictionary[employee.UserName].
+                    Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.OnHold).SingleOrDefault().TaskCount;
+                }
             }
-            if (userTaskDictionary[employee.UserName].
-                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.Completed).Count() > 0)
+            else
             {
-                newRow.CompletedTasksCount = userTaskDictionary[employee.UserName].
-                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.Completed).SingleOrDefault().TaskCount;
+                newRow.TagCount = 0;
+                newRow.CancelledTasksCount = 0;
+                newRow.CompletedTasksCount = 0;
+                newRow.InProgressTasksCount = 0;
+                newRow.NotStartedTasksCount = 0;
+                newRow.OnHoldTasksCount = 0;
             }
-            if (userTaskDictionary[employee.UserName].
-                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.InProgress).Count() > 0)
-            {
-                newRow.InProgressTasksCount = userTaskDictionary[employee.UserName].
-                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.InProgress).SingleOrDefault().TaskCount;
-            }
-            if (userTaskDictionary[employee.UserName].
-                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.NotStarted).Count() > 0)
-            {
-                newRow.NotStartedTasksCount = userTaskDictionary[employee.UserName].
-                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.NotStarted).SingleOrDefault().TaskCount;
-            }
-            if (userTaskDictionary[employee.UserName].
-                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.OnHold).Count() > 0)
-            {
-                newRow.OnHoldTasksCount = userTaskDictionary[employee.UserName].
-                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.OnHold).SingleOrDefault().TaskCount;
-            }
+           
             newRow.TagUserName = employee.UserName;
             reportsVM.Add(newRow);
         }

@@ -35,12 +35,12 @@
 
 <div class="container-fluid">
     <div class="row">
-        <div class="col-sm-4 col-md-2" id="deleteBtnDiv">
+        <div class="col-sm-4 col-md-2" id="deleteBtnDiv" style="display:none">
             <div class="color-palette-set mb-1">
                 <button type="button" id="deleteTaskBtnId" class="btn btn-block btn-danger btn-sm">Delete</button>
             </div>
         </div>
-        <div class="col-sm-4 col-md-2" id="editBtnDiv">
+        <div class="col-sm-4 col-md-2" id="editBtnDiv" style="display:none">
             <div class="color-palette-set mb-1">
                 <button type="button" id="editTaskBtnId" class="btn btn-block btn-primary btn-sm">Edit</button>
             </div>
@@ -59,7 +59,7 @@
                 <div class="card-header">
                     <h3 class="card-title">Progress Update</h3>
                     <div class="card-tools">
-                        <button type="button" id="updateTaskBtnId" class="btn  btn-primary btn-sm">New</button>
+                        <button type="button" id="updateTaskBtnId" style="display:none" class="btn  btn-primary btn-sm">New</button>
                         <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
                             <i class="fas fa-minus"></i>
                         </button>
@@ -70,8 +70,14 @@
                         <dt class="col-sm-4">Status</dt>
                         <dd class="col-sm-8"><span id="taskStatusBadge" class="badge bg-primary">@Model.Task.TaskStatus.Status</span></dd>
                         <dt class="col-sm-4">Progress</dt>
-                        <dd class="col-sm-8"><input id="taskProgressUpdateId" type="range" value="@Model.Task.TaskProgress"/><output>@Model.Task.TaskProgress%</output></dd>
-                        @*<dd class="col-sm-8"><input id="taskProgressUpdateId" type="text" class="knob" value="@Model.Task.TaskProgress%" data-width="90" data-height="90" data-fgColor="#3c8dbc"></dd>*@
+                        <dd class="col-sm-8">
+                            <div class="progress mb-3">
+                                <div id="taskProgressDivId" class="progress-bar bg-info" role="progressbar" aria-valuenow="@Model.Task.TaskProgress" aria-valuemin="0"
+                                     aria-valuemax="100" style="width: @Model.Task.TaskProgress%">
+                                    <!-- <span class="sr-only">20% Complete</span> -->
+                                </div>
+                            </div>
+                        </dd>
                         <dt class="col-sm-4">Remarks</dt>
                         <dd class="col-sm-8" id="taskRemarks">@Model.Task.ProgressRemarks</dd>
                     </dl>
@@ -181,7 +187,7 @@
                         <dt class="col-sm-4">Description</dt>
                         <dd class="col-sm-8"><span id="taskDescription">@Model.Task.Description</span></dd>
                         <dt class="col-sm-4">Target Date</dt>
-                        <dd class="col-sm-8" id="taskTarget">@Model.Task.Target</dd>
+                        <dd class="col-sm-8" id="taskTarget">@Model.Task.Target.ToString("dd-MMM-yyyy")</dd>
                         <dt class="col-sm-4">Priority</dt>
                         <dd class="col-sm-8" id="taskPriority">@Model.Task.TaskPriority.Priority</dd>
                     </dl>
@@ -204,7 +210,7 @@
                     </div>
                 </div>
                 <br />
-                <div class="btn-group btn-group-toggle" style="padding-left:10px; width:60%;" data-toggle="buttons">
+                <div class="btn-group btn-group-toggle flex-wrap" style="padding-left:2%; width:80%;" data-toggle="buttons">
                     <label class="btn btn-info multi-btn active">
                         <input type="checkbox" class="historyType" value="progress" checked autocomplete="off"> Progress
                     </label>
@@ -273,7 +279,6 @@
         @if (ViewData["UserName"] != null)
         {
                 <text>
-                    testing = "@ViewData["UserName"]";
                     currentUserName =  "@ViewData["UserName"]";
                 </text>
         }

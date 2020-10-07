@@ -17,5 +17,6 @@ namespace TaskManager.Data
         public string PhoneNo { get; set; }
         [ForeignKey("DepartmentId")]
         public virtual Department Department { get; set; }
+        public string AvatarImage { get; set; }
     }
 }

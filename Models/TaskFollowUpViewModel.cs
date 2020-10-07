@@ -11,7 +11,7 @@ namespace TaskManager.Web.Models
     {
         public TaskFollowUp TaskFollowUp { get; set; }
         public int Id { get; set; }
-        [Required]
+        [Required(ErrorMessage ="*Remarks are required")]
         public string Remarks { get; set; }
         public string FollowerUserName { get; set; }
         public string ListofTasks { get; set; }

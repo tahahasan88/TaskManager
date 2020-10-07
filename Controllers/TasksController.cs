@@ -636,55 +636,48 @@ namespace TaskManager.Web.Controllers
                     TaskEmployee currentEmployee = _context.TaskEmployees
                         .Include(x => x.TaskCapacity)
                         .Where(x => x.UserName == currentUserName && x.Task.Id == id).FirstOrDefault();
-                    if (TaskPermissions.IsAllowed(Common.Common.TaskAction.ProgressUpdate, (Common.Common.TaskCapacity)currentEmployee.TaskCapacity.Id))
+                    TaskManager.Data.Task thisTask = _context.Tasks.Where(x => x.Id == id).SingleOrDefault();
+
+                    string previousProgress = thisTask.TaskProgress;
+                    string taskProgress = updateVM.TaskProgress;
+                    thisTask.LastUpdatedAt = DateTime.Now;
+                    thisTask.LastUpdatedBy = currentUserName;
+                    thisTask.TaskProgress = taskProgress;
+                    thisTask.ProgressRemarks = updateVM.Remarks;
+                    thisTask.TaskStatus = _context.TaskStatus.Where(x => x.Id == Convert.ToInt32(updateVM.Status)).SingleOrDefault();
+                    _context.Update(thisTask);
+
+                    TaskFollowUpResponse taskFollowUpResponse = new TaskFollowUpResponse();
+                    taskFollowUpResponse.RespondedBy = currentUserName;
+                    taskFollowUpResponse.LastUpdatedAt = DateTime.Now;
+                    taskFollowUpResponse.CreatedAt = DateTime.Now;
+                    taskFollowUpResponse.TaskResponse = taskProgress;
+                    taskFollowUpResponse.Task = thisTask;
+                    _context.Add(taskFollowUpResponse);
+
+                    TaskAudit followUpResponseAudit = new TaskAudit();
+                    followUpResponseAudit.ActionDate = DateTime.Now;
+                    followUpResponseAudit.ActionBy = currentUserName;
+                    followUpResponseAudit.Description = "Follow up taken";
+                    followUpResponseAudit.Task = thisTask;
+                    followUpResponseAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.FollowUpResponse).SingleOrDefault();
+                    _context.Add(followUpResponseAudit);
+
+                    if (previousProgress != taskProgress)
                     {
-                        TaskManager.Data.Task thisTask = _context.Tasks.Where(x => x.Id == id).SingleOrDefault();
-
-                        string previousProgress = thisTask.TaskProgress;
-                        string taskProgress = updateVM.TaskProgress;
-                        thisTask.LastUpdatedAt = DateTime.Now;
-                        thisTask.LastUpdatedBy = currentUserName;
-                        thisTask.TaskProgress = taskProgress;
-                        thisTask.ProgressRemarks = updateVM.Remarks;
-                        thisTask.TaskStatus = _context.TaskStatus.Where(x => x.Id == Convert.ToInt32(updateVM.Status)).SingleOrDefault();
-                        _context.Update(thisTask);
-
-                        TaskFollowUpResponse taskFollowUpResponse = new TaskFollowUpResponse();
-                        taskFollowUpResponse.RespondedBy = currentUserName;
-                        taskFollowUpResponse.LastUpdatedAt = DateTime.Now;
-                        taskFollowUpResponse.CreatedAt = DateTime.Now;
-                        taskFollowUpResponse.TaskResponse = taskProgress;
-                        taskFollowUpResponse.Task = thisTask;
-                        _context.Add(taskFollowUpResponse);
-
-                        TaskAudit followUpResponseAudit = new TaskAudit();
-                        followUpResponseAudit.ActionDate = DateTime.Now;
-                        followUpResponseAudit.ActionBy = currentUserName;
-                        followUpResponseAudit.Description = "Follow up taken";
-                        followUpResponseAudit.Task = thisTask;
-                        followUpResponseAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.FollowUpResponse).SingleOrDefault();
-                        _context.Add(followUpResponseAudit);
-
-                        if (previousProgress != taskProgress)
-                        {
-                            //Audit this update task..
-                            TaskAudit progressAudit = new TaskAudit();
-                            progressAudit.ActionDate = DateTime.Now;
-                            progressAudit.ActionBy = currentUserName;
-                            progressAudit.Description = "Progress updated to " + taskProgress + "%";
-                            progressAudit.Task = thisTask;
-                            progressAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.Progress).SingleOrDefault();
-                            _context.Add(progressAudit);
-                        }
-
-                        await _context.SaveChangesAsync();
-                        List<string> employeeList = GetTaskEmployeeEmailAddresses(id, currentUserName);
-                        await MailSystem.SendEmail(MailSystem.FollowUpResponseEmailTemplate, employeeList);
+                        //Audit this update task..
+                        TaskAudit progressAudit = new TaskAudit();
+                        progressAudit.ActionDate = DateTime.Now;
+                        progressAudit.ActionBy = currentUserName;
+                        progressAudit.Description = "Progress updated to " + taskProgress + "%";
+                        progressAudit.Task = thisTask;
+                        progressAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.Progress).SingleOrDefault();
+                        _context.Add(progressAudit);
                     }
-                    else
-                    {
-                        return NotFound();
-                    }
+
+                    await _context.SaveChangesAsync();
+                    //List<string> employeeList = GetTaskEmployeeEmailAddresses(id, currentUserName);
+                    //await MailSystem.SendEmail(MailSystem.FollowUpResponseEmailTemplate, employeeList);
                 }
                 catch (DbUpdateConcurrencyException)
                 {

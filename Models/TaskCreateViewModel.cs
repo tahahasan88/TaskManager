@@ -13,15 +13,15 @@ namespace TaskManager.Web.Models
     {
         public int Id { get; set; }
         public string TaskProgress { get; set; }
-        [Required]
+        [Required(ErrorMessage ="*Title is required")]
         [TaskUniqueValidation]
         public virtual string Title { get; set; }
-        [Required]
+        [Required(ErrorMessage ="*Description is required")]
         public string Description { get; set; }
 
         private DateTime _date = DateTime.Now;
 
-        [Required]
+        [Required(ErrorMessage ="*Target Date is required")]
         [ValidateDateRange]
 
         public DateTime Target

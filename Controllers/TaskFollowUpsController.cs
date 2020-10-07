@@ -282,10 +282,10 @@ namespace TaskManager.Web.Controllers
                     taskEmployeeDictionary.Add(thisTaskId, employeeList);
                 }
                 await _context.SaveChangesAsync();
-                foreach (KeyValuePair<int, List<string>> keyValuePair in taskEmployeeDictionary)
-                {
-                    await MailSystem.SendEmail(MailSystem.RequestFollowUpEmailTemplate, keyValuePair.Value);
-                }
+                //foreach (KeyValuePair<int, List<string>> keyValuePair in taskEmployeeDictionary)
+                //{
+                //    await MailSystem.SendEmail(MailSystem.RequestFollowUpEmailTemplate, keyValuePair.Value);
+                //}
 
                 //return RedirectToAction(nameof(Index));
             }

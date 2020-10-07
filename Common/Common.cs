@@ -74,7 +74,7 @@ namespace TaskManager.Common
             {
                 DateTime thisVal = (DateTime)value;
                 // your validation logic
-                if (thisVal >= DateTime.Now)
+                if (thisVal.Date >= DateTime.Now.Date)
                 {
                     return ValidationResult.Success;
                 }

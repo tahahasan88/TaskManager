@@ -249,7 +249,7 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="row" id="summaryRow">
+                    <div class="row" id="summaryRow" style="display:none;">
                             <div class="col-md-2  text-center">
                                 <input id="totalTasksId" type="text" class="knob" value="30" data-width="120" data-height="120"
                                        data-fgColor="#3c8dbc">
@@ -362,7 +362,6 @@
          @if (ViewData["UserName"] != null)
             {
                 <text>
-                    testing = "@ViewData["UserName"]";
                     currentUserName =  "@ViewData["UserName"]";
                 </text>
             }
