@@ -1,4 +1,4 @@
-﻿$("#employeeDetailId").html(currentUserName);
+﻿$("#employeeDetailId").html(currentEmployeeName);
 
 $(".nav-sidebar .nav-item .nav-link").each(function () {
     $(this).removeClass("active");

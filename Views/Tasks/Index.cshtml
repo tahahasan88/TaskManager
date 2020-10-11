@@ -14,6 +14,9 @@
         .slider {
             width: 60%;
         }
+        .bg-info {
+            background-color: #007bff!important;
+        }
 
         input[type="range"]:disabled {
             background: #28a745 !important;
@@ -44,6 +47,7 @@
             /* Disabled slider-thumb */
             color: #28a745 !important;
         }
+
 
 
     </style>
@@ -324,7 +328,6 @@
                                     <th class="progressCls">Progress</th>
                                     <th>Assigned To</th>
                                     <th>Last Updated</th>
-                                    <th>Action</th>
                                     <th>Created By</th>
                                     <th>Target Date</th>
                                     <th>ProgressVal</th>
@@ -362,7 +365,8 @@
          @if (ViewData["UserName"] != null)
             {
                 <text>
-                    currentUserName =  "@ViewData["UserName"]";
+                    currentUserName = "@ViewData["UserName"]";
+                    currentEmployeeName =  "@ViewData["EmployeeName"]";
                 </text>
             }
         var thisBaseUrl = "@Html.Raw(this.Context.Request.Scheme + "://" + this.Context.Request.Host)";

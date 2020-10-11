@@ -11,17 +11,13 @@ using TaskManager.Web.Models;
 
 namespace TaskManager.Web.Controllers
 {
-    public class SubTasksController : Controller
+    public class SubTasksController : BaseController
     {
-        private readonly TaskManagerContext _context;
         public int currentTaskId = 4;
-        public string currentUserName = "";
 
 
-        public SubTasksController(TaskManagerContext context, IConfiguration configuration)
+        public SubTasksController(TaskManagerContext context, IConfiguration configuration) : base(context, configuration)
         {
-            _context = context;
-            currentUserName = configuration.GetSection("TaskManagerUserName").Value;
         }
 
 
@@ -49,6 +45,7 @@ namespace TaskManager.Web.Controllers
 
         public async Task<IActionResult> SubTaskList(int id)
         {
+            SetUserName();
             SubTaskListViewModel subTaskListViewModel = new SubTaskListViewModel();
             List<TaskEmployeeListViewModel> emmployeeVMList = new List<TaskEmployeeListViewModel>();
             List<SbTaskViewModel> subTaskVMList = new List<SbTaskViewModel>();
@@ -60,14 +57,8 @@ namespace TaskManager.Web.Controllers
                 .ToListAsync();
 
             List<Employee> employees = _context.Employees.ToList();
-            foreach (Employee employee in employees)
-            {
-                emmployeeVMList.Add(new TaskEmployeeListViewModel()
-                {
-                    UserName = employee.UserName,
-                    EmailAddress = employee.EmailAddress
-                });
-            }
+
+            subTaskListViewModel.employeeVMList = this.LoadAssigneeDrpDwnData(currentUserName);
 
             foreach (SubTask subTask in subTasks)
             {
@@ -82,17 +73,19 @@ namespace TaskManager.Web.Controllers
             }
 
             subTaskListViewModel.subTaskVMList = subTaskVMList;
-            subTaskListViewModel.employeeVMList = emmployeeVMList;
-
             return new JsonResult(new { records = subTaskListViewModel });
         }
+
+
 
         [HttpPost]
         public async Task<IActionResult> Create(string description, int taskId, bool isCompleted, string assignee)
         {
             bool subTaskExist = false;
             bool subTaskAdded = false;
+            SetUserName();
             SubTask existingSubTask = _context.SubTasks.Where(x => x.Task.Id == taskId && x.Description == description && x.IsDeleted == false).SingleOrDefault();
+            var employees = _context.Employees.ToList();
             if (existingSubTask == null)
             {
                 Data.Task thisTask = _context.Tasks.Where(X => X.Id == taskId).SingleOrDefault();
@@ -111,12 +104,15 @@ namespace TaskManager.Web.Controllers
                 subTask.LastUpdatedBy = currentUserName;
                 if (assignee == null || assignee == "")
                 {
-                    TaskEmployee taskEmployee = _context.TaskEmployees.Where(x => x.TaskCapacity.Id == (int)Common.Common.TaskCapacity.Assignee
+                    TaskEmployee taskEmployee = _context.TaskEmployees
+                        .Include(x => x.Employee)
+                        .Where(x => x.TaskCapacity.Id == (int)Common.Common.TaskCapacity.Assignee
                     && x.Task.Id == taskId).FirstOrDefault();
-                    subTask.SubTaskAssigneeUserName = taskEmployee.UserName;
+                    subTask.SubTaskAssigneeUserName = employees.Where(x => x.UserCode == taskEmployee.UserName).SingleOrDefault().UserCode;
                 }
                 else
                 {
+
                     subTask.SubTaskAssigneeUserName = assignee;
                 }
 

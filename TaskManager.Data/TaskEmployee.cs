@@ -11,6 +11,8 @@ namespace TaskManager.Data
         public virtual Task Task { get; set; }
         public virtual TaskCapacity TaskCapacity { get; set; }
         public bool IsActive { get; set; }
+        public virtual Employee Employee { get; set; }
+
     }
 
 }

@@ -31,6 +31,8 @@ namespace TaskManager.Web.Controllers
         {
             SetUserName();
             ViewData["UserName"] = currentUserName;
+            Employee employee = _context.Employees.Where(x => x.UserName == currentUserName).SingleOrDefault();
+            ViewData["EmployeeName"] = employee == null ? "" : employee.EmployeeName;
             return View(await _context.TaskFollowUps.ToListAsync());
         }
 

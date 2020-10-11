@@ -23,58 +23,10 @@ namespace TaskManager.Web.Controllers
         {
             SetUserName();
             ViewData["UserName"] = currentUserName;
+            Employee employee = _context.Employees.Where(x => x.UserName == currentUserName).SingleOrDefault();
+            ViewData["EmployeeName"] = employee == null ? "" : employee.EmployeeName;
             return View();
         }
-
-        protected void GetUserData(string connectionString, Dictionary<string, List<TaskData>> userTaskDictionary)
-        {
-            using (SqlConnection conn = new SqlConnection(connectionString))
-            {
-                string sqlQuery = "select taskdata.UserName, taskdata.TaskStatusId, count(taskdata.id) as taskCount from " +
-                    "(select distinct Tasks.id, Tasks.TaskStatusId, TaskEmployees.UserName from Tasks " +
-                    "inner join TaskEmployees on TaskEmployees.TaskId = Tasks.Id " +
-                    "where TaskEmployees.IsActive = 1 " +
-                    "and Tasks.isdeleted = 0) " +
-                    "as taskdata " +
-                    "group by taskdata.TaskStatusId,taskdata.UserName";
-
-                conn.Open();
-                var queryResult = conn.Query(sqlQuery);
-                foreach (var result in queryResult)
-                {
-                    if (userTaskDictionary.ContainsKey(result.UserName))
-                    {
-                        userTaskDictionary[result.UserName].Add(new TaskData()
-                        {
-                            TaskCount = result.taskCount,
-                            TaskStatusId = result.TaskStatusId
-                        });
-                    }
-                    else
-                    {
-                        userTaskDictionary.Add(result.UserName, new List<TaskData>() { new TaskData()
-                        {   TaskStatusId = result.TaskStatusId,
-                            TaskCount = result.taskCount
-                        } });
-                    }
-                    List<TaskData> existingUserTaskList = userTaskDictionary[result.UserName];
-                    if (existingUserTaskList.Any(x => x.TaskStatusId == (int)Common.Common.TaskStatus.AllTasks))
-                    {
-                        TaskData thisTaskData = existingUserTaskList.Where(x => x.TaskStatusId == 0).SingleOrDefault();
-                        thisTaskData.TaskCount += result.taskCount;
-                    }
-                    else
-                    {
-                        userTaskDictionary[result.UserName].Add(new TaskData()
-                        {
-                            TaskStatusId = (int)Common.Common.TaskStatus.AllTasks,
-                            TaskCount = result.taskCount
-                        });
-                    }
-                }
-            }
-        }
-
 
         public IActionResult LoadReportsData(string username)
         {
@@ -96,26 +48,25 @@ namespace TaskManager.Web.Controllers
 
             foreach (Department department in departments)
             {
-                int gridViewUiDepthLevel = 0;
                 ReportsViewModel reportRow = new ReportsViewModel();
                 reportRow.TagName = department.Name;
                 reportRow.TagId = ++tagCounter;
                 reportRow.IsDeptName = true;
-                gridViewUiDepthLevel = GetDeptLevel(department);
+                int gridViewUiDepthLevel = GetDeptLevel(department);
                 reportRow.DepartmentLevel = gridViewUiDepthLevel;
 
                 reportsVM.Add(reportRow);
-                gridViewUiDepthLevel += 2;
+                gridViewUiDepthLevel += 4;
                 bool baseDept = false;
 
                 foreach (Employee employee in employees.Where(x => x.Department.Id == department.Id))
                 {
                     bool isThisEmployeeManager = IsThisUserManagingThisDepartment(department, currentUserName);
-                    if (userTaskDictionary.ContainsKey(employee.UserName))
+                    if (userTaskDictionary.ContainsKey(employee.UserCode))
                     {
                         if (isThisEmployeeManager
-                            || employee.UserName == currentUserName
-                            || department.Manager.UserName == currentUserName
+                            || employee.UserCode == currentUserName
+                            || department.Manager.UserCode == currentUserName
                             )
                         {
                             if (!baseDept)
@@ -126,7 +77,7 @@ namespace TaskManager.Web.Controllers
                             CreateReportRows(userTaskDictionary, reportsVM, employee, ++tagCounter, gridViewUiDepthLevel);
                         }
                     }
-                    else if (isThisEmployeeManager || employee.UserName == currentUserName)
+                    else if (isThisEmployeeManager || employee.UserCode == currentUserName)
                     {
                         CreateReportRows(userTaskDictionary, reportsVM, employee, ++tagCounter, gridViewUiDepthLevel);
                     }
@@ -144,40 +95,40 @@ namespace TaskManager.Web.Controllers
             newRow.TagName = employee.EmployeeName;
             newRow.TagId = tagId;
             newRow.DepartmentLevel = deptLevel;
-            if (userTaskDictionary.ContainsKey(employee.UserName))
+            if (userTaskDictionary.ContainsKey(employee.UserCode))
             {
-                newRow.TagCount = userTaskDictionary[employee.UserName].
+                newRow.TagCount = userTaskDictionary[employee.UserCode].
                 Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.AllTasks)
                 .SingleOrDefault().TaskCount;
 
-                if (userTaskDictionary[employee.UserName].
+                if (userTaskDictionary[employee.UserCode].
                Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.Cancelled).Count() > 0)
                 {
-                    newRow.CancelledTasksCount = userTaskDictionary[employee.UserName].
+                    newRow.CancelledTasksCount = userTaskDictionary[employee.UserCode].
                     Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.Cancelled).SingleOrDefault().TaskCount;
                 }
-                if (userTaskDictionary[employee.UserName].
+                if (userTaskDictionary[employee.UserCode].
                     Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.Completed).Count() > 0)
                 {
-                    newRow.CompletedTasksCount = userTaskDictionary[employee.UserName].
+                    newRow.CompletedTasksCount = userTaskDictionary[employee.UserCode].
                     Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.Completed).SingleOrDefault().TaskCount;
                 }
-                if (userTaskDictionary[employee.UserName].
+                if (userTaskDictionary[employee.UserCode].
                     Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.InProgress).Count() > 0)
                 {
-                    newRow.InProgressTasksCount = userTaskDictionary[employee.UserName].
+                    newRow.InProgressTasksCount = userTaskDictionary[employee.UserCode].
                     Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.InProgress).SingleOrDefault().TaskCount;
                 }
-                if (userTaskDictionary[employee.UserName].
+                if (userTaskDictionary[employee.UserCode].
                     Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.NotStarted).Count() > 0)
                 {
-                    newRow.NotStartedTasksCount = userTaskDictionary[employee.UserName].
+                    newRow.NotStartedTasksCount = userTaskDictionary[employee.UserCode].
                     Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.NotStarted).SingleOrDefault().TaskCount;
                 }
-                if (userTaskDictionary[employee.UserName].
+                if (userTaskDictionary[employee.UserCode].
                     Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.OnHold).Count() > 0)
                 {
-                    newRow.OnHoldTasksCount = userTaskDictionary[employee.UserName].
+                    newRow.OnHoldTasksCount = userTaskDictionary[employee.UserCode].
                     Where(x => x.TaskStatusId == (int)Common.Common.TaskStatus.OnHold).SingleOrDefault().TaskCount;
                 }
             }
@@ -191,7 +142,7 @@ namespace TaskManager.Web.Controllers
                 newRow.OnHoldTasksCount = 0;
             }
            
-            newRow.TagUserName = employee.UserName;
+            newRow.TagUserName = employee.UserCode;
             reportsVM.Add(newRow);
         }
 

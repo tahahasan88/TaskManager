@@ -52,6 +52,8 @@ namespace TaskManager.Controllers
                 != (int)TaskManager.Common.Common.TaskStatus.Completed).Count();
 
             ViewData["UserName"] = currentUserName;
+            Employee employee = _context.Employees.Where(x => x.UserName == currentUserName).SingleOrDefault();
+            ViewData["EmployeeName"] = employee == null ? "" : employee.EmployeeName;
             return View(taskSummaryVM);
         }
 

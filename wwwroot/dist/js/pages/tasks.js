@@ -360,7 +360,7 @@
             tasksTable.column(2).search(taskName, true, false)
                 .column(3).search(selectStatuses, true, false)
                 .column(5).search(assignedToValues, true, false)
-                .column(8).search(createdBy, true, false)
+                .column(7).search(createdBy, true, false)
                 .draw();
             updateTasksSummaryGraph();
         }
@@ -425,7 +425,7 @@
         tasksTable.column(2).search('', true, false)
             .column(3).search('', true, false)
             .column(5).search('', true, false)
-            .column(8).search('', true, false)
+            .column(7).search('', true, false)
             .draw();
         updateTasksSummaryGraph();
     });
@@ -526,9 +526,9 @@
     $.fn.dataTable.ext.search.push(
         function (settings, data, dataIndex) {
             
-            var isValid = validateProgressFilter(data[10]);
+            var isValid = validateProgressFilter(data[9]);
             if (isValid) {
-                isValid = validateTargetDateFilter(data[9]);
+                isValid = validateTargetDateFilter(data[8]);
             }
             return isValid;
         }
@@ -549,7 +549,7 @@
             paging: true,
             initComplete: function (settings, json) {
                 $("a[name='employeeDetailLink']").click(function () {
-                    showEmployeeDetails($(this).html());
+                    showEmployeeDetails($(this).attr("data-usercode"));
                 });
                 $(".knob").knob({});
             },
@@ -578,7 +578,12 @@
                 { "data": "taskId", "name": "TaskId", "autoWidth": true, "visible": false, "searchable": true },
                 {
                     "render": function (data, type, full, meta) {
-                        return '<a href="' + thisBaseUrl + '/tasks/Edit?id=' + full.taskId + '&username=' + currentUserName + '&viewMode=1"><u>' + full.title + '</u> </a>';
+
+                        if (full.isEditable == true) {
+                            return '<a href="' + thisBaseUrl + '/tasks/Edit?id=' + full.taskId + '&username=' + currentUserName + '"><u>' + full.title + '</u> </a>';
+                        }
+                        else
+                            return '<a href="' + thisBaseUrl + '/tasks/Edit?id=' + full.taskId + '&username=' + currentUserName + '&viewMode=1"><u>' + full.title + '</u> </a>';
                     }
                 },
                 {
@@ -625,28 +630,18 @@
                                     else
                                         color = '28a745';
 
-                        return '<div class="progress mb-3"><div class="progress-bar bg-info" role="progressbar" aria-valuenow="' + full.progress + '" aria-valuemin="0" aria - valuemax="100" style = "width: ' + full.progress+'%" ></div></div>';
+                        return '<div><div class="progress mb-2" style="width:50%"><div class="progress-bar bg-info" role="progressbar" aria-valuenow="' + full.progress + '" aria-valuemin="0" aria - valuemax="100" style = "width: ' + full.progress+'%" ></div></div><div><span>50%</span></div></div>';
                     }
                 },
                 {
                     "render": function (data, type, full, meta) {
                         return '<img name="employeeAvatar" src="../dist/img/user2-160x160.jpg" width="20%" height="20%" class="img-circle elevation-2" alt="User Image"></img>'
-                            + '&nbsp;&nbsp;<a href="javascript:void(null);" name="employeeDetailLink">' + full.assignedTo + '</a>';
+                            + '&nbsp;&nbsp;<a href="javascript:void(null);" data-usercode=' + full.assignedTo + ' name="employeeDetailLink">' + full.assignedToEmployeeName + '</a>';
                     }
                 },
                 {
                     "render": function (data, type, full, meta) {
                         return '<span title="' + full.lastUpdated + '" name="lastupdatedLink">' + jQuery.timeago(full.lastUpdated) + '</span>';
-                    }
-                },
-                {
-                    "render": function (data, type, full, meta) {
-                        if (full.isEditable == true) {
-                            return '<a class="btn btn-info" href="' + thisBaseUrl + '/tasks/Edit?id=' + full.taskId + '&username=' + currentUserName + '">Edit</a>';
-                        }
-                        else {
-                            return "";
-                        }
                     }
                 },
                 { "data": "createdBy", "name": "Created By", "autoWidth": true, "visible": false, "searchable": true },
@@ -674,23 +669,13 @@
                 taskCreationPlaceHolder.find('.modal').modal(options);
                 taskCreationPlaceHolder.find('.modal').modal('show');
 
-                $("#addMultipleCreationLink").click(function () {
-                    $.ajax({
-                        type: "GET",
-                        url: thisBaseUrl + "/tasks/CreateMultiple",
-                        contentType: "application/json; charset=utf-8",
-                        data: null,
-                        datatype: "json",
-                        success: function (data) {
-                            taskMultipleCreationPlaceHolder.html(data);
-                            taskMultipleCreationPlaceHolder.find('.modal').modal(options);
-                            taskMultipleCreationPlaceHolder.find('.modal').modal('show');
-                        },
-                        error: function () {
-                            alert("Dynamic content load failed.");
-                        }
-                    });
-                });
+                var month = $("#TargetVal").val().split("/")[0];
+                var date = $("#TargetVal").val().split("/")[1];
+                var remaining = $("#TargetVal").val().split("/")[2];
+                month = month.length == 1 ? ("0" + month) : month;
+                date = date.length == 1 ? ("0" + date) : date;
+                var year = remaining.split(" ")[0];
+                $("#Target").val(year + "-" + month + "-" + date);
             },
             error: function () {
                 alert("Dynamic content load failed.");
@@ -828,12 +813,12 @@
                     tmpData = data[i];
                     $.each(tmpData, function (i, val) {
                         allEmployeeList.push(tmpData[i].userName);
-                        var o = new Option(tmpData[i].userName, tmpData[i].userName);
+                        var o = new Option(tmpData[i].employeeName, tmpData[i].userName);
                         /// jquerify the DOM object 'o' so we can use the html method
-                        $(o).html(tmpData[i].userName);
+                        $(o).html(tmpData[i].employeeName);
                         $("#assignSelectValuesId").append(o);
-                        var o1 = new Option(tmpData[i].userName, tmpData[i].userName);
-                        $(o1).html(tmpData[i].userName);
+                        var o1 = new Option(tmpData[i].employeeName, tmpData[i].userName);
+                        $(o1).html(tmpData[i].employeeName);
                         $("#createdByValuesId").append(o1);
                     });
                 });
@@ -901,7 +886,7 @@
         var actionUrl = form.attr('action');
         var dataToSend = form.serialize();
         var buttonClickedId = $(this).attr('id');
-        $.post(actionUrl, dataToSend).done(function (data) {
+        $.post(actionUrl + "?username=" + currentUserName, dataToSend).done(function (data) {
             var newbody = $('.modal-body', data);
             taskMultipleCreationPlaceHolder.find('.modal-body').replaceWith(newbody);
             var isValid = newbody.find('[name="IsValid"]').val() == 'True';
@@ -928,28 +913,59 @@
         var dataToSend = form.serialize();
         var buttonClickedId = $(this).attr('id');
         $("#spinnerCreate").show();
-        
-        $.post(actionUrl, dataToSend).done(function (data) {
-            var newbody = $('.modal-body', data);
-            taskCreationPlaceHolder.find('.modal-body').replaceWith(newbody);
-            var isValid = newbody.find('[name="IsValid"]').val() == 'True';
-            $("#spinnerCreate").hide();
-            if (isValid) {
-                if (buttonClickedId == "task-submit-btnId") {
-                    taskCreationPlaceHolder.find('.modal').modal('hide');
+
+        if (buttonClickedId == "addMultipleCreationLink") {
+
+            $.post(thisBaseUrl + "/tasks/CreateMultipleTasks?username=" + currentUserName, dataToSend).done(function (data) {
+                var newbody = $('.modal-body', data);
+                taskCreationPlaceHolder.find('.modal-body').replaceWith(newbody);
+                var isValid = newbody.find('[name="IsValid"]').val() == 'True';
+                var options = { "backdrop": "static", keyboard: true };
+
+                if (isValid) {
+                    $.ajax({
+                        type: "GET",
+                        url: thisBaseUrl + "/tasks/CreateMultiple",
+                        contentType: "application/json; charset=utf-8",
+                        data: null,
+                        datatype: "json",
+                        success: function (data) {
+                            taskMultipleCreationPlaceHolder.html(data);
+                            taskMultipleCreationPlaceHolder.find('.modal').modal(options);
+                            taskMultipleCreationPlaceHolder.find('.modal').modal('show');
+                        },
+                        error: function () {
+                            alert("Dynamic content load failed.");
+                        }
+                    });
                 }
-                else {
+            });
+        }
+        else
+        {
+            $.post(actionUrl + '?username=' + currentUserName, dataToSend).done(function (data) {
+                var newbody = $('.modal-body', data);
+                taskCreationPlaceHolder.find('.modal-body').replaceWith(newbody);
+                var isValid = newbody.find('[name="IsValid"]').val() == 'True';
+                $("#spinnerCreate").hide();
+                if (isValid) {
                     getSummaryInfo();
-                    alert("Task added");
+                    if (buttonClickedId == "task-submit-btnId") {
+                        taskCreationPlaceHolder.find('.modal').modal('hide');
+                    }
+                    else {
+                        alert("Task added");
+                    }
+
+                    tasksTable.ajax.reload(function () {
+                        setTimeout(
+                            function () {
+                                $(".knob").knob({});
+                            }, 100);
+                    });
                 }
-                tasksTable.ajax.reload(function () {
-                    setTimeout(
-                        function () {
-                            $(".knob").knob({});
-                        }, 100);
-                });
-            }
-        });
+            });
+        }
     });
 
     getAllEmployees();

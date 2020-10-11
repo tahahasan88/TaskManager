@@ -77,8 +77,9 @@
     @if (ViewData["UserName"] != null)
     {
         <text>
-            currentUserName =  "@ViewData["UserName"]";
-            $("#employeeDetailId").html("@ViewData["UserName"].ToString()");
+            currentUserName = "@ViewData["UserName"]";
+            currentEmployeeName = "@ViewData["EmployeeName"].ToString()";
+            $("#employeeDetailId").html("@ViewData["EmployeeName"].ToString()");
         </text>
     }
 

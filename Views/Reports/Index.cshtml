@@ -99,23 +99,19 @@
         <text>
             currentUserName = "@ViewData["UserName"]";
             $("#employeeDetailId").html("@ViewData["UserName"]");
+            currentEmployeeName = "@ViewData["EmployeeName"]";
         </text>
     }
 
     $(document).ready(function () {
 
-    var currentUserName = '';
     var employeeDiv = $('#employeeDetailDiv');
-    
-
     var cancelledTaskStatusId = @((int)TaskManager.Common.Common.TaskStatus.Cancelled);
     var completedTaskStatusId = @((int)TaskManager.Common.Common.TaskStatus.Completed);
     var inProgressTaskStatusId = @((int)TaskManager.Common.Common.TaskStatus.InProgress);
     var notStartedTaskStatusId = @((int)TaskManager.Common.Common.TaskStatus.NotStarted);
     var onHoldTaskStatusId = @((int)TaskManager.Common.Common.TaskStatus.OnHold);
 
-
-    
         $(".nav-sidebar .nav-item .nav-link").each(function () {
             $(this).removeClass("active");
             var href = $(this).attr('href');

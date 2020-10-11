@@ -294,7 +294,7 @@ function setFormState() {
                     var options = { "backdrop": "static", keyboard: true };
                     $.ajax({
                         type: "GET",
-                        url: thisBaseUrl + "/tasks/UpdateTaskProgress",
+                        url: thisBaseUrl + "/tasks/UpdateTaskProgress?username=" + currentUserName,
                         contentType: "application/json; charset=utf-8",
                         data: { id: taskId },
                         datatype: "json",
@@ -302,14 +302,22 @@ function setFormState() {
                             progressUpdatePlaceHolder.html(data);
                             progressUpdatePlaceHolder.find('.modal').modal(options);
                             progressUpdatePlaceHolder.find('.modal').modal('show');
-                            if ($("#taskProgressInput").val() > 0 && $("#taskProgressInput").val() < 100) {
+                            
+                            if ($("#taskStatusBadge").html() == 'Cancelled') {
+                                $("#Status").val("5");
+                            }
+                            else if ($("#taskStatusBadge").html() == 'In Progress') {
                                 $("#Status").val("2");
                             }
-                            else if ($("taskProgressInput").val() == 0 || $("taskProgressInput").val() == null) {
+                            else if ($("#taskStatusBadge").html() == 'Completed') {
+                                $("#Status").val("3");
+                            }
+                            else if ($("#taskStatusBadge").html() == 'On Hold') {
+                                $("#Status").val("4");
+                            }
+                            else {
                                 $("#Status").val("1");
                             }
-                            else
-                                $("#Status").val("3");
 
                             $("#taskProgressInput").change(function () {
                                 if ($(this).val() > 0 && $(this).val() < 100) {
@@ -362,7 +370,7 @@ function setFormState() {
         var options = { "backdrop": "static", keyboard: true };
         $.ajax({
             type: "GET",
-            url: thisBaseUrl + "/tasks/EditTask?taskId=" + taskId,
+            url: thisBaseUrl + "/tasks/EditTask?taskId=" + taskId + "&username=" + currentUserName,
             contentType: "application/json; charset=utf-8",
             data: null,
             datatype: "json",
@@ -399,7 +407,7 @@ function setFormState() {
         $("#spinnerCreate").show();
        
 
-        $.post(actionUrl, dataToSend).done(function (data) {
+        $.post(actionUrl + '?username=' + currentUserName, dataToSend).done(function (data) {
             var newbody = $('.modal-body', data);
             taskEditPlaceHolder.find('.modal-body').replaceWith(newbody);
             var isValid = newbody.find('[name="IsValid"]').val() == 'True';
@@ -438,7 +446,6 @@ function setBadgeStyle() {
 
     $("#taskStatusBadge").removeClass();
     if (taskStatus == 'Completed') {
-
         $("#taskStatusBadge").addClass('badge badge-success');
     }
     else if (taskStatus == 'In Progress') {
@@ -499,6 +506,7 @@ progressUpdatePlaceHolder.on('click', '[data-save="modal"]', function (event) {
     var form = $(this).parents('.modal').find('form');
     var actionUrl = form.attr('action');
     $("#TaskProgress").val($("#taskProgressId").val());
+    $("#taskProgressShowId").html($("#taskProgressId").val() + "%");
 
     var dataToSend = form.serialize();
     $("#progressSpinner").show();
@@ -520,13 +528,21 @@ progressUpdatePlaceHolder.on('click', '[data-save="modal"]', function (event) {
         $("#taskStatusBadge").html("Completed");
         $("#taskStatusBadge").addClass('badge badge-success');
     }
+    else if (status == '4') {
+        $("#taskStatusBadge").html("On Hold");
+        $("#taskStatusBadge").addClass('badge badge-secondary');
+    }
+    else {
+        $("#taskStatusBadge").html("Cancelled");
+        $("#taskStatusBadge").addClass('badge badge-secondary');
+    }
 
     $("#taskProgressDivId").attr("aria-valuenow", $("#TaskProgress").val());
     $("#taskProgressDivId").css("width", $("#TaskProgress").val() + "%");
 
     $("#taskRemarks").html(remarks);
 
-    $.post(actionUrl, dataToSend).done(function (data) {
+    $.post(actionUrl + "?username=" + currentUserName, dataToSend).done(function (data) {
         var newBody = $('.modal-body', data);
         $("#progressSpinner").hide();
         console.log('here');
@@ -566,7 +582,16 @@ function getHistoryList() {
             alert("Dynamic content load failed.");
         }
     });
-}
+    }
+
+    function isSubTaskCreationAllowed() {
+        isAllowed = true;
+        taskStatus = $("#taskStatusBadge").html();
+        if (taskStatus != 'In Progress' && taskStatus != 'Not Started') {
+            isAllowed = false;
+        }
+        return isAllowed;
+    }
 
 function getSubTasksList() {
 
@@ -579,8 +604,8 @@ function getSubTasksList() {
 
     var subTaskBody = "<div class=\"row\">" +
         "<div class=\"col-5 pl-0 d-flex align-items-center\">" +
-        "<input class=\"mr-1\" type=\"checkbox\" id=\"checkboxtaskid\" ischecked name=\"completecheck\" " + disableThis + ">" +
-        "<input name = \"subTaskInput\" id=\"inputtaskid\" value=\"tasktitle\" " + disableThis + " class=\"w-100\" />" +
+        "<input class=\"iCheckBox\" type=\"checkbox\" id=\"checkboxtaskid\" ischecked name=\"completecheck\" " + disableThis + ">" +
+        "&nbsp;<input name = \"subTaskInput\" id=\"inputtaskid\" value=\"tasktitle\" " + disableThis + " class=\"w-100\" />" +
         "</div>" +
         "<div class=\"col-6 d-flex align-items-center\">" +
         "<i class=\"far fa-user-circle mr-1\" style=\"font-size:24px\" aria-hidden=\"true\">" +
@@ -608,7 +633,7 @@ function getSubTasksList() {
     var newBody = "";
     $.ajax({
         type: "GET",
-        url: thisBaseUrl + "/subtasks/SubTaskList",
+        url: thisBaseUrl + "/subtasks/SubTaskList?username=" + currentUserName,
         contentType: "application/json; charset=utf-8",
         data: { id: taskId },
         datatype: "json",
@@ -634,14 +659,29 @@ function getSubTasksList() {
                     newBody = newBody.replace("linkUserName", tmpData.subTaskVMList[i].subTaskAssignee);
                     newBody = newBody.replace("ischecked", isSubTaskCompleted);
                     var dropdown = "";
-                    for (var j = 0; j < allEmployees.length; j++) {
-                        if (tmpData.subTaskVMList[i].subTaskAssignee == allEmployees[j].userName) {
-                            dropdown += "<option selected>" + allEmployees[j].userName + "</option>";
+                    for (var k = 0; k < allEmployees.length; k++) {
+
+                        var spacing = '';
+                        if (allEmployees[k].departmentLevel!= 0) {
+                            for (m = 0; m < allEmployees[k].departmentLevel; m++) {
+                                spacing += "&nbsp;";
+                            }
                         }
-                        else {
-                            dropdown += "<option>" + allEmployees[j].userName + "</option>";
+                        if (allEmployees[k].isDeptName != true) {
+                            spacing = spacing + "&nbsp;&nbsp;";
                         }
 
+                        if (tmpData.subTaskVMList[i].subTaskAssignee == allEmployees[k].tagUserName) {
+                            dropdown += "<option selected>" + spacing + allEmployees[k].tagUserName + "</option>";
+                        }
+                        else {
+                            if (allEmployees[k].isDeptName == true) {
+                                dropdown += "<option disabled>" + spacing + allEmployees[k].tagName + "</option>";
+                            }
+                            else {
+                                dropdown += "<option false>" + spacing + allEmployees[k].tagName + "</option>";
+                            }
+                        }
                     }
                     var thisdropDownHtml = selectedDrownHtml;
                     thisdropDownHtml = thisdropDownHtml.replace("setoptions", dropdown);
@@ -679,22 +719,31 @@ function getSubTasksList() {
                     });
                 }
 
-                $('input[name ="completecheck"]').click(function () {
-
+                $('input.iCheckBox').on('ifChecked ifUnchecked', function (event) {
                     var description = $(this).closest('.row').find('input[name ="subTaskInput"]').val();
                     var isCompleted = $(this).is(':checked');
                     var subTaskId = $(this).attr('id');
-                    var assignee = $(this).closest('.row').find('[name="subTaskassignee"]').html()
-                    var taskId = taskId;
+                    var assignee = $(this).closest('.row').find('[name="employeeLink"]').html();
+                    assignee = assignee.replace("<u>", "");
+                    assignee = assignee.replace("</u>", "");
+                    assignee = assignee.replaceAll("&nbsp;", "");
+                    assignee = assignee.trimStart();
+                    //alert(taskId);
                     updateSubTask(subTaskId, taskId, description, assignee, isCompleted);
                 });
+
+
                 if (disabled == false) {
                     $('input[name ="subTaskInput"]').change(function () {
                         var description = $(this).closest('.row').find('input[name ="subTaskInput"]').val();
                         var isCompleted = $(this).is(':checked');
                         var subTaskId = $(this).attr('id');
-                        var assignee = $(this).closest('.row').find('[name="subTaskassignee"]').html()
+                        var assignee = $(this).closest('.row').find('[name="employeeLink"]').html();
+                        assignee = assignee.replace("<u>", "");
+                        assignee = assignee.replace("</u>", "");
                         var taskId = taskId;
+                        assignee = assignee.replaceAll("&nbsp;", "");
+                        assignee = assignee.trimStart();
                         updateSubTask(subTaskId, taskId, description, assignee, isCompleted);
                     });
                 }
@@ -710,16 +759,27 @@ function getSubTasksList() {
                 $("#subTaskAddDiv").hide();
             }
 
+            $('input.iCheckBox').iCheck({
+                checkboxClass: 'icheckbox_square-blue',
+                radioClass: 'iradio_square-blue',
+                increaseArea: '50%' // optional
+            });
+
             $("#addSubtaskBtnId").click(function () {
                 //var taskId = taskId;
-                var description = $("#newTaskInputId").val();
-                var isCompleted = false;
-                var assignee = "";
-                if (description == "") {
-                    alert("please enter description");
+                if (isSubTaskCreationAllowed() == true) {
+                    var description = $("#newTaskInputId").val();
+                    var isCompleted = false;
+                    var assignee = "";
+                    if (description == "") {
+                        alert("please enter description");
+                    }
+                    else
+                        addSubTask(taskId, description, isCompleted, assignee);
                 }
-                else
-                    addSubTask(taskId, description, isCompleted, assignee);
+                else {
+                    alert("Operation not allowed in status " + taskStatus + ". Please change the status to In Progress.");
+                }
             });
 
             $("select[name='employeeDrpDwn']").focusout(function () {
@@ -738,10 +798,11 @@ function getSubTasksList() {
                 var description = $(this).closest('.row').find('input[name ="subTaskInput"]').val();
                 var isCompleted = $(this).is(':checked');
                 var subTaskId = $(this).attr('id');
+                end = end.replaceAll("&nbsp;", "");
+                end = end.trimStart();
                 var assignee = end;
-                var taskId = taskId;
+                //alert(taskId);
                 updateSubTask(subTaskId, taskId, description, assignee, isCompleted);
-
             });
 
             if (disabled == false) {
@@ -778,7 +839,7 @@ function updateSubTask(subtaskId, taskId, description, assignee, isCompleted) {
 
 function addSubTask(taskId, description, isCompleted, assignee) {
 
-    $.post(thisBaseUrl + "/subtasks/Create",
+    $.post(thisBaseUrl + "/subtasks/Create?username=" + currentUserName,
         { description: description, taskId: taskId, isCompleted: isCompleted, assignee: assignee },
         function (returnedData) {
             if (returnedData.subTaskExist == true) {
@@ -844,7 +905,7 @@ function appendEmployeeList() {
     var cardBody = "<div class=\"d-flex justify-content-between\">" +
         "<div class=\"d-flex align-items-center\">" +
         "<img name=\"employeeAvatar\" src=\"../dist/img/user2-160x160.jpg\" width=\"15%\" height=\"60%\" class=\"img-circle elevation-2\" alt=\"User Image\"></img>" +
-        "&nbsp;<a href=\"javascript: void(null); \"name=\"employeeDetailLink\">userName</a>&nbsp" +
+        "&nbsp;<a href=\"javascript: void(null);\" data-username=\"employeeusername\" name=\"employeeDetailLink\">employeeName</a>&nbsp" +
         "<i class=\"fas fa-wifi\" aria-hidden=\"true\"></i>" +
         "</div>" +
         "<span class=\"float-right text-md\">capacity</span>" +
@@ -863,7 +924,8 @@ function appendEmployeeList() {
                 $.each(tmpData, function (i, val) {
                     employeeHtmlBody += cardBody;
                     employeeList.push(tmpData[i]);
-                    employeeHtmlBody = employeeHtmlBody.replace("userName", tmpData[i].userName);
+                    employeeHtmlBody = employeeHtmlBody.replace("employeeName", tmpData[i].employeeName);
+                    employeeHtmlBody = employeeHtmlBody.replace("employeeusername", tmpData[i].userName);
                     employeeHtmlBody = employeeHtmlBody.replace("capacity", getTaskDescription(tmpData[i].capacityId));
 
                 });
@@ -875,7 +937,7 @@ function appendEmployeeList() {
             $("#people-placeholder").html(employeeHtmlBody);
 
             $("a[name='employeeDetailLink']").click(function () {
-                showEmployeeDetails($(this).html());
+                showEmployeeDetails($(this).attr("data-username"));
             });
         },
         error: function () {
@@ -942,8 +1004,9 @@ function updateHistoryTable(typeList) {
         });
         filteredHistory = filteredHistory.concat(thisHistory);
     }
-
+    
     for (var i = 0; i < filteredHistory.length; i++) {
+        console.log(filteredHistory[i].historyDate);
         table.rows.add([{
             "Date": filteredHistory[i].historyDate,
             "Type": getHistoryTypeDescription(filteredHistory[i].type),
@@ -951,6 +1014,9 @@ function updateHistoryTable(typeList) {
             "Action By": filteredHistory[i].actionBy
         }]).draw();
     }
+    //sort by desc..
+    table.order([0, 'desc']).draw();
+
 }
 
 setFormState();

@@ -7,7 +7,7 @@ namespace TaskManager.Web.Models
 {
     public class SubTaskListViewModel
     {
-        public List<TaskEmployeeListViewModel> employeeVMList { get; set; }
+        public List<AssigneeDropDownViewModel> employeeVMList { get; set; }
         public List<SbTaskViewModel> subTaskVMList { get; set; }
     }
 }

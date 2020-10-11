@@ -5,7 +5,6 @@ using System.ComponentModel.DataAnnotations;
 namespace TaskManager.Common
 {
 
-
     public class Common
     {
         
@@ -35,6 +34,7 @@ namespace TaskManager.Common
             High = 3
         }
 
+
         public enum TaskStatus
         {
             NotStarted = 1,
@@ -43,6 +43,16 @@ namespace TaskManager.Common
             OnHold = 4,
             Cancelled = 5,
             AllTasks = 0
+        }
+
+        public static string GetTaskStatusDescription(int taskStatusId)
+        {
+            return taskStatusId == 1 ? "Not Started" :
+                taskStatusId == 2 ? "In Progress" :
+                taskStatusId == 3 ? "Completed" :
+                taskStatusId == 4 ? "On Hold" :
+                taskStatusId == 5 ? "Cancelled" :
+                "All Tasks";
         }
 
         public enum TaskAction

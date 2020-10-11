@@ -12,6 +12,7 @@ namespace TaskManager.Web.Models
         public string Status { get; set; }
         public string Progress { get; set; }
         public string AssignedTo { get; set; }
+        public string AssignedToEmployeeName { get; set; }
         public string LastUpdated { get; set; }
         public string CreatedBy { get; set; }
         public string TargetDate { get; set; }

@@ -6,7 +6,7 @@
             <div class="modal-header">
                 <h4 class="modal-title">Add Task</h4>
                 <div class="">
-                    <a id="addMultipleCreationLink" class="modal-title" href="#"><u>Add Multiple</u></a>
+                    @*<a id="addMultipleCreationLink" class="modal-title" href="#"><u>Add Multiple</u></a>*@
                     <button type="button" class="close" id="task-closePopup-icon" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -27,7 +27,7 @@
                     </div>
                     <div class="form-group">
                         <b><label class="control-label">Assignee</label></b>
-                        @{ 
+                        @{
                             foreach (TaskManager.Web.Models.AssigneeDropDownViewModel assignee in Model.EmployeeList)
                             {
                                 <text>
@@ -47,18 +47,20 @@
                                         else {
                                             $(o).html(spacing + "&nbsp;&nbsp;" + "@assignee.TagName");
                                             $("#assigneeDrpDown").append(o);
-                                            o.selected = true;
+                                            if ("@assignee.TagUserName" == currentUserName) {
+                                                o.selected = true;
+                                            } 
                                         }
                                     </script>
                                 </text>
                             }
                         }
-                        @Html.HiddenFor(x => x.AssigneeCode, new { id = "AssigneeCode"})
+                        @Html.HiddenFor(x => x.AssigneeCode, new { id = "AssigneeCode" })
                         <select id="assigneeDrpDown" class="chosen-select form-control input-form"></select>
                     </div>
                     <div class="form-group">
                         <label asp-for="@Model.Target" class="control-label"></label>
-                        <input asp-for="@Model.Target" asp-format="{0:dd/MM/yyyy HH:mm}" class="form-control" />
+                        <input asp-for="@Model.Target" asp-format="{0:dd-MM-yyyy}" class="form-control" />
                         <span asp-validation-for="@Model.Target" class="text-danger"></span>
                     </div>
                     <div class="form-group">
@@ -73,13 +75,13 @@
                     <div id="spinnerCreate" style="display:none;" class="spinner-border text-primary" role="status">
                         <span class="sr-only">Loading...</span>
                     </div>
-
+                    @Html.HiddenFor(x => x.TargetVal, new { id = "TargetVal" })
                 </form>
             </div>
             <div class="modal-footer justify-content-between">
                 <button type="button" id="task-submit-btnId" data-save="modal" class="btn btn-primary">Add Task</button>
+                <button type="button" id="addMultipleCreationLink" data-save="modal" class="btn btn-primary">Add Multiple</button>
                 <button type="button" id="task-reuse-btnId" data-save="modal" class="btn btn-primary">Add Task & Re-use Inputs</button>
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
 
             </div>
         </div>

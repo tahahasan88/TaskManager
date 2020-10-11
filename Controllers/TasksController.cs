@@ -60,6 +60,8 @@ namespace TaskManager.Web.Controllers
             TaskViewModel taskVM = new TaskViewModel();
             taskVM.CurrentUserName = currentUserName;
             ViewData["UserName"] = currentUserName;
+            Employee employee = _context.Employees.Where(x => x.UserName == currentUserName).SingleOrDefault();
+            ViewData["EmployeeName"] = employee == null ? "" : employee.EmployeeName;
             //return View(await _context.Tasks.Where(x => x.IsDeleted != true).ToListAsync());
             return View(taskVM);
         }
@@ -77,19 +79,19 @@ namespace TaskManager.Web.Controllers
                             .Where(x => x.IsDeleted != true).OrderByDescending(x => x.LastUpdatedAt).ToList();
                 var taskEmployees = (from c in _context.TaskEmployees
                                      join o in _context.Employees
-                                     on c.UserName equals o.UserName
+                                     on c.UserName equals o.UserCode
                                      join tc in _context.TaskCapacities
                                      on c.TaskCapacity.Id equals tc.Id
                                      join dept in _context.Departments
                                      on o.Department.Id equals dept.Id
                                      select new
                                      {
-                                         UserName = o.UserName,
+                                         UserName = o.UserCode,
                                          EmployeeName = o.EmployeeName,
                                          TaskId = c.Task.Id,
                                          CapacityId = tc.Id,
                                          DeptId = o.Department.Id,
-                                         ManagerUserName = o.Department.Manager.UserName
+                                         ManagerUserName = o.Department.Manager.UserCode
                                      }).ToList();
 
                 List<Department> departments = _context.Departments
@@ -116,8 +118,8 @@ namespace TaskManager.Web.Controllers
                         taskGridVM.Status = task.TaskStatus.Status;
                         taskGridVM.Title = task.Title;
 
-                        string assigneeUserName = taskEmployees.Where(x => x.CapacityId == (int)Common.Common.TaskCapacity.Assignee
-                            && x.TaskId == task.Id).FirstOrDefault().UserName;
+                        var assignee = taskEmployees.Where(x => x.CapacityId == (int)Common.Common.TaskCapacity.Assignee
+                            && x.TaskId == task.Id).FirstOrDefault();
 
                         string creatorUserName = taskEmployees.Where(x => x.CapacityId == (int)Common.Common.TaskCapacity.Creator
                             && x.TaskId == task.Id).FirstOrDefault().UserName;
@@ -128,7 +130,8 @@ namespace TaskManager.Web.Controllers
                          || x.CapacityId == (int)Common.Common.TaskCapacity.Assignee)
                         ).Any();
                         taskGridVM.CreatedBy = creatorUserName;
-                        taskGridVM.AssignedTo = assigneeUserName;
+                        taskGridVM.AssignedTo = assignee.UserName;
+                        taskGridVM.AssignedToEmployeeName = assignee.EmployeeName;
                         tasksGridVMList.Add(taskGridVM);
                     }
                 }
@@ -256,6 +259,7 @@ namespace TaskManager.Web.Controllers
             TaskCreateViewModel taskVM = new TaskCreateViewModel();
             List<Employee> employees = _context.Employees.ToList();
             popuLateTaskViewDropDowns(taskVM, userName);
+            taskVM.TargetVal = DateTime.Now;
             return PartialView("_Create", taskVM);
         }
 
@@ -263,6 +267,7 @@ namespace TaskManager.Web.Controllers
         {
             TaskUpdateViewModel taskVM = new TaskUpdateViewModel();
             List<Employee> employees = _context.Employees.ToList();
+            SetUserName();
 
             var task = await _context.Tasks
                .Include(x => x.TaskPriority)
@@ -318,10 +323,26 @@ namespace TaskManager.Web.Controllers
 
 
         [HttpPost]
+        public ActionResult CreateMultipleTasks(TaskCreateViewModel taskCreateVM)
+        {
+            SetUserName();
+            if (ModelState.IsValid)
+            {
+            }
+            List<Employee> employeeList = _context.Employees.ToList();
+            popuLateTaskViewDropDowns(taskCreateVM, currentUserName);
+            taskCreateVM.Title = string.Empty;
+
+            return PartialView("_Create", taskCreateVM);
+        }
+
+
+        [HttpPost]
         public async Task<ActionResult> Create(TaskCreateViewModel taskCreateVM)
         {
             try
             {
+                SetUserName();
                 if (ModelState.IsValid)
                 {
                     Data.Task task = new Data.Task();
@@ -397,9 +418,9 @@ namespace TaskManager.Web.Controllers
         {
             try
             {
+                SetUserName();
                 if (ModelState.IsValid)
                 {
-
                     Data.Task task = _context.Tasks
                         .Include(x =>x.TaskPriority)
                         .Where(x => x.Id == taskCreateVM.Id).SingleOrDefault();
@@ -505,6 +526,7 @@ namespace TaskManager.Web.Controllers
         {
             try
             {
+                SetUserName();
                 if (ModelState.IsValid)
                 {
                     string[] listOfTaskTitles = taskCreateVM.ListOfTaskTitles.Split(",");
@@ -572,10 +594,12 @@ namespace TaskManager.Web.Controllers
         private void populateUpdateProgressVMDropDowns(TaskUpdateProgressViewModel updateProgressVM)
         {
             List<SelectListItem> statusDrpDwnList = new List<SelectListItem>();
-            var taskStatusEnumsList = Enum.GetValues(typeof(Common.Common.TaskPriority));
+            var taskStatusEnumsList = Enum.GetValues(typeof(Common.Common.TaskStatus));
             foreach (Common.Common.TaskStatus taskStatus in taskStatusEnumsList)
             {
-                statusDrpDwnList.Add(new SelectListItem() { Text = taskStatus.ToString(), Value = ((int)taskStatus).ToString() });
+                if (taskStatus != Common.Common.TaskStatus.AllTasks) {
+                    statusDrpDwnList.Add(new SelectListItem() { Text = Common.Common.GetTaskStatusDescription((int)taskStatus), Value = ((int)taskStatus).ToString() });
+                }
             }
             updateProgressVM.StatusList = statusDrpDwnList;
         }
@@ -628,7 +652,7 @@ namespace TaskManager.Web.Controllers
             {
                 return NotFound();
             }
-
+            SetUserName();
             if (ModelState.IsValid)
             {
                 try
@@ -748,10 +772,12 @@ namespace TaskManager.Web.Controllers
             taskVM.PriorityId = task.TaskPriority.Id;
             TaskEmployee currentEmployee = _context.TaskEmployees.Where(x => x.Task.Id == id
                 && x.TaskCapacity.Id == (int)Common.Common.TaskCapacity.Assignee).FirstOrDefault();
+            Employee employee = _context.Employees.Where(x => x.UserName == currentUserName).SingleOrDefault();
 
             taskVM.AssigneeCode = currentEmployee.UserName;
             taskVM.CurrentUserName = currentUserName;
             ViewData["UserName"] = currentUserName;
+            ViewData["EmployeeName"] = employee == null ? "" : employee.EmployeeName;
             taskVM.IsReadOnly = viewMode == 1 ? true : false;
             return View(taskVM);
         }

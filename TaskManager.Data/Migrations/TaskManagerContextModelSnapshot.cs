@@ -242,6 +242,9 @@ namespace TaskManager.Data.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<int?>("EmployeeId")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
@@ -255,6 +258,8 @@ namespace TaskManager.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("EmployeeId");
 
                     b.HasIndex("TaskCapacityId");
 
@@ -404,6 +409,10 @@ namespace TaskManager.Data.Migrations
 
             modelBuilder.Entity("TaskManager.Data.TaskEmployee", b =>
                 {
+                    b.HasOne("TaskManager.Data.Employee", "Employee")
+                        .WithMany()
+                        .HasForeignKey("EmployeeId");
+
                     b.HasOne("TaskManager.Data.TaskCapacity", "TaskCapacity")
                         .WithMany()
                         .HasForeignKey("TaskCapacityId");

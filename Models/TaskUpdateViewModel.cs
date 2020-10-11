@@ -17,7 +17,6 @@ namespace TaskManager.Web.Models
         [Required(ErrorMessage = "*Title is required")]
         [TaskUpdateUniqueValidation]
         public virtual string Title { get; set; }
-        [Required(ErrorMessage ="*Description is required")]
         public string Description { get; set; }
 
         private DateTime _date = DateTime.Now;

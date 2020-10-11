@@ -44,6 +44,7 @@ namespace TaskManager.Web.Controllers
                 .Include(x => x.TaskCapacity)
                 .Where(x => x.Task.Id == taskId && x.IsActive == true)
                 .ToListAsync();
+            var allEmployees = _context.Employees.ToList();
 
             foreach (TaskEmployee employee in employeeList)
             {
@@ -51,7 +52,8 @@ namespace TaskManager.Web.Controllers
                 {
                     UserName = employee.UserName,
                     CapacityId = employee.TaskCapacity.Id,
-                    IsActive = employee.IsActive
+                    IsActive = employee.IsActive,
+                    EmployeeName = allEmployees.Where(x => x.UserCode == employee.UserName).SingleOrDefault().EmployeeName
                 });
             }
             return new JsonResult(new { records = emmployeeVMList });
@@ -67,7 +69,8 @@ namespace TaskManager.Web.Controllers
                 emmployeeVMList.Add(new TaskEmployeeListViewModel()
                 {
                     UserName = employee.UserName,
-                    EmailAddress = employee.EmailAddress
+                    EmailAddress = employee.EmailAddress,
+                    EmployeeName = employee.EmployeeName
                 });
             }
             return new JsonResult(new { records = emmployeeVMList });

@@ -89,11 +89,13 @@
 
     <script>
         var currentUserName = '';
+        var current
         @if (ViewData["UserName"] != null)
         {
             <text>
                 testing = "@ViewData["UserName"]";
-                currentUserName =  "@ViewData["UserName"]";
+                currentUserName = "@ViewData["UserName"]";
+                currentEmployeeName = "@ViewData["EmployeeName"]";
             </text>
         }
         var thisBaseUrl = "@Html.Raw(this.Context.Request.Scheme + "://" + this.Context.Request.Host)";
