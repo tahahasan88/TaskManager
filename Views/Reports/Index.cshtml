@@ -292,7 +292,7 @@
                                  {
                                     "render": function (data, type, full, meta) {
                                         return '<img name="employeeAvatar" src="../dist/img/user2-160x160.jpg" width="20%" height="20%" class="img-circle elevation-2" alt="User Image"></img>'
-                                            + '&nbsp;&nbsp;<span>' + full.followUpFrom + '</span>';
+                                            + '&nbsp;&nbsp;<span>' + full.followUpEmployeeName + '</span>';
                                     }
                                 },
                                 {
@@ -468,7 +468,7 @@
                     "render": function (data, type, full, meta) {
                         if (full.isDeptName == false) {
                             return '<span style="padding-left:' + full.departmentLevel + 'em"></span>'
-                                + '<img name="employeeAvatar" src="../dist/img/user2-160x160.jpg" width="10%" height="20%" class="img-circle elevation-2" alt = "User Image" ></img>'
+                                + '<img name="employeeAvatar" src="../dist/img/user2-160x160.jpg" width="40px" height="40px" class="img-circle elevation-2" alt = "User Image" ></img>'
                                 + '&nbsp;&nbsp;<a href="javascript:void(null);" data-username="' + full.tagUserName + '" name = "employeeDetailLink" > ' + full.tagName + '</span >';
                         }
                         else

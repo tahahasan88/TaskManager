@@ -178,7 +178,7 @@ $(document).ready(function () {
                             {
                                 "render": function (data, type, full, meta) {
                                     return '<img name="employeeAvatar" src="../dist/img/user2-160x160.jpg" width="20%" height="20%" class="img-circle elevation-2" alt="User Image"></img>'
-                                        + '&nbsp;&nbsp;<span>' + full.followUpFrom + '</span>';
+                                        + '&nbsp;&nbsp;<span>' + full.followUpEmployeeName + '</span>';
                                 }
                             },
                             {
@@ -400,6 +400,7 @@ function setFormState() {
         var form = $(this).parents('.modal').find('form');
         var actionUrl = form.attr('action');
         $(this).parents('.modal').find('#AssigneeCode').val($("#assigneeDrpDown").val());
+        
         $("#Id").val(taskId);
         $("#TargetVal").val($("#Target").val());
         var dataToSend = form.serialize();
@@ -414,13 +415,11 @@ function setFormState() {
             $("#spinnerCreate").hide();
             if (isValid) {
                 alert("Task updated");
-
                 var month = $("#TargetVal").val().split("-")[1];
                 var date = $("#TargetVal").val().split("-")[2];
                 var year = $("#TargetVal").val().split("-")[0];
                 splitDate = date.split("T");
                 date = date.split("T")[0];
-                console.log(splitDate);
 
                 const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
                     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
@@ -432,11 +431,10 @@ function setFormState() {
                 $("#taskTitle").html($("#Title").val());
                 $("#taskDescription").html($("#Description").val());
 
+                setFormState();
                 taskEditPlaceHolder.find('.modal').modal('hide');
                 appendEmployeeList();
                 getHistoryList();
-                
-
             }
         });
     });
@@ -610,7 +608,7 @@ function getSubTasksList() {
         "<div class=\"col-6 d-flex align-items-center\">" +
         "<i class=\"far fa-user-circle mr-1\" style=\"font-size:24px\" aria-hidden=\"true\">" +
         "</i>" +
-        "<a " + disableThis + " href=\"javascript:void(null);\" name=\"employeeLink\" rel=\"nofollow noreferrer\"><u>linkUserName</u></a>" +
+        "<a " + disableThis + " href=\"javascript:void(null);\" class=\"text-underline\" name=\"employeeLink\" rel=\"nofollow noreferrer\">linkUserName</a>" +
         "<div class=\"form-group mb-0 w-100\" name=\"employeeDrpDwndiv\" style=\"display:none;\">" +
         "employeeOptions" +
         "</div>" +
@@ -656,7 +654,7 @@ function getSubTasksList() {
                     newBody = newBody.replace("inputtaskid", tmpData.subTaskVMList[i].subTaskId);
                     newBody = newBody.replace("deletetaskid", tmpData.subTaskVMList[i].subTaskId);
                     newBody = newBody.replace("tasktitle", tmpData.subTaskVMList[i].description);
-                    newBody = newBody.replace("linkUserName", tmpData.subTaskVMList[i].subTaskAssignee);
+                    newBody = newBody.replace("linkUserName", tmpData.subTaskVMList[i].subTaskEmployeeName);
                     newBody = newBody.replace("ischecked", isSubTaskCompleted);
                     var dropdown = "";
                     for (var k = 0; k < allEmployees.length; k++) {
@@ -671,15 +669,15 @@ function getSubTasksList() {
                             spacing = spacing + "&nbsp;&nbsp;";
                         }
 
-                        if (tmpData.subTaskVMList[i].subTaskAssignee == allEmployees[k].tagUserName) {
-                            dropdown += "<option selected>" + spacing + allEmployees[k].tagUserName + "</option>";
+                        if (tmpData.subTaskVMList[i].subTaskUserName == allEmployees[k].tagUserName) {
+                            dropdown += "<option value='" + allEmployees[k].tagUserName+"' selected>" + spacing + allEmployees[k].tagName + "</option>";
                         }
                         else {
                             if (allEmployees[k].isDeptName == true) {
                                 dropdown += "<option disabled>" + spacing + allEmployees[k].tagName + "</option>";
                             }
                             else {
-                                dropdown += "<option false>" + spacing + allEmployees[k].tagName + "</option>";
+                                dropdown += "<option value='" + allEmployees[k].tagUserName +"'>" + spacing + allEmployees[k].tagName + "</option>";
                             }
                         }
                     }
@@ -702,7 +700,7 @@ function getSubTasksList() {
                         if (result) {
                             $.ajax({
                                 type: "POST",
-                                url: thisBaseUrl + "/subtasks/DeleteSubTask?subTaskId=" + $(this).attr('id'),
+                                url: thisBaseUrl + "/subtasks/DeleteSubTask?subTaskId=" + $(this).attr('id') + "&username=" + currentUserName,
                                 contentType: "application/json; charset=utf-8",
                                 data: null,
                                 datatype: "json",
@@ -710,6 +708,7 @@ function getSubTasksList() {
                                     subTaskPlaceHolder.html('');
                                     getSubTasksList();
                                     appendEmployeeList();
+                                    getHistoryList();
                                 },
                                 error: function () {
                                     alert("Dynamic content load failed.");
@@ -723,12 +722,7 @@ function getSubTasksList() {
                     var description = $(this).closest('.row').find('input[name ="subTaskInput"]').val();
                     var isCompleted = $(this).is(':checked');
                     var subTaskId = $(this).attr('id');
-                    var assignee = $(this).closest('.row').find('[name="employeeLink"]').html();
-                    assignee = assignee.replace("<u>", "");
-                    assignee = assignee.replace("</u>", "");
-                    assignee = assignee.replaceAll("&nbsp;", "");
-                    assignee = assignee.trimStart();
-                    //alert(taskId);
+                    var assignee = $("select[name='employeeDrpDwn'] option:selected").val();
                     updateSubTask(subTaskId, taskId, description, assignee, isCompleted);
                 });
 
@@ -738,12 +732,7 @@ function getSubTasksList() {
                         var description = $(this).closest('.row').find('input[name ="subTaskInput"]').val();
                         var isCompleted = $(this).is(':checked');
                         var subTaskId = $(this).attr('id');
-                        var assignee = $(this).closest('.row').find('[name="employeeLink"]').html();
-                        assignee = assignee.replace("<u>", "");
-                        assignee = assignee.replace("</u>", "");
-                        var taskId = taskId;
-                        assignee = assignee.replaceAll("&nbsp;", "");
-                        assignee = assignee.trimStart();
+                        var assignee = $("select[name='employeeDrpDwn'] option:selected").val();
                         updateSubTask(subTaskId, taskId, description, assignee, isCompleted);
                     });
                 }
@@ -783,7 +772,9 @@ function getSubTasksList() {
             });
 
             $("select[name='employeeDrpDwn']").focusout(function () {
-                var end = this.value;
+                var end = $(this).closest('.row').find("select[name='employeeDrpDwn'] option:selected").text();
+                end = end.replaceAll("&nbsp;", "");
+                end = end.trimStart();
                 $(this).closest('.row').find('[name="employeeDrpDwndiv"]').hide();
                 $(this).closest('.row').find('[name="employeeLink"]').html(end);
                 $(this).closest('.row').find('[name="employeeLink"]').show();
@@ -791,8 +782,9 @@ function getSubTasksList() {
 
             $("select[name='employeeDrpDwn']").change(function () {
                 var end = this.value;
+                var text = $("select[name='employeeDrpDwn'] option:selected").text();
                 $(this).closest('.row').find('[name="employeeDrpDwndiv"]').hide();
-                $(this).closest('.row').find('[name="employeeLink"]').html(end);
+                $(this).closest('.row').find('[name="employeeLink"]').html(text);
                 $(this).closest('.row').find('[name="employeeLink"]').show();
 
                 var description = $(this).closest('.row').find('input[name ="subTaskInput"]').val();
@@ -801,7 +793,6 @@ function getSubTasksList() {
                 end = end.replaceAll("&nbsp;", "");
                 end = end.trimStart();
                 var assignee = end;
-                //alert(taskId);
                 updateSubTask(subTaskId, taskId, description, assignee, isCompleted);
             });
 
@@ -821,7 +812,7 @@ function getSubTasksList() {
 
 function updateSubTask(subtaskId, taskId, description, assignee, isCompleted) {
 
-    $.post(thisBaseUrl + "/subtasks/Update",
+    $.post(thisBaseUrl + "/subtasks/Update?username=" + currentUserName,
         { id: subtaskId, description: description, taskId: taskId, assignee: assignee, isCompleted: isCompleted },
         function (returnedData) {
             if (returnedData.subTaskExist == true) {
@@ -847,6 +838,7 @@ function addSubTask(taskId, description, isCompleted, assignee) {
             }
             else if (returnedData.subTaskAdded == true) {
                 getHistoryList();
+                appendEmployeeList();
                 alert("sub task added");
                 getSubTasksList();
             }
@@ -902,13 +894,13 @@ function getTaskDescription(taskCapacityId) {
 
 function appendEmployeeList() {
 
-    var cardBody = "<div class=\"d-flex justify-content-between\">" +
+    var cardBody = "<div class=\"d-flex justify-content-between flex-wrap-xs\">" +
         "<div class=\"d-flex align-items-center\">" +
         "<img name=\"employeeAvatar\" src=\"../dist/img/user2-160x160.jpg\" width=\"15%\" height=\"60%\" class=\"img-circle elevation-2\" alt=\"User Image\"></img>" +
         "&nbsp;<a href=\"javascript: void(null);\" data-username=\"employeeusername\" name=\"employeeDetailLink\">employeeName</a>&nbsp" +
         "<i class=\"fas fa-wifi\" aria-hidden=\"true\"></i>" +
         "</div>" +
-        "<span class=\"float-right text-md\">capacity</span>" +
+        "<span class=\"float-right text-md d-flex align-items-center\">capacity</span>" +
         "</div>";
 
     var employeeHtmlBody = "";

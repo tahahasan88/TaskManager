@@ -10,31 +10,21 @@ using Microsoft.Extensions.Logging;
 using TaskManager.Data;
 using TaskManager.Data.Repositories;
 using TaskManager.Models;
+using TaskManager.Web.Controllers;
 using TaskManager.Web.Models;
 
 namespace TaskManager.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController : BaseController
     {
-        private readonly ILogger<HomeController> _logger;
-        private readonly ITaskRepository _taskRepository;
-        private readonly TaskManagerContext _context;
-        public string currentUserName;
-
-        public HomeController(ILogger<HomeController> logger, ITaskRepository taskRepository, TaskManagerContext context, IConfiguration configuration)
+        public HomeController(IConfiguration configuration, TaskManagerContext context) : base(context, configuration)
         {
-            _logger = logger;
-            _taskRepository = taskRepository;
-            _context = context;
             currentUserName = configuration.GetSection("TaskManagerUserName").Value;
         }
 
         public IActionResult Index()
         {
-            //string identity = User.Identity.Name;
-            //var user = System.Net.CredentialCache.DefaultCredentials;
-            //Console.WriteLine(Environment.UserName);
-
+            SetUserName();
             TaskSummaryViewModel taskSummaryVM = new TaskSummaryViewModel();
             taskSummaryVM.PendingTasksCount = _context.Tasks.Where(x => x.TaskStatus.Id
                 != (int)TaskManager.Common.Common.TaskStatus.Completed

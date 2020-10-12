@@ -143,6 +143,7 @@ namespace TaskManager.Web.Controllers
                                          })
                                 .Where(x => x.FollowerUserName != userName)
                                 .OrderByDescending(m => m.LastUpdatedAt);
+                var employees = _context.Employees.ToList();
 
                 TaskFollowUpMailBoxViewModel taskFollowUpMailBoxVM = new TaskFollowUpMailBoxViewModel();
                 taskFollowUpMailBoxVM.InBoxFollowUpList = new List<TaskFollowUpInboxViewModel>();
@@ -155,6 +156,7 @@ namespace TaskManager.Web.Controllers
                             UpdatedDate = inbox.LastUpdatedAt.ToString("dd-MMM-yyyy"),
                             TaskInfo = inbox.Title,
                             FollowUpFrom = inbox.FollowerUserName,
+                            FollowUpEmployeeName = employees.Where(x => x.UserCode == inbox.FollowerUserName).SingleOrDefault().EmployeeName,
                             Status = inbox.Status,
                             TaskId = inbox.Id,
                             SortId = inbox.SortId

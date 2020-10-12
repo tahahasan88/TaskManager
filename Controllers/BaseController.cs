@@ -67,6 +67,10 @@ namespace TaskManager.Web.Controllers
         protected virtual bool IsThisUserManagingThisDepartment(Department thisDepartment, string userName)
         {
             bool isThisUserManager = false;
+            if (thisDepartment.Manager.UserName == userName)
+            {
+                return true;
+            }
             Department parentDepartment = thisDepartment.ParentDepartment;
             if (parentDepartment != null)
             {
@@ -208,21 +212,77 @@ namespace TaskManager.Web.Controllers
                 assigneeRow.IsDeptName = true;
                 assigneeRow.DepartmentLevel = GetDeptLevel(department);
                 assigneeVM.Add(assigneeRow);
-
+                bool isThisEmployeeManager = IsThisUserManagingThisDepartment(department, username);
+                bool isThisEmployeeNonManager = false;
+                if (!isThisEmployeeManager)
+                {
+                    isThisEmployeeNonManager = employees.Where(x => x.Department.Id == department.Id && x.UserName == username).Any();
+                }
                 foreach (Employee employee in employees.Where(x => x.Department.Id == department.Id))
                 {
-                    bool isThisEmployeeManager = IsThisUserManagingThisDepartment(department, username);
+                    
                     if (userDataDictionary.ContainsKey(employee.UserName))
                     {
                         if (isThisEmployeeManager
-                            || employee.UserName == username
-                            || department.Manager.UserName == username
+                            || isThisEmployeeNonManager)
+                        {
+                            CreateAssigneeRows(assigneeVM, employee, ++tagCounter, assigneeRow.DepartmentLevel);
+                        }
+                    }
+                    else if (isThisEmployeeManager || isThisEmployeeNonManager)
+                    {
+                        CreateAssigneeRows(assigneeVM, employee, ++tagCounter, assigneeRow.DepartmentLevel);
+                    }
+                }
+            }
+
+            return assigneeVM;
+        }
+
+        protected List<AssigneeDropDownViewModel> LoadSubTaskAssigneeDrpDwnData(string username, string defaultAssignee, List<string> subTaskAssignee)
+        {
+            var connectionString = _iconfiguration.GetConnectionString("DefaultConnection");
+            Dictionary<string, List<TaskData>> userDataDictionary = new Dictionary<string, List<TaskData>>();
+            int tagCounter = 0;
+
+            List<Employee> employees = _context.Employees.Include(x => x.Department).ToList();
+            List<Department> departments = _context.Departments
+                .Include(x => x.ParentDepartment)
+                .Include(x => x.Manager).OrderBy(x => x.Id).ToList();
+
+            GetUserData(connectionString, userDataDictionary);
+            List<AssigneeDropDownViewModel> assigneeVM = new List<AssigneeDropDownViewModel>();
+
+            foreach (Department department in departments)
+            {
+                AssigneeDropDownViewModel assigneeRow = new AssigneeDropDownViewModel();
+                assigneeRow.TagName = department.Name;
+                assigneeRow.TagId = ++tagCounter;
+                assigneeRow.IsDeptName = true;
+                assigneeRow.DepartmentLevel = GetDeptLevel(department);
+                assigneeVM.Add(assigneeRow);
+
+                bool isThisEmployeeManager = IsThisUserManagingThisDepartment(department, username);
+                bool isThisEmployeeNonManager = false;
+                if (!isThisEmployeeManager)
+                {
+                    isThisEmployeeNonManager = employees.Where(x => x.Department.Id == department.Id && x.UserName == username).Any();
+                }
+
+                foreach (Employee employee in employees.Where(x => x.Department.Id == department.Id))
+                {
+                    if (userDataDictionary.ContainsKey(employee.UserName))
+                    {
+                        if (isThisEmployeeManager
+                            || isThisEmployeeNonManager
+                            || employee.UserName == defaultAssignee
+                            || subTaskAssignee.Contains(employee.UserName)
                             )
                         {
                             CreateAssigneeRows(assigneeVM, employee, ++tagCounter, assigneeRow.DepartmentLevel);
                         }
                     }
-                    else if (isThisEmployeeManager || employee.UserName == username)
+                    else if (isThisEmployeeManager || isThisEmployeeNonManager)
                     {
                         CreateAssigneeRows(assigneeVM, employee, ++tagCounter, assigneeRow.DepartmentLevel);
                     }

@@ -179,7 +179,7 @@
                             {
                                 "render": function (data, type, full, meta) {
                                     return '<img name="employeeAvatar" src="../dist/img/user2-160x160.jpg" width="20%" height="20%" class="img-circle elevation-2" alt="User Image"></img>'
-                                        + '&nbsp;&nbsp;<span>' + full.followUpFrom + '</span>';
+                                        + '&nbsp;&nbsp;<span>' + full.followUpEmployeeName + '</span>';
                                 }
                             },
                             {
@@ -630,12 +630,12 @@
                                     else
                                         color = '28a745';
 
-                        return '<div><div class="progress mb-2" style="width:50%"><div class="progress-bar bg-info" role="progressbar" aria-valuenow="' + full.progress + '" aria-valuemin="0" aria - valuemax="100" style = "width: ' + full.progress+'%" ></div></div><div><span>50%</span></div></div>';
+                        return '<div class="d-flex align-items-center"><div class="progress mr-2" style="width:50%"><div class="progress-bar bg-info" role="progressbar" aria-valuenow="' + full.progress + '" aria-valuemin="0" aria - valuemax="100" style = "width: ' + full.progress + '%" ></div></div><div><span>' + full.progress + '%</span></div></div>';
                     }
                 },
                 {
                     "render": function (data, type, full, meta) {
-                        return '<img name="employeeAvatar" src="../dist/img/user2-160x160.jpg" width="20%" height="20%" class="img-circle elevation-2" alt="User Image"></img>'
+                        return '<img name="employeeAvatar" src="../dist/img/user2-160x160.jpg" width="40px" height="40px" class="img-circle elevation-2" alt="User Image"></img>'
                             + '&nbsp;&nbsp;<a href="javascript:void(null);" data-usercode=' + full.assignedTo + ' name="employeeDetailLink">' + full.assignedToEmployeeName + '</a>';
                     }
                 },
@@ -846,7 +846,7 @@
         var dataToSend = form.serialize();
         $("#spinnerFollowUpCreate").show();
 
-        $.post(actionUrl, dataToSend).done(function (data) {
+        $.post(actionUrl + "?username=" + currentUserName, dataToSend).done(function (data) {
             var newBody = $('.modal-body', data);
             $("#spinnerFollowUpCreate").hide();
             taskFollowUpPlaceHolder.find('.modal-body').replaceWith(newBody);

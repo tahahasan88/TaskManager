@@ -10,7 +10,8 @@ namespace TaskManager.Web.Models
         public int TaskId { get; set; }
         public int SubTaskId { get; set; }
         public string Description { get; set; }
-        public string SubTaskAssignee{ get; set; }
+        public string SubTaskUserName { get; set; }
+        public string SubTaskEmployeeName { get; set; }
         public bool IsCompleted { get; set; }
     }
 }

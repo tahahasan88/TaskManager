@@ -208,8 +208,8 @@ namespace TaskManager.Web.Controllers
 
                         TaskAudit assigneeAudit = new TaskAudit();
                         assigneeAudit.ActionDate = DateTime.Now;
-                        assigneeAudit.ActionBy = currentUserName;
-                        assigneeAudit.Description = "Task Assignment updated. Assigned to " + assigneeVM.SelectedAssignee;
+                        assigneeAudit.ActionBy = _context.Employees.Where(x=>x.UserCode == currentUserName).SingleOrDefault().EmployeeName;
+                        assigneeAudit.Description = "Task " + thisTask.Title + " assignment updated. Assigned to " + _context.Employees.Where(x => x.UserCode == assigneeVM.SelectedAssignee).SingleOrDefault().EmployeeName;
                         assigneeAudit.Task = thisTask;
                         assigneeAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.Assignment).SingleOrDefault();
                         _context.Add(assigneeAudit);
@@ -380,16 +380,19 @@ namespace TaskManager.Web.Controllers
                     //Audit this task creation..
                     TaskAudit progressAudit = new TaskAudit();
                     progressAudit.ActionDate = DateTime.Now;
-                    progressAudit.ActionBy = currentUserName;
-                    progressAudit.Description = "Task created. Progess is 0%";
+                    string description = taskCreateVM.Description == null ? "" : "Description : " + taskCreateVM.Description;
+                    description += " , Target Date : " + taskCreateVM.Target.ToString("dd-MMM-yyyy");
+                    description += " , Priority : " + task.TaskPriority.Priority;
+                    progressAudit.ActionBy = _context.Employees.Where(x =>x.UserCode == currentUserName).SingleOrDefault().EmployeeName;
+                    progressAudit.Description = "Task with title " + task.Title + " created. Details are : " + description;
                     progressAudit.Task = task;
                     progressAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.Progress).SingleOrDefault();
                     _context.Add(progressAudit);
 
                     TaskAudit assignmentAudit = new TaskAudit();
                     assignmentAudit.ActionDate = DateTime.Now;
-                    assignmentAudit.ActionBy = currentUserName;
-                    assignmentAudit.Description = "Task created. Assigned to " + taskCreateVM.AssigneeCode;
+                    assignmentAudit.ActionBy = _context.Employees.Where(x => x.UserCode == currentUserName).SingleOrDefault().EmployeeName;
+                    assignmentAudit.Description = "Task with title " + task.Title + " created. Assigned to " + _context.Employees.Where(x => x.UserCode == taskCreateVM.AssigneeCode).SingleOrDefault().EmployeeName;
                     assignmentAudit.Task = task;
                     assignmentAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.Assignment).SingleOrDefault();
                     _context.Add(assignmentAudit);
@@ -426,6 +429,8 @@ namespace TaskManager.Web.Controllers
                         .Where(x => x.Id == taskCreateVM.Id).SingleOrDefault();
                     task.LastUpdatedAt = DateTime.Now;
                     task.LastUpdatedBy = currentUserName;
+                    var employees = _context.Employees.ToList();
+                    string currentEmployeeName = employees.Where(x => x.UserCode == currentUserName).SingleOrDefault().EmployeeName;
 
                     string previousTitle = task.Title;
                     if (taskCreateVM.Title != previousTitle)
@@ -433,20 +438,20 @@ namespace TaskManager.Web.Controllers
                         task.Title = taskCreateVM.Title;
                         TaskAudit titleAudit = new TaskAudit();
                         titleAudit.ActionDate = DateTime.Now;
-                        titleAudit.ActionBy = currentUserName;
-                        titleAudit.Description = "Task Updated. Title changed from " + previousTitle + " to " + taskCreateVM.Title;
+                        titleAudit.ActionBy = currentEmployeeName;
+                        titleAudit.Description = "Task updated. Title changed from " + previousTitle + " to " + taskCreateVM.Title;
                         titleAudit.Task = task;
                         titleAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.Update).SingleOrDefault();
                         _context.Add(titleAudit);
                     }
                     DateTime previousTarget = task.Target;
-                    if (taskCreateVM.Target != previousTarget)
+                    if (taskCreateVM.Target.Date != previousTarget.Date)
                     {
                         task.Target = taskCreateVM.Target;
                         TaskAudit targetAudit = new TaskAudit();
                         targetAudit.ActionDate = DateTime.Now;
-                        targetAudit.ActionBy = currentUserName;
-                        targetAudit.Description = "Task Updated. Target changed from " + previousTarget + " to " + taskCreateVM.Target;
+                        targetAudit.ActionBy = currentEmployeeName;
+                        targetAudit.Description = "Task with title " + task.Title +" Updated. Target changed from " + previousTarget.Date.ToString("dd-MMM-yyyy") + " to " + taskCreateVM.Target.Date.ToString("dd-MMM-yyyy");
                         targetAudit.Task = task;
                         targetAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.Update).SingleOrDefault();
                         _context.Add(targetAudit);
@@ -457,8 +462,8 @@ namespace TaskManager.Web.Controllers
                         task.Description = taskCreateVM.Description;
                         TaskAudit descriptionAudit = new TaskAudit();
                         descriptionAudit.ActionDate = DateTime.Now;
-                        descriptionAudit.ActionBy = currentUserName;
-                        descriptionAudit.Description = "Task Updated. Description changed from " + previousDescription + " to " + taskCreateVM.Description;
+                        descriptionAudit.ActionBy = currentEmployeeName;
+                        descriptionAudit.Description = "Task with title " + task.Title + " Updated. Description changed from " + previousDescription + " to " + taskCreateVM.Description;
                         descriptionAudit.Task = task;
                         descriptionAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.Update).SingleOrDefault();
                         _context.Add(descriptionAudit);
@@ -469,8 +474,8 @@ namespace TaskManager.Web.Controllers
                         task.Description = taskCreateVM.Description;
                         TaskAudit descriptionAudit = new TaskAudit();
                         descriptionAudit.ActionDate = DateTime.Now;
-                        descriptionAudit.ActionBy = currentUserName;
-                        descriptionAudit.Description = "Task Updated. Priority changed from " + task.TaskPriority.Priority + " to " + modifiedPriority.Priority;
+                        descriptionAudit.ActionBy = currentEmployeeName;
+                        descriptionAudit.Description = "Task with title " + task.Title + " Updated. Priority changed from " + task.TaskPriority.Priority + " to " + modifiedPriority.Priority;
                         task.TaskPriority = modifiedPriority;
                         descriptionAudit.Task = task;
                         descriptionAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.Update).SingleOrDefault();
@@ -485,6 +490,7 @@ namespace TaskManager.Web.Controllers
                     {
                         if (employee.UserName != taskCreateVM.AssigneeCode)
                         {
+                            string previousEmployeeName = employees.Where(x => x.UserCode == employee.UserName).SingleOrDefault().EmployeeName;
                             employee.UserName = taskCreateVM.AssigneeCode;
                             employee.IsActive = true;
                             _context.TaskEmployees.Attach(employee);
@@ -492,8 +498,9 @@ namespace TaskManager.Web.Controllers
 
                             TaskAudit assigneeAudit = new TaskAudit();
                             assigneeAudit.ActionDate = DateTime.Now;
-                            assigneeAudit.ActionBy = currentUserName;
-                            assigneeAudit.Description = "Task Assignment updated. Assigned to " + taskCreateVM.AssigneeCode;
+                            assigneeAudit.ActionBy = currentEmployeeName;
+                            string modifiedEmployeeName = employees.Where(x => x.UserCode == taskCreateVM.AssigneeCode).SingleOrDefault().EmployeeName;
+                            assigneeAudit.Description = "Task with title " + task.Title + " Updated. Assignment changed from " + previousEmployeeName + " to " + modifiedEmployeeName;
                             assigneeAudit.Task = task;
                             assigneeAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.Assignment).SingleOrDefault();
                             _context.Add(assigneeAudit);
@@ -532,6 +539,7 @@ namespace TaskManager.Web.Controllers
                     string[] listOfTaskTitles = taskCreateVM.ListOfTaskTitles.Split(",");
                     foreach (string title in listOfTaskTitles)
                     {
+                        string currentEmployeeName = _context.Employees.Where(x => x.UserCode == currentUserName).SingleOrDefault().EmployeeName;
                         Data.Task task = new Data.Task();
                         task.IsDeleted = false;
                         task.LastUpdatedAt = DateTime.Now;
@@ -565,16 +573,16 @@ namespace TaskManager.Web.Controllers
                         //Audit this task creation..
                         TaskAudit progressAudit = new TaskAudit();
                         progressAudit.ActionDate = DateTime.Now;
-                        progressAudit.ActionBy = currentUserName;
-                        progressAudit.Description = "Task created. Progess is 0%";
+                        progressAudit.ActionBy = currentEmployeeName;
+                        progressAudit.Description = "Task with title " + task.Title + " created. Progess is 0%";
                         progressAudit.Task = task;
                         progressAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.Progress).SingleOrDefault();
                         _context.Add(progressAudit);
 
                         TaskAudit assignmentAudit = new TaskAudit();
                         assignmentAudit.ActionDate = DateTime.Now;
-                        assignmentAudit.ActionBy = currentUserName;
-                        assignmentAudit.Description = "Task created. Assigned to " + taskCreateVM.AssigneeCode;
+                        assignmentAudit.ActionBy = currentEmployeeName;
+                        assignmentAudit.Description = "Task with title " + task.Title + " created. Assigned to " + _context.Employees.Where(x => x.UserCode == taskCreateVM.AssigneeCode).SingleOrDefault().EmployeeName;
                         assignmentAudit.Task = task;
                         assignmentAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.Assignment).SingleOrDefault();
                         _context.Add(assignmentAudit);
@@ -660,10 +668,16 @@ namespace TaskManager.Web.Controllers
                     TaskEmployee currentEmployee = _context.TaskEmployees
                         .Include(x => x.TaskCapacity)
                         .Where(x => x.UserName == currentUserName && x.Task.Id == id).FirstOrDefault();
-                    TaskManager.Data.Task thisTask = _context.Tasks.Where(x => x.Id == id).SingleOrDefault();
+                    TaskManager.Data.Task thisTask = _context.Tasks
+                        .Include(X => X.TaskStatus)
+                        .Where(x => x.Id == id).SingleOrDefault();
+
+                    string currentEmployeeName = _context.Employees.Where(x => x.UserCode == currentUserName).SingleOrDefault().EmployeeName;
 
                     string previousProgress = thisTask.TaskProgress;
                     string taskProgress = updateVM.TaskProgress;
+                    string previousRemarks = thisTask.ProgressRemarks;
+                    int previousStatusId = thisTask.TaskStatus.Id;
                     thisTask.LastUpdatedAt = DateTime.Now;
                     thisTask.LastUpdatedBy = currentUserName;
                     thisTask.TaskProgress = taskProgress;
@@ -671,33 +685,69 @@ namespace TaskManager.Web.Controllers
                     thisTask.TaskStatus = _context.TaskStatus.Where(x => x.Id == Convert.ToInt32(updateVM.Status)).SingleOrDefault();
                     _context.Update(thisTask);
 
-                    TaskFollowUpResponse taskFollowUpResponse = new TaskFollowUpResponse();
-                    taskFollowUpResponse.RespondedBy = currentUserName;
-                    taskFollowUpResponse.LastUpdatedAt = DateTime.Now;
-                    taskFollowUpResponse.CreatedAt = DateTime.Now;
-                    taskFollowUpResponse.TaskResponse = taskProgress;
-                    taskFollowUpResponse.Task = thisTask;
-                    _context.Add(taskFollowUpResponse);
+                    TaskFollowUp followUp = _context.TaskFollowUps.Where(x => x.Task.Id == id).FirstOrDefault();
+                    if (followUp != null)
+                    {
+                        TaskFollowUpResponse taskFollowUpResponse = new TaskFollowUpResponse();
+                        taskFollowUpResponse.RespondedBy = currentUserName;
+                        taskFollowUpResponse.LastUpdatedAt = DateTime.Now;
+                        taskFollowUpResponse.CreatedAt = DateTime.Now;
+                        taskFollowUpResponse.TaskResponse = taskProgress;
+                        taskFollowUpResponse.Task = thisTask;
+                        _context.Add(taskFollowUpResponse);
 
-                    TaskAudit followUpResponseAudit = new TaskAudit();
-                    followUpResponseAudit.ActionDate = DateTime.Now;
-                    followUpResponseAudit.ActionBy = currentUserName;
-                    followUpResponseAudit.Description = "Follow up taken";
-                    followUpResponseAudit.Task = thisTask;
-                    followUpResponseAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.FollowUpResponse).SingleOrDefault();
-                    _context.Add(followUpResponseAudit);
+                        TaskAudit followUpResponseAudit = new TaskAudit();
+                        followUpResponseAudit.ActionDate = DateTime.Now;
+                        followUpResponseAudit.ActionBy = currentEmployeeName;
+                        followUpResponseAudit.Description = "Follow up response provided with progress update from " + previousProgress + "% to " + taskProgress + "%";
+                        followUpResponseAudit.Description += " and remarks " + updateVM.Remarks;
+                        followUpResponseAudit.Task = thisTask;
+                        followUpResponseAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.FollowUpResponse).SingleOrDefault();
+                        _context.Add(followUpResponseAudit);
+                    }
 
                     if (previousProgress != taskProgress)
                     {
-                        //Audit this update task..
                         TaskAudit progressAudit = new TaskAudit();
                         progressAudit.ActionDate = DateTime.Now;
-                        progressAudit.ActionBy = currentUserName;
-                        progressAudit.Description = "Progress updated to " + taskProgress + "%";
+                        progressAudit.ActionBy = currentEmployeeName;
+                        progressAudit.Description = "Task with title " + thisTask.Title + " progress updated from " + previousProgress + "% to " + taskProgress + "%";
                         progressAudit.Task = thisTask;
                         progressAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.Progress).SingleOrDefault();
                         _context.Add(progressAudit);
                     }
+
+                    if (previousRemarks != updateVM.Remarks)
+                    {
+                        TaskAudit remarksAudit = new TaskAudit();
+                        remarksAudit.ActionDate = DateTime.Now;
+                        remarksAudit.ActionBy = currentEmployeeName;
+                        string remarksDescription = string.Empty;
+                        if (previousRemarks != null)
+                        {
+                            remarksDescription = "Task with title " + thisTask.Title + " updated. Remarks updated from " + previousRemarks + " to " + updateVM.Remarks;
+                        }
+                        else
+                        {
+                            remarksDescription = "Task with title " + thisTask.Title + " updated. Remarks are " + updateVM.Remarks;
+                        }
+                        remarksAudit.Description = remarksDescription;
+                        remarksAudit.Task = thisTask;
+                        remarksAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.Update).SingleOrDefault();
+                        _context.Add(remarksAudit);
+                    }
+                    
+                    if (previousStatusId != thisTask.TaskStatus.Id)
+                    {
+                        TaskAudit statusAudit = new TaskAudit();
+                        statusAudit.ActionDate = DateTime.Now;
+                        statusAudit.ActionBy = currentEmployeeName;
+                        statusAudit.Description = "Task with title " + thisTask.Title + " updated. Status updated from " + Common.Common.GetTaskStatusDescription(previousStatusId) + " to " + Common.Common.GetTaskStatusDescription(thisTask.TaskStatus.Id);
+                        statusAudit.Task = thisTask;
+                        statusAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.Update).SingleOrDefault();
+                        _context.Add(statusAudit);
+                    }
+
 
                     await _context.SaveChangesAsync();
                     //List<string> employeeList = GetTaskEmployeeEmailAddresses(id, currentUserName);

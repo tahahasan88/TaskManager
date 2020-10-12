@@ -15,7 +15,6 @@ namespace TaskManager.Web.Controllers
 {
     public class TaskFollowUpsController : BaseController
     {
-
         public TaskFollowUpsController(TaskManagerContext context, IConfiguration configuration) : base(context, configuration)
         {
             currentUserName = configuration.GetSection("TaskManagerUserName").Value;
@@ -134,6 +133,7 @@ namespace TaskManager.Web.Controllers
                                  .OrderByDescending(m => m.LastUpdatedAt);
 
                 int recordsTotal = filteredTaskInbox.Count();
+                var employees = _context.Employees.ToList();
 
                 List<TaskFollowUpInboxViewModel> taskFollowUpInboxVMList = new List<TaskFollowUpInboxViewModel>();
 
@@ -146,9 +146,10 @@ namespace TaskManager.Web.Controllers
                             UpdatedDate = inbox.LastUpdatedAt.ToString("dd-MMM-yyyy"),
                             TaskInfo = inbox.Title,
                             FollowUpFrom = inbox.FollowerUserName,
+                            FollowUpEmployeeName = employees.Where(x => x.UserCode == inbox.FollowerUserName).SingleOrDefault().EmployeeName,
                             Status = inbox.Status,
                             TaskId = inbox.Id
-                        });
+                        }); ;
                 }
 
                 //Returning Json Data
@@ -242,6 +243,7 @@ namespace TaskManager.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(TaskFollowUpViewModel taskFollowUpVM)
         {
+            SetUserName();
             if (ModelState.IsValid)
             {
                 string [] listOfTaskIds = taskFollowUpVM.ListofTasks.Split(",");
@@ -274,8 +276,8 @@ namespace TaskManager.Web.Controllers
 
                     TaskAudit followUpAudit = new TaskAudit();
                     followUpAudit.ActionDate = DateTime.Now;
-                    followUpAudit.ActionBy = currentUserName;
-                    followUpAudit.Description = "Follow up requested";
+                    followUpAudit.ActionBy = _context.Employees.Where(x => x.UserCode == currentUserName).SingleOrDefault().EmployeeName;
+                    followUpAudit.Description = "Follow up requested for Task with title " + Thistask.Title + " and remarks are " + followUp.Remarks;
                     followUpAudit.Task = Thistask;
                     followUpAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.FollowUp).SingleOrDefault();
                     _context.Add(followUpAudit);

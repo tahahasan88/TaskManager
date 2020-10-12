@@ -1,4 +1,6 @@
 ﻿$("#employeeDetailId").html(currentEmployeeName);
+$("#employeeDetailId").attr("data-usercode", currentUserName);
+
 
 $(".nav-sidebar .nav-item .nav-link").each(function () {
     $(this).removeClass("active");

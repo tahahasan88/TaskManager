@@ -58,10 +58,10 @@ namespace TaskManager.Web.Controllers
                 reportsVM.Add(reportRow);
                 gridViewUiDepthLevel += 4;
                 bool baseDept = false;
+                bool isThisEmployeeManager = IsThisUserManagingThisDepartment(department, currentUserName);
 
                 foreach (Employee employee in employees.Where(x => x.Department.Id == department.Id))
                 {
-                    bool isThisEmployeeManager = IsThisUserManagingThisDepartment(department, currentUserName);
                     if (userTaskDictionary.ContainsKey(employee.UserCode))
                     {
                         if (isThisEmployeeManager

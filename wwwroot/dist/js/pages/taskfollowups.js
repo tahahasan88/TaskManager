@@ -162,7 +162,7 @@ function showEmployeeDetails(userName) {
                         {
                             "render": function (data, type, full, meta) {
                                 return '<img name="employeeAvatar" src="../dist/img/user2-160x160.jpg" width="20%" height="20%" class="img-circle elevation-2" alt="User Image"></img>'
-                                    + '&nbsp;&nbsp;<span>' + full.followUpFrom + '</span>';
+                                    + '&nbsp;&nbsp;<span>' + full.followUpEmployeeName + '</span>';
                             }
                         },
                         {
@@ -213,7 +213,7 @@ var inboxTable = $('#inboxTable').DataTable({
     //},
     initComplete: function (settings, json) {
         $("a[name='employeeDetailLink']").click(function () {
-            showEmployeeDetails($(this).html());
+            showEmployeeDetails($(this).attr("data-usercode"));
         });
     },
     columnDefs: [{
@@ -229,7 +229,7 @@ var inboxTable = $('#inboxTable').DataTable({
         {
             "render": function (data, type, full, meta) {
                 return '<img name="employeeAvatar" src="../dist/img/user2-160x160.jpg" width="20%" height="20%" class="img-circle elevation-2" alt="User Image"></img>'
-                    + '&nbsp;&nbsp;<a href="javascript:void(null);" name="employeeDetailLink">' + full.followUpFrom + '</a>';
+                    + '&nbsp;&nbsp;<a href="javascript:void(null);" data-usercode=' + full.followUpFrom + ' name="employeeDetailLink">' + full.followUpEmployeeName + '</a>';
             }
         },
         {

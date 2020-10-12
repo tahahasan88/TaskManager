@@ -27,6 +27,14 @@
         .bg-info {
             background-color: #007bff!important;
         }
+        .text-underline { text-decoration:underline;}
+        .elevation-2 { width:40px; height:40px; margin-right:10px;}
+        .progress { margin-top:5px;}
+
+        @@media(max-width:991px){
+            #people-placeholder .text-md { width:100%; margin-top:10px; margin-bottom:10px;}
+            .flex-wrap-xs { flex-wrap:wrap;}
+        }
 
         /* iCheck plugin Square skin, blue
 ----------------------------------- */
@@ -148,14 +156,14 @@
             <dt class="col-sm-4">Status</dt>
             <dd class="col-sm-8"><span id="taskStatusBadge" class="badge bg-primary">@Model.Task.TaskStatus.Status</span></dd>
             <dt class="col-sm-4">Progress</dt>
-            <dd class="col-sm-6">
-                <div class="progress mb-3">
+            <dd class="col-6">
+                <div class="progress">
                     <div id="taskProgressDivId" class="progress-bar bg-info align-middle" role="progressbar" aria-valuenow="@Model.Task.TaskProgress" aria-valuemin="0"
                          aria-valuemax="100" style="width: @Model.Task.TaskProgress%">
                     </div>
                 </div>
             </dd>
-            <dd class="col-sm-2">
+            <dd class="col-2">
                 <span id="taskProgressShowId">@Model.Task.TaskProgress%</span>
             </dd>
 

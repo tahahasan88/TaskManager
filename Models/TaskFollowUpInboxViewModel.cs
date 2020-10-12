@@ -12,6 +12,7 @@ namespace TaskManager.Web.Models
         public string TaskInfo { get; set; }
         public string Status { get; set; }
         public string FollowUpFrom { get; set; }
+        public string FollowUpEmployeeName { get; set; }
         public int TaskId { get; set; }
         public int SortId { get; set; }
     }
