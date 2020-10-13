@@ -145,6 +145,15 @@ function showEmployeeDetails(userName) {
                             data: pieData,
                             options: pieOptions
                         });
+
+                        if (this.api().data().length == 0) {
+                            $('#pieChart2').hide();
+                            $('#followUpPiDiv').hide();
+                            $("#tasksPiDiv").removeClass("col-md-6 d-flex justify-content-center");
+                            $("#tasksPiDiv").addClass("col-md-12 d-flex justify-content-center");
+                            $("#textset1").hide();
+                            $("#textset2").show();
+                        }
                     },
                     search: { regex: true, caseInsensitive: true },
                     ajax: {
@@ -161,7 +170,7 @@ function showEmployeeDetails(userName) {
                         },
                         {
                             "render": function (data, type, full, meta) {
-                                return '<img name="employeeAvatar" src="../dist/img/user2-160x160.jpg" width="20%" height="20%" class="img-circle elevation-2" alt="User Image"></img>'
+                                return '<img name="employeeAvatar" src="../dist/img/user2-160x160.jpg" width="40px" height="40px" class="img-circle elevation-2" alt="User Image"></img>'
                                     + '&nbsp;&nbsp;<span>' + full.followUpEmployeeName + '</span>';
                             }
                         },
@@ -228,7 +237,7 @@ var inboxTable = $('#inboxTable').DataTable({
     columns: [
         {
             "render": function (data, type, full, meta) {
-                return '<img name="employeeAvatar" src="../dist/img/user2-160x160.jpg" width="20%" height="20%" class="img-circle elevation-2" alt="User Image"></img>'
+                return '<img name="employeeAvatar" src="../dist/img/user2-160x160.jpg" width="40px" height="40px" class="img-circle elevation-2" alt="User Image"></img>'
                     + '&nbsp;&nbsp;<a href="javascript:void(null);" data-usercode=' + full.followUpFrom + ' name="employeeDetailLink">' + full.followUpEmployeeName + '</a>';
             }
         },
@@ -262,7 +271,7 @@ var inboxTable = $('#inboxTable').DataTable({
         { "data": "updatedDate", "name": "Date", "autoWidth": true }
 
     ],
-    order: [[1, 'desc']]
+    order: [[4, 'desc']]
 });
 
 
@@ -315,6 +324,6 @@ var outboxTable = $('#outboxTable').DataTable({
         },
         { "data": "followUpDate", "name": "Date", "autoWidth": true, "visible": true }
     ],
-    order: [[1, 'desc']]
+    order: [[3, 'desc']]
 });
 

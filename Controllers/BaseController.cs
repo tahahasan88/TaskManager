@@ -92,6 +92,27 @@ namespace TaskManager.Web.Controllers
             return isThisUserManager;
         }
 
+        protected virtual bool IsThisUserManagingThisDepartment(List<Department> alldepartments, List<int> selectedDepartmentIds, string userName)
+        {
+            bool isThisUserManager = false;
+            try
+            {
+                List<Department> selectedDepts = alldepartments.Where(x => selectedDepartmentIds.Any(y => y == x.Id)).ToList();
+
+                foreach (Department department in selectedDepts)
+                {
+                    isThisUserManager = IsThisUserManagingThisDepartment(department, userName);
+                    if (isThisUserManager)
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return isThisUserManager;
+        }
+
         protected int GetDeptLevel(Department thisDept)
         {
             int depthLevel = 0;

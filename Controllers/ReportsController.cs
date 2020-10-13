@@ -60,7 +60,7 @@ namespace TaskManager.Web.Controllers
                 bool baseDept = false;
                 bool isThisEmployeeManager = IsThisUserManagingThisDepartment(department, currentUserName);
 
-                foreach (Employee employee in employees.Where(x => x.Department.Id == department.Id))
+                foreach (Employee employee in employees.Where(x => x.Department != null && x.Department.Id == department.Id))
                 {
                     if (userTaskDictionary.ContainsKey(employee.UserCode))
                     {

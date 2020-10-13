@@ -79,6 +79,7 @@ namespace TaskManager.Web.Controllers
                     Description = subTask.Description,
                     SubTaskUserName = subTask.SubTaskAssigneeUserName,
                     SubTaskEmployeeName = employees.Where(x => x.UserCode == subTask.SubTaskAssigneeUserName).SingleOrDefault().EmployeeName,
+                    IsCompleted = IsSubTaskCompleted(subTask.TaskStatus.Id)
                 });
             }
 

@@ -18,78 +18,67 @@ namespace TaskManager.Web.Controllers
             currentUserName = configuration.GetSection("TaskManagerUserName").Value;
         }
 
-        private bool IsThisUserManagingThisDepartment(int thisDepartmentId, IEnumerable<Department> departments, string userName)
+
+        public IActionResult Index()
+        {
+            return View();
+        }
+
+        protected override bool IsThisUserManagingThisDepartment(Department thisDepartment, string userName)
         {
             bool isThisUserManager = false;
-            Department thisDepartment = departments.Where(x => x.Id == thisDepartmentId).SingleOrDefault().ParentDepartment;
-            while (thisDepartment != null)
+
+            string managerUserName = _context.Departments.Where(x => x.Id == thisDepartment.Id)
+                .Select(x => x.Manager).SingleOrDefault().UserName;
+
+            if (managerUserName == userName)
             {
-                string managerUserName = _context.Departments.Where(x => x.Id == thisDepartment.Id).Select(x => x.Manager).SingleOrDefault().UserName;
-                if (managerUserName == userName)
+                return true;
+            }
+            Department parentDepartment = thisDepartment.ParentDepartment;
+            if (parentDepartment != null)
+            {
+                thisDepartment = parentDepartment;
+                while (thisDepartment != null)
                 {
-                    isThisUserManager = true;
-                    break;
+                    managerUserName = _context.Departments.Where(x => x.Id == thisDepartment.Id).Select(x => x.Manager).SingleOrDefault().UserName;
+                    if (managerUserName == userName)
+                    {
+                        isThisUserManager = true;
+                        break;
+                    }
+                    thisDepartment = thisDepartment.ParentDepartment;
                 }
-                thisDepartment = thisDepartment.ParentDepartment;
+            }
+            else
+            {
+                managerUserName = _context.Departments.Where(x => x.Id == thisDepartment.Id).Select(x => x.Manager).SingleOrDefault().UserName;
+                isThisUserManager = managerUserName == userName;
             }
             return isThisUserManager;
         }
 
-        public IActionResult Index()
+        protected override bool IsThisUserManagingThisDepartment(List<Department> alldepartments, List<int> selectedDepartmentIds, string userName)
         {
-            TaskSummaryViewModel taskSummaryVM = new TaskSummaryViewModel();
-
-            var tasks = _context.Tasks
-                            .Include(x => x.TaskStatus)
-                            .Where(x => x.IsDeleted != true).OrderByDescending(x => x.LastUpdatedAt)
-                            .ToList();
-            
-            var taskEmployees = (from c in _context.TaskEmployees
-                                 join o in _context.Employees
-                                 on c.UserName equals o.UserName
-                                 join tc in _context.TaskCapacities
-                                 on c.TaskCapacity.Id equals tc.Id
-                                 join dept in _context.Departments
-                                 on o.Department.Id equals dept.Id
-                                 select new
-                                 {
-                                     UserName = o.UserName,
-                                     EmployeeName = o.EmployeeName,
-                                     TaskId = c.Task.Id,
-                                     DeptId = o.Department.Id,
-                                     ManagerUserName = o.Department.Manager.UserName
-                                 }).ToList();
-
-            List<Department> departments = _context.Departments
-                    .Include(x => x.ParentDepartment)
-                    .Include(x => x.Manager)
-                    .ToList();
-
-            foreach (TaskManager.Data.Task task in tasks)
+            bool isThisUserManager = false;
+            try
             {
-                if (taskEmployees.Where(x => x.TaskId == task.Id && x.UserName == currentUserName).Any()
-                    || taskEmployees.Where(x => x.TaskId == task.Id && x.ManagerUserName == currentUserName).Any()
-                    || IsThisUserManagingThisDepartment(taskEmployees.Where(x => x.TaskId == task.Id).FirstOrDefault().DeptId,
-                        departments, currentUserName))
+                List<Department> selectedDepts = alldepartments.Where(x => selectedDepartmentIds.Any(y => y == x.Id)).ToList();
+
+                foreach (Department department in selectedDepts)
                 {
-                    if (task.TaskStatus.Id != (int)TaskManager.Common.Common.TaskStatus.Completed)
-                    {
-                        taskSummaryVM.PendingTasksCount += 1;
-                    }
-                    else if (task.TaskStatus.Id == (int)TaskManager.Common.Common.TaskStatus.Completed)
-                    {
-                        taskSummaryVM.CompletedTasksCount += 1;
-                    }
-                    else if (task.TaskStatus.Id == (int)TaskManager.Common.Common.TaskStatus.OnHold)
-                    {
-                        taskSummaryVM.OnHoldTasksCount += 1;
-                    }
-                    taskSummaryVM.TotalTasksCount += 1;
+                    isThisUserManager = IsThisUserManagingThisDepartment(department, userName);
+                    if (isThisUserManager)
+                        break;
                 }
             }
+            catch (Exception ex)
+            {
 
-            return View(taskSummaryVM);
+            }
+            return isThisUserManager;
         }
+
 
         public IActionResult List(string username)
         {
@@ -101,12 +90,11 @@ namespace TaskManager.Web.Controllers
             {
                 TaskSummaryViewModel taskSummaryVM = new TaskSummaryViewModel();
                 var tasks = _context.Tasks
-                               .Include(x => x.TaskStatus)
-                               .Where(x => x.IsDeleted != true).OrderByDescending(x => x.LastUpdatedAt)
-                                .Select(x=> new { x.Id, StatusId = x.TaskStatus.Id})
-                               .ToList();
+                            .Include(x => x.TaskStatus)
+                            .Where(x => x.IsDeleted != true).Select(x => new { x.Id, StatusId = x.TaskStatus.Id }).ToList();
 
                 var taskEmployees = (from c in _context.TaskEmployees
+                                     .Where(k => k.IsActive == true && k.Task.IsDeleted == false)
                                      join o in _context.Employees
                                      on c.UserName equals o.UserName
                                      join tc in _context.TaskCapacities
@@ -122,16 +110,17 @@ namespace TaskManager.Web.Controllers
                                          ManagerUserName = o.Department.Manager.UserName
                                      }).ToList();
 
-                IEnumerable<Department> departments = _context.Departments
-                        .Include(x => x.ParentDepartment)
-                        .Select(s => s);
+                List<Department> departments = _context.Departments.Include(x => x.ParentDepartment)
+                     .ToList();
 
                 foreach (var task in tasks)
                 {
                     if (taskEmployees.Where(x => x.TaskId == task.Id && x.UserName == currentUserName).Any()
                         || taskEmployees.Where(x => x.TaskId == task.Id && x.ManagerUserName == currentUserName).Any()
-                        || IsThisUserManagingThisDepartment(taskEmployees.Where(x => x.TaskId == task.Id).FirstOrDefault().DeptId,
-                            departments, currentUserName))
+                        || IsThisUserManagingThisDepartment(
+                            departments,
+                            taskEmployees.Where(x => x.TaskId == task.Id).Select(x => x.DeptId).Distinct().ToList(),
+                           currentUserName))
                     {
                         if (task.StatusId == (int)TaskManager.Common.Common.TaskStatus.Cancelled)
                         {
@@ -161,6 +150,7 @@ namespace TaskManager.Web.Controllers
             }
             catch(Exception ex)
             {
+                Console.WriteLine(ex.StackTrace);
                 throw ex;
             }
         }

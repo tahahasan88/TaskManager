@@ -89,7 +89,7 @@
                 
                 $.ajax({
                     type: "GET",
-                    url: thisBaseUrl + "/home/list",
+                    url: thisBaseUrl + "/home/list?username=" + currentUserName,
                     contentType: "application/json; charset=utf-8",
                     data: null,
                     datatype: "json",

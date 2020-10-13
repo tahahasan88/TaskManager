@@ -46,8 +46,6 @@ namespace TaskManager.Web.Controllers
             return new JsonResult(new { records = taskSummaryVM });
         }
 
-       
-
         // GET: Tasks
         public IActionResult Index()
         {
@@ -66,6 +64,61 @@ namespace TaskManager.Web.Controllers
             return View(taskVM);
         }
 
+        protected bool IsThisUserManagerOfThisDepartment(Department thisDepartment, string userName)
+        {
+            bool isThisUserManager = false;
+
+            string managerUserName = _context.Departments.Where(x => x.Id == thisDepartment.Id)
+                .Select(x => x.Manager).SingleOrDefault().UserName;
+
+            if (managerUserName == userName)
+            {
+                return true;
+            }
+            Department parentDepartment = thisDepartment.ParentDepartment;
+            if (parentDepartment != null)
+            {
+                thisDepartment = parentDepartment;
+                while (thisDepartment != null)
+                {
+                    managerUserName = _context.Departments.Where(x => x.Id == thisDepartment.Id).Select(x => x.Manager).SingleOrDefault().UserName;
+                    if (managerUserName == userName)
+                    {
+                        isThisUserManager = true;
+                        break;
+                    }
+                    thisDepartment = thisDepartment.ParentDepartment;
+                }
+            }
+            else
+            {
+                managerUserName = _context.Departments.Where(x => x.Id == thisDepartment.Id).Select(x => x.Manager).SingleOrDefault().UserName;
+                isThisUserManager = managerUserName == userName;
+            }
+            return isThisUserManager;
+        }
+
+        protected bool IsThisUserManagerOfThisDepartment(List<Department> alldepartments, List<int> selectedDepartmentIds, string userName)
+        {
+            bool isThisUserManager = false;
+            try
+            {
+                List<Department> selectedDepts = alldepartments.Where(x => selectedDepartmentIds.Any(y => y == x.Id)).ToList();
+
+                foreach (Department department in selectedDepts)
+                {
+                    isThisUserManager = IsThisUserManagerOfThisDepartment(department, userName);
+                    if (isThisUserManager)
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            return isThisUserManager;
+        }
+
         public IActionResult LoadTasksData(string username)
         {
             try
@@ -78,6 +131,7 @@ namespace TaskManager.Web.Controllers
                             .Include(x => x.TaskStatus)
                             .Where(x => x.IsDeleted != true).OrderByDescending(x => x.LastUpdatedAt).ToList();
                 var taskEmployees = (from c in _context.TaskEmployees
+                                     .Where(k => k.IsActive == true && k.Task.IsDeleted == false)
                                      join o in _context.Employees
                                      on c.UserName equals o.UserCode
                                      join tc in _context.TaskCapacities
@@ -105,9 +159,12 @@ namespace TaskManager.Web.Controllers
                 foreach (TaskManager.Data.Task task in tasks)
                 {
                     if (taskEmployees.Where(x => x.TaskId == task.Id && x.UserName == currentUserName).Any()
-                        || taskEmployees.Where(x => x.TaskId == task.Id && x.ManagerUserName == currentUserName).Any()
-                        || IsThisUserManagingThisDepartment(taskEmployees.Where(x => x.TaskId == task.Id).FirstOrDefault().DeptId,
-                            departments, currentUserName))
+                        || taskEmployees.Where(x => x.TaskId == task.Id 
+                        && IsThisUserManagerOfThisDepartment(
+                            departments,
+                            taskEmployees.Where(x => x.TaskId == task.Id).Select(x => x.DeptId).ToList(),
+                           currentUserName)).Any()
+                        )
                     {
                         TasksGridViewModel taskGridVM = new TasksGridViewModel();
 
@@ -124,10 +181,12 @@ namespace TaskManager.Web.Controllers
                         string creatorUserName = taskEmployees.Where(x => x.CapacityId == (int)Common.Common.TaskCapacity.Creator
                             && x.TaskId == task.Id).FirstOrDefault().UserName;
 
-
                         taskGridVM.IsEditable = taskEmployees.Where(x => x.TaskId == task.Id && x.UserName == currentUserName
                         && (x.CapacityId == (int)Common.Common.TaskCapacity.Creator
-                         || x.CapacityId == (int)Common.Common.TaskCapacity.Assignee)
+                         || x.CapacityId == (int)Common.Common.TaskCapacity.Assignee
+                         || x.CapacityId == (int)Common.Common.TaskCapacity.SubTaskAssignee
+                         || x.CapacityId == (int)Common.Common.TaskCapacity.Follower
+                         )
                         ).Any();
                         taskGridVM.CreatedBy = creatorUserName;
                         taskGridVM.AssignedTo = assignee.UserName;
@@ -143,23 +202,6 @@ namespace TaskManager.Web.Controllers
             {
                 throw;
             }
-
-        }
-
-        private bool IsThisUserManagingThisDepartment(int thisDepartmentId, List<Department> departments, string userName)
-        {
-            bool isThisUserManager = false;
-            Department thisDepartment = departments.Where(x => x.Id == thisDepartmentId).SingleOrDefault().ParentDepartment;
-            while (thisDepartment != null)
-            {
-                if (thisDepartment.Manager.UserName == userName)
-                {
-                    isThisUserManager = true;
-                    break;
-                }
-                thisDepartment = thisDepartment.ParentDepartment;
-            }
-            return isThisUserManager;
         }
 
         private AssigneeViewModel PopulateAllAssignee(string userName)

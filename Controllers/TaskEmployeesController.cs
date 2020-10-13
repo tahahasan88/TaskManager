@@ -100,7 +100,7 @@ namespace TaskManager.Web.Controllers
 
             if (!employeeProfiles.Any())
             {
-                employeeProfiles.Add(new TaskEmployee() { TaskCapacity = new TaskCapacity() { Id = (int)Common.Common.TaskCapacity.Follower } });
+                employeeProfiles.Add(new TaskEmployee() { TaskCapacity = new TaskCapacity() { Id = (int)Common.Common.TaskCapacity.ExTaskAssignee } });
             }
             bool isTaskDeletionAllowed = false;
             bool isSubTaskDeletionAllowed = false;
@@ -132,10 +132,23 @@ namespace TaskManager.Web.Controllers
                 }
             }
 
+            if (isSubTaskEditAllowed)
+            {
+                isSubTaskEditAllowed = IsTaskInLockedState(taskId) == true ? false : true;
+            }
+            
             return new JsonResult(new { isTaskDeletionAllowed = isTaskDeletionAllowed, isSubTaskDeletionAllowed  = isSubTaskDeletionAllowed , isTaskEditAllowed  = isTaskEditAllowed,
                 isSubTaskEditAllowed = isSubTaskEditAllowed,
                 isProgressUpdateAllowed = isProgressUpdateAllowed
             });
+        }
+
+
+        private bool IsTaskInLockedState(int taskId)
+        {
+            return _context.Tasks.Where(x => x.Id == taskId && x.TaskStatus.Id == (int)Common.Common.TaskStatus.Completed
+            || x.TaskStatus.Id == (int)Common.Common.TaskStatus.Cancelled
+            || x.TaskStatus.Id == (int)Common.Common.TaskStatus.OnHold).Any();
         }
 
         // GET: TaskEmployees/Details/5

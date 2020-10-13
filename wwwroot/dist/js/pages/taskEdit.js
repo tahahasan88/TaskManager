@@ -12,6 +12,7 @@ $(document).ready(function () {
         $("#editBtnDiv").hide();
         $("#deleteBtnDiv").hide();
         $("#updateTaskBtnDiv").hide();
+        disabled = true;
     }
 
     $('#Quality').slider('disable');
@@ -161,6 +162,15 @@ $(document).ready(function () {
                                 data: pieData,
                                 options: pieOptions
                             });
+
+                            if (this.api().data().length == 0) {
+                                $('#pieChart2').hide();
+                                $('#followUpPiDiv').hide();
+                                $("#tasksPiDiv").removeClass("col-md-6 d-flex justify-content-center");
+                                $("#tasksPiDiv").addClass("col-md-12 d-flex justify-content-center");
+                                $("#textset1").hide();
+                                $("#textset2").show();
+                            }
                         },
                         search: { regex: true, caseInsensitive: true },
                         ajax: {
@@ -177,7 +187,7 @@ $(document).ready(function () {
                             },
                             {
                                 "render": function (data, type, full, meta) {
-                                    return '<img name="employeeAvatar" src="../dist/img/user2-160x160.jpg" width="20%" height="20%" class="img-circle elevation-2" alt="User Image"></img>'
+                                    return '<img name="employeeAvatar" src="../dist/img/user2-160x160.jpg" width="40px" height="40px" class="img-circle elevation-2" alt="User Image"></img>'
                                         + '&nbsp;&nbsp;<span>' + full.followUpEmployeeName + '</span>';
                                 }
                             },
@@ -242,6 +252,33 @@ $(document).ready(function () {
         });
 
     });
+
+
+    function setSubTaskSectionState() {
+
+        $.ajax({
+            type: "GET",
+            url: thisBaseUrl + "/taskemployees/GetUserPermissions",
+            contentType: "application/json; charset=utf-8",
+            data: { taskId: taskId, userName: currentUserName },
+            datatype: "json",
+            success: function (data) {
+                tmpData = data;
+                console.log(tmpData);
+                if (tmpData.isSubTaskEditAllowed == false && isReadOnlyMode != "True") {
+                    disabled = true;
+                }
+                else {
+                    disabled = false;
+                }
+                getSubTasksList();
+            },
+            error: function () {
+                alert("Dynamic content load failed.");
+            }
+        });
+
+    }
 
 function setFormState() {
 
@@ -348,13 +385,16 @@ function setFormState() {
                 $("#editBtnDiv").hide();
             }
 
+            if (isReadOnlyMode != "True") {
+                if (tmpData.isSubTaskEditAllowed == true) {
+                    disabled = false;
+                }
+                else {
+                    //i need to discuss with Usman
+                    disabled = true;
+                }
+            }
 
-            if (tmpData.isSubTaskEditAllowed == true) {
-                disabled = false;
-            }
-            else {
-                disabled = true;
-            }
             getSubTasksList();
         },
         error: function () {
@@ -553,6 +593,7 @@ progressUpdatePlaceHolder.on('click', '[data-save="modal"]', function (event) {
                     $("input.knob").trigger('change');
                 }, 100);
             progressUpdatePlaceHolder.find('.modal').modal('hide');
+            setSubTaskSectionState();
         }
     });
 });
@@ -606,8 +647,9 @@ function getSubTasksList() {
         "&nbsp;<input name = \"subTaskInput\" id=\"inputtaskid\" value=\"tasktitle\" " + disableThis + " class=\"w-100\" />" +
         "</div>" +
         "<div class=\"col-6 d-flex align-items-center\">" +
-        "<i class=\"far fa-user-circle mr-1\" style=\"font-size:24px\" aria-hidden=\"true\">" +
-        "</i>" +
+        //"<i class=\"far fa-user-circle mr-1\" style=\"font-size:24px\" aria-hidden=\"true\">" +
+        //"</i>" +
+        "<img name=\"subTaskEmployeeAvatar\" src=\"../dist/img/user2-160x160.jpg\" width=\"40px\" height=\"40px\" class=\"img-circle elevation-2\" alt=\"User Image\" />" +
         "<a " + disableThis + " href=\"javascript:void(null);\" class=\"text-underline\" name=\"employeeLink\" rel=\"nofollow noreferrer\">linkUserName</a>" +
         "<div class=\"form-group mb-0 w-100\" name=\"employeeDrpDwndiv\" style=\"display:none;\">" +
         "employeeOptions" +
@@ -650,6 +692,7 @@ function getSubTasksList() {
                     if (tmpData.subTaskVMList[i].isCompleted == true) {
                         isSubTaskCompleted = "checked";
                     }
+                    console.log(isSubTaskCompleted);
                     newBody = newBody.replace("checkboxtaskid", tmpData.subTaskVMList[i].subTaskId);
                     newBody = newBody.replace("inputtaskid", tmpData.subTaskVMList[i].subTaskId);
                     newBody = newBody.replace("deletetaskid", tmpData.subTaskVMList[i].subTaskId);
@@ -802,6 +845,11 @@ function getSubTasksList() {
                     $(this).closest('.row').find('[name="employeeDrpDwndiv"]').show();
                 });
             }
+            else {
+                $("i[name='delete']").hide();
+                $("a[name='employeeLink']").removeClass('text-underline');
+                $("a[name='employeeLink']").removeAttr("href");
+            }
 
         },
         error: function () {
@@ -896,7 +944,7 @@ function appendEmployeeList() {
 
     var cardBody = "<div class=\"d-flex justify-content-between flex-wrap-xs\">" +
         "<div class=\"d-flex align-items-center\">" +
-        "<img name=\"employeeAvatar\" src=\"../dist/img/user2-160x160.jpg\" width=\"15%\" height=\"60%\" class=\"img-circle elevation-2\" alt=\"User Image\"></img>" +
+        "<img name=\"employeeAvatar\" src=\"../dist/img/user2-160x160.jpg\" width=\"40px\" height=\"40px\" class=\"img-circle elevation-2\" alt=\"User Image\"></img>" +
         "&nbsp;<a href=\"javascript: void(null);\" data-username=\"employeeusername\" name=\"employeeDetailLink\">employeeName</a>&nbsp" +
         "<i class=\"fas fa-wifi\" aria-hidden=\"true\"></i>" +
         "</div>" +

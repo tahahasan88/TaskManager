@@ -300,7 +300,7 @@
                                },
                                search: { regex: true, caseInsensitive: true },
                                ajax: {
-                                   "url": baseUrl + "/employeeDetail/LoadEmployeeTasksData",
+                                   "url": baseUrl + "/employeeDetail/LoadEmployeeTasksData?username=" + userName,
                                    "type": "POST",
                                    "datatype": "json"
                                },
@@ -344,6 +344,7 @@
                                searching: false,
                                //pageLength: 10,
                                //"scrollY": 200,
+                               //"scrollX" : 200,
                                initComplete: function (settings, json) {
                                    if (this.api().data().length == 0) {
                                         $("#followupCount").hide();
@@ -391,7 +392,7 @@
                                },
                                search: { regex: true, caseInsensitive: true },
                                ajax: {
-                                   "url": baseUrl + "/employeeDetail/LoadEmployeeFollowUps",
+                                   "url": baseUrl + "/employeeDetail/LoadEmployeeFollowUps?username=" + currentUserName,
                                    "type": "POST",
                                    "datatype": "json"
                                },
@@ -403,7 +404,7 @@
                                    },
                                    {
                                         "render": function (data, type, full, meta) {
-                                            return '<img name="employeeAvatar" src="../dist/img/user2-160x160.jpg" width="20%" height="20%" class="img-circle elevation-2" alt="User Image"></img>'
+                                            return '<img name="employeeAvatar" src="../dist/img/user2-160x160.jpg" width="40px" height="40px" class="img-circle elevation-2" alt="User Image"></img>'
                                                 + '&nbsp;&nbsp;<span>' + full.followUpEmployeeName + '</span>';
                                         }
                                    },

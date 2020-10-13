@@ -162,6 +162,15 @@
                                 data: pieData,
                                 options: pieOptions
                             });
+
+                            if (this.api().data().length == 0) {
+                                $('#pieChart2').hide();
+                                $('#followUpPiDiv').hide();
+                                $("#tasksPiDiv").removeClass("col-md-6 d-flex justify-content-center");
+                                $("#tasksPiDiv").addClass("col-md-12 d-flex justify-content-center");
+                                $("#textset1").hide();
+                                $("#textset2").show();
+                            }
                         },
                         search: { regex: true, caseInsensitive: true },
                         ajax: {
@@ -178,7 +187,7 @@
                             },
                             {
                                 "render": function (data, type, full, meta) {
-                                    return '<img name="employeeAvatar" src="../dist/img/user2-160x160.jpg" width="20%" height="20%" class="img-circle elevation-2" alt="User Image"></img>'
+                                    return '<img name="employeeAvatar" src="../dist/img/user2-160x160.jpg" width="40px" height="40px" class="img-circle elevation-2" alt="User Image"></img>'
                                         + '&nbsp;&nbsp;<span>' + full.followUpEmployeeName + '</span>';
                                 }
                             },
@@ -318,7 +327,7 @@
 
         var assignedToValues = '';
         $('#assignSelectValuesId > option:selected').each(function () {
-            assignedToValues += $(this).val() + "|";
+            assignedToValues += $(this).text().trimEnd() + "|";
         });
         if (assignedToValues.length > 0) {
             assignedToValues = assignedToValues.substring(0, assignedToValues.length - 1);
@@ -356,12 +365,14 @@
             }
         }
 
+
         if (isValid) {
             tasksTable.column(2).search(taskName, true, false)
                 .column(3).search(selectStatuses, true, false)
                 .column(5).search(assignedToValues, true, false)
-                .column(7).search(createdBy, true, false)
+                .column(7).search(createdBy, true, false, false)
                 .draw();
+
             updateTasksSummaryGraph();
         }
     });
@@ -395,7 +406,6 @@
             totalTasks = totalTasks + 1;
         });
 
-        console.log(notStartedTasks);
         $("#notStartedTaskId").val(notStartedTasks).trigger('change');
         $("#inProgressTaskId").val(inProgressTasks).trigger('change');
         $("#cancelledTasksId").val(cancelledTasks).trigger('change');
@@ -530,6 +540,8 @@
             if (isValid) {
                 isValid = validateTargetDateFilter(data[8]);
             }
+            //console.log(isValid);
+            //alert(isValid);
             return isValid;
         }
     );
@@ -648,7 +660,7 @@
                 { "data": "targetDate", "name": "Target Date", "autoWidth": true, "visible": false, "searchable": true },
                 { "data": "progress", "name": "ProgressVal", "autoWidth": true, "visible": false, "searchable": true },
             ],
-            order: [[1, 'desc']]
+            order: [[5, 'desc']]
         });
 
     var taskCreationPlaceHolder = $('#modal-default');
