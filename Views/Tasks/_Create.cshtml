@@ -1,5 +1,8 @@
 ﻿@model TaskManager.Web.Models.TaskCreateViewModel
 
+
+
+
 <div class="modal fade" id="modal-task">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -15,9 +18,9 @@
             <div class="modal-body">
                 <form asp-action="Create">
                     <input name="IsValid" type="hidden" value="@ViewData.ModelState.IsValid.ToString()" />
-                    <div class="form-group">
+                    <div class="form-group required">
                         <label asp-for="@Model.Title" class="control-label"></label>
-                        <input asp-for="@Model.Title" class="form-control" />
+                        <input asp-for="@Model.Title" required="required" class="form-control" />
                         <span asp-validation-for="@Model.Title" class="text-danger"></span>
                     </div>
                     <div class="form-group">
@@ -60,7 +63,14 @@
                     </div>
                     <div class="form-group">
                         <label asp-for="@Model.Target" class="control-label"></label>
-                        <input asp-for="@Model.Target" asp-format="{0:dd-MM-yyyy}" class="form-control" />
+
+                        <div class="input-group date" id="reservationdate" data-target-input="nearest">
+                            <input name="Target" id="Target" type="text" class="form-control datetimepicker-input" data-target="#reservationdate" />
+                            <div class="input-group-append" data-target="#reservationdate" data-toggle="datetimepicker">
+                                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                            </div>
+                        </div>
+
                         <span asp-validation-for="@Model.Target" class="text-danger"></span>
                     </div>
                     <div class="form-group">

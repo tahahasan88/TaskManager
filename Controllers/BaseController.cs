@@ -55,9 +55,9 @@ namespace TaskManager.Web.Controllers
             List<Employee> employees = _context.Employees.Include(x => x.Department).ToList();
             foreach (TaskEmployee employee in taskEmployees)
             {
-                if (employee.UserName != null && employee.UserName != currentUserName)
+                if (employee.Employee != null && employee.Employee.UserCode != currentUserName)
                 {
-                    listOfEmployeeEmailAddress.Add(employees.Where(x => x.UserCode == employee.UserName)
+                    listOfEmployeeEmailAddress.Add(employees.Where(x => x.UserCode == employee.Employee.UserCode)
                         .SingleOrDefault().EmailAddress);
                 }
             }
@@ -67,7 +67,7 @@ namespace TaskManager.Web.Controllers
         protected virtual bool IsThisUserManagingThisDepartment(Department thisDepartment, string userName)
         {
             bool isThisUserManager = false;
-            if (thisDepartment.Manager.UserName == userName)
+            if (thisDepartment.Manager.UserCode == userName)
             {
                 return true;
             }
@@ -77,7 +77,7 @@ namespace TaskManager.Web.Controllers
                 thisDepartment = parentDepartment;
                 while (thisDepartment != null)
                 {
-                    if (thisDepartment.Manager.UserName == userName)
+                    if (thisDepartment.Manager.UserCode == userName)
                     {
                         isThisUserManager = true;
                         break;
@@ -87,7 +87,7 @@ namespace TaskManager.Web.Controllers
             }
             else
             {
-                isThisUserManager = thisDepartment.Manager.UserName == userName;
+                isThisUserManager = thisDepartment.Manager.UserCode == userName;
             }
             return isThisUserManager;
         }
@@ -130,9 +130,10 @@ namespace TaskManager.Web.Controllers
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 string sqlQuery = "select taskdata.UserCode, taskdata.TaskStatusId, count(taskdata.id) as taskCount from " +
-                    "(select distinct Tasks.id, Tasks.TaskStatusId, TaskEmployees.UserName as UserCode from Tasks " +
+                    "(select distinct Tasks.id, Tasks.TaskStatusId, Employees.UserCode as UserCode from Tasks " +
                     "inner join TaskEmployees on TaskEmployees.TaskId = Tasks.Id " +
-                    "where TaskEmployees.IsActive = 1 " +
+                    "inner join Employees on Employees.Id = TaskEmployees.EmployeeId " +
+                    "where TaskEmployees.IsActive = 1" + 
                     "and Tasks.isdeleted = 0) " +
                     "as taskdata " +
                     "group by taskdata.TaskStatusId,taskdata.UserCode";
@@ -175,42 +176,6 @@ namespace TaskManager.Web.Controllers
         }
 
 
-        protected virtual void GetUserData(string connectionString, bool isManager, int deptId, Dictionary<string, string> userDataDictionary)
-        {
-            string sqlQuery = string.Empty;
-
-            using (SqlConnection conn = new SqlConnection(connectionString))
-            {
-                if (isManager)
-                {
-                    sqlQuery = "select UserName, EmployeeName from employees where DepartmentId = " + deptId +  
-                    "union " +
-                    "select UserName, EmployeeName from employees where id in (select managerId from Departments where ParentDepartmentId = " + deptId + ") " +
-                    "union " +
-                    "select UserName, EmployeeName from employees where id in (select managerId from Departments where ParentDepartmentId = " +
-                    "(select ParentDepartmentId from Departments where Id = " + deptId + "))";
-                }
-                else
-                {
-                    sqlQuery = "select UserName, EmployeeName from employees where DepartmentId = " + deptId + "";
-                }
-
-                conn.Open();
-                var queryResult = conn.Query(sqlQuery);
-                foreach (var result in queryResult)
-                {
-                    if (userDataDictionary.ContainsKey(result.UserName))
-                    {
-                        userDataDictionary[result.UserName].Add(result.EmployeeName);
-                    }
-                    else
-                    {
-                        userDataDictionary.Add(result.UserName, result.EmployeeName);
-                    }
-                }
-            }
-        }
-
         protected List<AssigneeDropDownViewModel> LoadAssigneeDrpDwnData(string username)
         {
             var connectionString = _iconfiguration.GetConnectionString("DefaultConnection");
@@ -237,12 +202,12 @@ namespace TaskManager.Web.Controllers
                 bool isThisEmployeeNonManager = false;
                 if (!isThisEmployeeManager)
                 {
-                    isThisEmployeeNonManager = employees.Where(x => x.Department.Id == department.Id && x.UserName == username).Any();
+                    isThisEmployeeNonManager = employees.Where(x => x.Department.Id == department.Id && x.UserCode == username).Any();
                 }
                 foreach (Employee employee in employees.Where(x => x.Department.Id == department.Id))
                 {
                     
-                    if (userDataDictionary.ContainsKey(employee.UserName))
+                    if (userDataDictionary.ContainsKey(employee.UserCode))
                     {
                         if (isThisEmployeeManager
                             || isThisEmployeeNonManager)
@@ -287,17 +252,17 @@ namespace TaskManager.Web.Controllers
                 bool isThisEmployeeNonManager = false;
                 if (!isThisEmployeeManager)
                 {
-                    isThisEmployeeNonManager = employees.Where(x => x.Department.Id == department.Id && x.UserName == username).Any();
+                    isThisEmployeeNonManager = employees.Where(x => x.Department.Id == department.Id && x.UserCode == username).Any();
                 }
 
                 foreach (Employee employee in employees.Where(x => x.Department.Id == department.Id))
                 {
-                    if (userDataDictionary.ContainsKey(employee.UserName))
+                    if (userDataDictionary.ContainsKey(employee.UserCode))
                     {
                         if (isThisEmployeeManager
                             || isThisEmployeeNonManager
-                            || employee.UserName == defaultAssignee
-                            || subTaskAssignee.Contains(employee.UserName)
+                            || employee.UserCode == defaultAssignee
+                            || subTaskAssignee.Contains(employee.UserCode)
                             )
                         {
                             CreateAssigneeRows(assigneeVM, employee, ++tagCounter, assigneeRow.DepartmentLevel);
@@ -319,7 +284,7 @@ namespace TaskManager.Web.Controllers
             newRow.TagName = employee.EmployeeName;
             newRow.TagId = tagId;
             newRow.DepartmentLevel = deptLevel;
-            newRow.TagUserName = employee.UserName;
+            newRow.TagUserName = employee.UserCode;
             assigneeVM.Add(newRow);
         }
 

@@ -27,6 +27,7 @@ namespace TaskManager.Web.Controllers
             List<TaskAudit> auditList = await _context.TaskAudit
                 .Include(x => x.Task)
                 .Include(x => x.Type)
+                .Include(x => x.ActionBy)
                 .Where(x => x.Task.Id == taskId)
                 .OrderByDescending(x => x.ActionDate)
                 .ToListAsync();
@@ -36,7 +37,7 @@ namespace TaskManager.Web.Controllers
                 auditVMList.Add(new HistoryViewModel()
                 {
                     HistoryDate = auditTask.ActionDate.ToString("dd-MMM-yyyy HH:mm:ss"),
-                    ActionBy = auditTask.ActionBy,
+                    ActionBy = auditTask.ActionBy.EmployeeName,
                     Description = auditTask.Description,
                     Type = auditTask.Type.Id
                 });

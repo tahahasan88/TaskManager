@@ -366,6 +366,11 @@
                         showReportDetails($(this).attr("data-username"), onHoldTaskStatusId);
                     });
 
+                     $("span[name='cancelledTasks']").click(function () {
+                         //alert($(this).attr("data-username"));
+                         showReportDetails($(this).attr("data-username"), cancelledTaskStatusId);
+                    });
+
                     function showReportDetails(userName, statusId) {
 
                         $.ajax({
@@ -401,6 +406,9 @@
                                             else if (statusId == onHoldTaskStatusId) {
                                                 thisTaskStatus = "On Hold";
                                             }
+                                            else if (statusId == cancelledTaskStatusId) {
+                                                thisTaskStatus = "Cancelled";
+                                            }
 
                                             $("#reportUserDetailHeading").html(this.api().data().length +  " " + thisTaskStatus + " task(s) under " + userName);
 
@@ -430,11 +438,11 @@
                                         }
                                         else
                                         if (full.status == "OnHold") {
-                                            return '<span class="badge badge-onhold">On Hold</span>';
+                                            return '<span class="badge badge-secondary">On Hold</span>';
                                         }
                                         else
                                         if (full.status == "Cancelled") {
-                                            return '<span class="badge badge-cancelledtask">Cancelled</span>';
+                                            return '<span class="badge badge-secondary">Cancelled</span>';
                                         }
                                         else
                                             return '<span class="badge badge-success">Completed</span>';
@@ -518,7 +526,7 @@
                 {
                         "render": function (data, type, full, meta) {
                             if (full.onHoldTasksCount != "0") {
-                                return '<span name="onHoldTasks" data-username="'+full.tagUserName+'" class="badge badge-onhold">' + full.onHoldTasksCount + '</span>';
+                                return '<span name="onHoldTasks" data-username="'+full.tagUserName+'" class="badge badge-secondary">' + full.onHoldTasksCount + '</span>';
                             }
                             else {
                                 return '';
@@ -529,7 +537,7 @@
                 {
                         "render": function (data, type, full, meta) {
                             if (full.cancelledTasksCount != "0") {
-                                return '<span name="cancelledTasks" data-username="'+full.tagUserName+'" class="badge badge-cancelledtask">' + full.cancelledTasksCount + '</span>';
+                                return '<span name="cancelledTasks" data-username="'+full.tagUserName+'" class="badge badge-secondary">' + full.cancelledTasksCount + '</span>';
                             }
                             else {
                                 return '';

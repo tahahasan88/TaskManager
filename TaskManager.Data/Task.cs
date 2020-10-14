@@ -15,8 +15,8 @@ namespace TaskManager.Data
         public bool IsDeleted { get; set; }
         public virtual TaskPriority TaskPriority { get; set; }
         public DateTime LastUpdatedAt { get; set; }
-        [ForeignKey("TaskEmployee")]
-        public string LastUpdatedBy { get; set; }
+        [ForeignKey("Employee")]
+        public virtual Employee LastUpdatedBy { get; set; }
         public DateTime CreatedAt { get; set; }
 
     }

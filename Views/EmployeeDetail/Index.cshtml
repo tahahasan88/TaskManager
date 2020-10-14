@@ -25,14 +25,40 @@
     }
 
      #employeeTasksTable th {
-          background-color: #343a40;
+          background-color: #343a40 !important;
           color: white;
      }
 
      #employeefollowUpsTable th {
-         background-color: #343a40;
+         background-color: #343a40 !important;
          color: white;
      }
+
+    .dataTables_scrollHead {
+        width: 100% !important; 
+    }
+
+    .dataTables_scrollHead th{
+        background-color: #343a40 !important;
+        color: white;
+    }
+
+    .dataTables_scrollHeadInner {
+        width: 100% !important;
+    }
+
+    .dataTables_scrollHeadInner th {
+        background-color: #343a40 !important;
+        color: white;
+    }
+
+    /*.dataTables_scrollBody tr {
+        width: 100% !important;
+    }*/
+
+    .dataTable  {
+        width: 100% !important;
+    }
 
      .profile-usertitle-name {
         color: #5a7391;
@@ -172,7 +198,7 @@
                                                 <div class="col-md-12">
                                                     <div class="card">
                                                         <div class="card-body">
-                                                            <table id="employeeTasksTable" class="table table-bordered table-hover" style="width:80%">
+                                                            <table id="employeeTasksTable" class="table table-bordered emptaskTable table-hover" width="100%">
                                                                 <thead>
                                                                     <tr>
                                                                         <th>Title</th>
@@ -194,7 +220,7 @@
                                                     <div class="card">
                                                         <div class="card-body">
                                                             <div class="table-responsive">
-                                                                <table id="employeefollowUpsTable" class="table table-bordered table-hover" style="width:80%">
+                                                                <table id="employeefollowUpsTable" width="100%" class="table table-bordered table-hover">
                                                                     <thead>
                                                                         <tr>
                                                                             <th>Title</th>

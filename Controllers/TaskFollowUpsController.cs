@@ -30,7 +30,7 @@ namespace TaskManager.Web.Controllers
         {
             SetUserName();
             ViewData["UserName"] = currentUserName;
-            Employee employee = _context.Employees.Where(x => x.UserName == currentUserName).SingleOrDefault();
+            Employee employee = _context.Employees.Where(x => x.UserCode == currentUserName).SingleOrDefault();
             ViewData["EmployeeName"] = employee == null ? "" : employee.EmployeeName;
             return View(await _context.TaskFollowUps.ToListAsync());
         }
@@ -58,18 +58,18 @@ namespace TaskManager.Web.Controllers
         {
             var filteredTaskInbox = (from c in _context.TaskFollowUps
                                  join o in _context.TaskEmployees
-                                 .Where(x=>x.UserName == currentUserName)
+                                 .Where(x=>x.Employee.UserCode == currentUserName)
                                  .Where(x => x.Task.IsDeleted == false)
                                  on c.Task.Id equals o.Task.Id
                                  select new
                                  {
-                                     c.FollowerUserName,
+                                     c.Follower.UserCode,
                                      c.LastUpdatedAt,
                                      c.Remarks,
                                      c.Task.Id,
                                      c.Task.TaskStatus.Status
                                  })
-                                 .Where(x => x.FollowerUserName != currentUserName)
+                                 .Where(x => x.UserCode != currentUserName)
                                  .OrderByDescending(m => m.LastUpdatedAt);
             TaskFollowUpMailBoxViewModel taskFollowUpMailBoxVM = new TaskFollowUpMailBoxViewModel();
             taskFollowUpMailBoxVM.InBoxFollowUpList = new List<TaskFollowUpInboxViewModel>();
@@ -83,14 +83,14 @@ namespace TaskManager.Web.Controllers
                         Remarks = inbox.Remarks,
                         UpdatedDate = inbox.LastUpdatedAt.ToString("dd-MMM-yyyy"),
                         TaskInfo = inbox.Id.ToString(),
-                        FollowUpFrom = inbox.FollowerUserName,
+                        FollowUpFrom = inbox.UserCode,
                         Status = inbox.Status
                     }); 
             }
             var filteredTaskOutbox =  await _context.TaskFollowUps
                 .Include(x => x.Task)
                 .Include(x => x.Task.TaskStatus)
-                .Where(x => x.FollowerUserName == currentUserName).ToListAsync();
+                .Where(x => x.Follower.UserCode == currentUserName).ToListAsync();
             foreach (var outbox in filteredTaskOutbox)
             {
                 taskFollowUpMailBoxVM.OutBoxFollowUpList.Add(
@@ -117,19 +117,19 @@ namespace TaskManager.Web.Controllers
                 }
                 var filteredTaskInbox = (from c in _context.TaskFollowUps
                                          join o in _context.TaskEmployees
-                                         .Where(x => x.UserName == currentUserName &&
+                                         .Where(x => x.Employee.UserCode == currentUserName &&
                                           x.IsActive == true && x.Task.IsDeleted == false)
                                          on c.Task.Id equals o.Task.Id
                                          select new
                                          {
-                                             c.FollowerUserName,
+                                             c.Follower.UserCode,
                                              c.LastUpdatedAt,
                                              c.Remarks,
                                              c.Task.Title,
                                              c.Task.TaskStatus.Status,
                                              c.Task.Id
                                          })
-                                 .Where(x => x.FollowerUserName != currentUserName)
+                                 .Where(x => x.UserCode != currentUserName)
                                  .OrderByDescending(m => m.LastUpdatedAt);
 
                 int recordsTotal = filteredTaskInbox.Count();
@@ -145,8 +145,8 @@ namespace TaskManager.Web.Controllers
                             Remarks = inbox.Remarks,
                             UpdatedDate = inbox.LastUpdatedAt.ToString("dd-MMM-yyyy"),
                             TaskInfo = inbox.Title,
-                            FollowUpFrom = inbox.FollowerUserName,
-                            FollowUpEmployeeName = employees.Where(x => x.UserCode == inbox.FollowerUserName).SingleOrDefault().EmployeeName,
+                            FollowUpFrom = inbox.UserCode,
+                            FollowUpEmployeeName = employees.Where(x => x.UserCode == inbox.UserCode).SingleOrDefault().EmployeeName,
                             Status = inbox.Status,
                             TaskId = inbox.Id
                         }); ;
@@ -177,14 +177,14 @@ namespace TaskManager.Web.Controllers
                                           on c.Task.Id equals o.Task.Id
                                           select new
                                           {
-                                              c.FollowerUserName,
+                                              c.Follower.UserCode,
                                               c.LastUpdatedAt,
                                               c.Remarks,
                                               c.Task.Title,
                                               c.Task.TaskStatus.Status,
                                               c.Task.Id
                                           })
-                                 .Where(x => x.FollowerUserName == currentUserName)
+                                 .Where(x => x.UserCode == currentUserName)
                                  .Distinct()
                                  .OrderByDescending(m => m.LastUpdatedAt);
 
@@ -220,7 +220,7 @@ namespace TaskManager.Web.Controllers
 
         public bool IsUserAlreadyFollowing(string userName, int taskId)
         {
-            var followUp = _context.TaskFollowUps.Where(x => x.FollowerUserName == userName && x.Task.Id == taskId).FirstOrDefault();
+            var followUp = _context.TaskFollowUps.Where(x => x.Follower.UserCode == userName && x.Task.Id == taskId).FirstOrDefault();
             if (followUp != null)
             {
                 return true;
@@ -249,6 +249,7 @@ namespace TaskManager.Web.Controllers
                 string [] listOfTaskIds = taskFollowUpVM.ListofTasks.Split(",");
                 Dictionary<int, List<string>> taskEmployeeDictionary = new Dictionary<int, List<string>>();
 
+                Employee currentEmployee = _context.Employees.Where(x => x.UserCode == currentUserName).SingleOrDefault();
                 foreach (string taskId in listOfTaskIds)
                 {
                     int thisTaskId = Convert.ToInt32(taskId);
@@ -257,7 +258,7 @@ namespace TaskManager.Web.Controllers
 
                     followUp.LastUpdatedAt = DateTime.Now;
                     followUp.CreatedAt = DateTime.Now;
-                    followUp.FollowerUserName = currentUserName;
+                    followUp.Follower = currentEmployee;
                     followUp.Task = Thistask;
                     followUp.Remarks = taskFollowUpVM.Remarks;
                     _context.Add(followUp);
@@ -270,13 +271,13 @@ namespace TaskManager.Web.Controllers
                         int taskFollowerCapacity = (int)Common.Common.TaskCapacity.Follower;
                         taskCreator.IsActive = true;
                         taskCreator.TaskCapacity = _context.TaskCapacities.Where(x => x.Id == taskFollowerCapacity).SingleOrDefault();
-                        taskCreator.UserName = currentUserName;
+                        taskCreator.Employee = currentEmployee;
                         _context.Add(taskCreator);
                     }
 
                     TaskAudit followUpAudit = new TaskAudit();
                     followUpAudit.ActionDate = DateTime.Now;
-                    followUpAudit.ActionBy = _context.Employees.Where(x => x.UserCode == currentUserName).SingleOrDefault().EmployeeName;
+                    followUpAudit.ActionBy = currentEmployee;
                     followUpAudit.Description = "Follow up requested for Task with title " + Thistask.Title + " and remarks are " + followUp.Remarks;
                     followUpAudit.Task = Thistask;
                     followUpAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.FollowUp).SingleOrDefault();

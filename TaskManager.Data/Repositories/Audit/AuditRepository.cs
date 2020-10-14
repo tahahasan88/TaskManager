@@ -14,14 +14,14 @@ namespace TaskManager.Data.Repositories.Audit
             _context = context;
         }
 
-        public async Task<bool> AddAudit(DateTime actionDate, string actionBy, string description, Task task, int progressType, string currentUserName)
+        public async Task<bool> AddAudit(DateTime actionDate, string actionBy, string description, Task task, int progressType, Employee employee)
         {
             bool isActionAudited = false;
             try
             {
                 TaskAudit progressAudit = new TaskAudit();
                 progressAudit.ActionDate = DateTime.Now;
-                progressAudit.ActionBy = currentUserName;
+                progressAudit.ActionBy = employee;
                 progressAudit.Description = description;
                 progressAudit.Task = task;
                 progressAudit.Type = _context.AuditType.Where(x => x.Id == progressType).SingleOrDefault();

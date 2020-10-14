@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TaskManager.Data;
 
 namespace TaskManager.Data.Migrations
 {
     [DbContext(typeof(TaskManagerContext))]
-    partial class TaskManagerContextModelSnapshot : ModelSnapshot
+    [Migration("20201014152313_V51")]
+    partial class V51
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -154,14 +156,14 @@ namespace TaskManager.Data.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("Employee")
-                        .HasColumnType("int");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<DateTime>("LastUpdatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<int?>("LastUpdatedById")
+                        .HasColumnType("int");
 
                     b.Property<string>("ProgressRemarks")
                         .HasColumnType("nvarchar(max)");
@@ -183,7 +185,7 @@ namespace TaskManager.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Employee");
+                    b.HasIndex("LastUpdatedById");
 
                     b.HasIndex("TaskPriorityId");
 
@@ -403,7 +405,7 @@ namespace TaskManager.Data.Migrations
                 {
                     b.HasOne("TaskManager.Data.Employee", "LastUpdatedBy")
                         .WithMany()
-                        .HasForeignKey("Employee");
+                        .HasForeignKey("LastUpdatedById");
 
                     b.HasOne("TaskManager.Data.TaskPriority", "TaskPriority")
                         .WithMany()

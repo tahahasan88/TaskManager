@@ -63,7 +63,7 @@ namespace TaskManager.Web.Controllers
                 using (SqlConnection conn = new SqlConnection(connectionString))
                 {
                     string sqlQuery = "select distinct Tasks.Id," +
-                    "TaskEmployees.UserName," +
+                    "Employees.UserCode," +
                     "TaskStatus.Status," +
                     "Tasks.TaskProgress," +
                     "Tasks.Title," +
@@ -71,9 +71,10 @@ namespace TaskManager.Web.Controllers
                     "Tasks.Target," +
                     "TaskStatus.Id as TaskStatusId" +
                     " from TaskEmployees" +
+                    " inner join Employees on Employees.Id = TaskEmployees.EmployeeId" + 
                     " inner join Tasks on Tasks.Id = TaskEmployees.TaskId" +
                     " inner join TaskStatus on TaskStatus.Id = Tasks.TaskStatusId" +
-                    " where TaskEmployees.UserName = '"+ userName + "'" +
+                    " where Employees.UserCode = '" + userName + "'" +
                     " and TaskEmployees.IsActive = 1" +
                     " and Tasks.IsDeleted = 0" +
                     " order by LastUpdatedAt desc";
@@ -128,12 +129,12 @@ namespace TaskManager.Web.Controllers
                 userName = userName == null ? currentUserName : userName;
                 var filteredTaskInbox = (from c in _context.TaskFollowUps
                                          join o in _context.TaskEmployees
-                                        .Where(x => x.UserName == userName &&
+                                        .Where(x => x.Employee.UserCode == userName &&
                                           x.IsActive == true && x.Task.IsDeleted == false)
                                          on c.Task.Id equals o.Task.Id
                                          select new
                                          {
-                                             c.FollowerUserName,
+                                             c.Follower.UserCode,
                                              c.LastUpdatedAt,
                                              c.Remarks,
                                              c.Task.Title,
@@ -141,7 +142,7 @@ namespace TaskManager.Web.Controllers
                                              c.Task.Id,
                                              SortId = GetSortOrderOfStatus(c.Task.TaskStatus.Id)
                                          })
-                                .Where(x => x.FollowerUserName != userName)
+                                .Where(x => x.UserCode != userName)
                                 .OrderByDescending(m => m.LastUpdatedAt);
                 var employees = _context.Employees.ToList();
 
@@ -155,8 +156,8 @@ namespace TaskManager.Web.Controllers
                             Remarks = inbox.Remarks,
                             UpdatedDate = inbox.LastUpdatedAt.ToString("dd-MMM-yyyy"),
                             TaskInfo = inbox.Title,
-                            FollowUpFrom = inbox.FollowerUserName,
-                            FollowUpEmployeeName = employees.Where(x => x.UserCode == inbox.FollowerUserName).SingleOrDefault().EmployeeName,
+                            FollowUpFrom = inbox.UserCode,
+                            FollowUpEmployeeName = employees.Where(x => x.UserCode == inbox.UserCode).SingleOrDefault().EmployeeName,
                             Status = inbox.Status,
                             TaskId = inbox.Id,
                             SortId = inbox.SortId
@@ -185,7 +186,7 @@ namespace TaskManager.Web.Controllers
             EmployeeViewModel employeeVM = new EmployeeViewModel();
 
             Employee thisEmployee = _context.Employees.Include(k => k.Department)
-                .Where(x => x.UserName == userName).SingleOrDefault();
+                .Where(x => x.UserCode == userName).SingleOrDefault();
 
             List<Department> departments = _context.Departments.Include(x => x.Manager).ToList();
 
@@ -202,12 +203,12 @@ namespace TaskManager.Web.Controllers
                 var employeeManager = (from c in _context.Employees
                                        join o in _context.Departments
                                        on c.Department.Id equals o.Id
-                                       where c.UserName == userName
+                                       where c.UserCode == userName
                                        select new
                                        {
                                            UserName = o.ParentDepartment == null ? "" :
-                                           c.Department.Manager.Id == c.Id ? o.ParentDepartment.Manager.UserName
-                                           : c.Department.Manager.UserName
+                                           c.Department.Manager.Id == c.Id ? o.ParentDepartment.Manager.UserCode
+                                           : c.Department.Manager.UserCode
                                        }
                                         );
 
@@ -235,7 +236,7 @@ namespace TaskManager.Web.Controllers
             EmployeeViewModel employeeVM = new EmployeeViewModel();
             
             Employee thisEmployee = _context.Employees.Include(k => k.Department)
-                .Where(x => x.UserName == userName).SingleOrDefault();
+                .Where(x => x.UserCode == userName).SingleOrDefault();
            
             List<Department> departments = _context.Departments.Include(x => x.Manager).ToList();
 
@@ -250,12 +251,12 @@ namespace TaskManager.Web.Controllers
             var employeeManager = (from c in _context.Employees
                                     join o in _context.Departments
                                     on c.Department.Id equals o.Id
-                                    where c.UserName == userName
+                                    where c.UserCode == userName
                                     select new
                                     {
                                         UserName = o.ParentDepartment == null ? "" :
-                                        c.Department.Manager.Id == c.Id ? o.ParentDepartment.Manager.UserName
-                                        : c.Department.Manager.UserName
+                                        c.Department.Manager.Id == c.Id ? o.ParentDepartment.Manager.UserCode
+                                        : c.Department.Manager.UserCode
                                     }
                                     );
 

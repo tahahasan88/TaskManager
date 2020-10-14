@@ -50,10 +50,10 @@ namespace TaskManager.Web.Controllers
             {
                 emmployeeVMList.Add(new TaskEmployeeListViewModel()
                 {
-                    UserName = employee.UserName,
+                    UserName = employee.Employee.EmployeeName,
                     CapacityId = employee.TaskCapacity.Id,
                     IsActive = employee.IsActive,
-                    EmployeeName = allEmployees.Where(x => x.UserCode == employee.UserName).SingleOrDefault().EmployeeName
+                    EmployeeName = allEmployees.Where(x => x.UserCode == employee.Employee.UserCode).SingleOrDefault().EmployeeName
                 });
             }
             return new JsonResult(new { records = emmployeeVMList });
@@ -68,7 +68,7 @@ namespace TaskManager.Web.Controllers
             {
                 emmployeeVMList.Add(new TaskEmployeeListViewModel()
                 {
-                    UserName = employee.UserName,
+                    UserName = employee.UserCode,
                     EmailAddress = employee.EmailAddress,
                     EmployeeName = employee.EmployeeName
                 });
@@ -82,7 +82,7 @@ namespace TaskManager.Web.Controllers
              TaskEmployee employeeProfile = _context.TaskEmployees
                 .Include(x => x.Task)
                 .Include(x => x.TaskCapacity)
-                .Where(x => x.Task.Id == taskId && x.UserName == userName)
+                .Where(x => x.Task.Id == taskId && x.Employee.UserCode == userName)
                 .FirstOrDefault();
 
             bool isAllowed = TaskPermissions.IsAllowed((Common.Common.TaskAction)actionId,(Common.Common.TaskCapacity)employeeProfile.TaskCapacity.Id);
@@ -94,7 +94,7 @@ namespace TaskManager.Web.Controllers
             List<TaskEmployee> employeeProfiles = _context.TaskEmployees
                .Include(x => x.Task)
                .Include(x => x.TaskCapacity)
-               .Where(x => x.Task.Id == taskId && x.UserName == userName && x.IsActive == true)
+               .Where(x => x.Task.Id == taskId && x.Employee.UserCode == userName && x.IsActive == true)
                .OrderBy(x => x.TaskCapacity)
                .ToList();
 
@@ -146,9 +146,9 @@ namespace TaskManager.Web.Controllers
 
         private bool IsTaskInLockedState(int taskId)
         {
-            return _context.Tasks.Where(x => x.Id == taskId && x.TaskStatus.Id == (int)Common.Common.TaskStatus.Completed
+            return _context.Tasks.Where(x => x.Id == taskId && (x.TaskStatus.Id == (int)Common.Common.TaskStatus.Completed
             || x.TaskStatus.Id == (int)Common.Common.TaskStatus.Cancelled
-            || x.TaskStatus.Id == (int)Common.Common.TaskStatus.OnHold).Any();
+            || x.TaskStatus.Id == (int)Common.Common.TaskStatus.OnHold)).Any();
         }
 
         // GET: TaskEmployees/Details/5

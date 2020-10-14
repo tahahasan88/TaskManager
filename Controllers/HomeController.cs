@@ -45,7 +45,7 @@ namespace TaskManager.Controllers
             //    != (int)TaskManager.Common.Common.TaskStatus.Completed).Count();
 
             ViewData["UserName"] = currentUserName;
-            Employee employee = _context.Employees.Where(x => x.UserName == currentUserName).SingleOrDefault();
+            Employee employee = _context.Employees.Where(x => x.UserCode == currentUserName).SingleOrDefault();
             ViewData["EmployeeName"] = employee == null ? "" : employee.EmployeeName;
             return View();
         }
@@ -60,9 +60,10 @@ namespace TaskManager.Controllers
 
                 sqlQuery = "select distinct TaskFollowUps.TaskId, Remarks,TaskFollowUps.LastUpdatedAt from TaskFollowUps" +
                    " inner join TaskEmployees on TaskEmployees.TaskId = TaskFollowUps.TaskId" +
+                   " inner join Employees on TaskEmployees.EmployeeId = Employees.Id" +
                    " inner join Tasks on Tasks.Id = TaskFollowUps.TaskId" +
-                   " where TaskFollowUps.FollowerUserName != '"+ userName + "'" +
-                   " and TaskEmployees.UserName = '"+ userName + "'";
+                   " where TaskFollowUps.FollowerId != ( select Id from Employees where userCode = '"+ userName + "')" +
+                   " and TaskEmployees.EmployeeId = ( select Id from Employees where userCode = '" + userName + "')";
                 conn.Open();
 
                 var queryResult = conn.Query(sqlQuery);
@@ -94,7 +95,7 @@ namespace TaskManager.Controllers
             var taskEmployees = (from c in _context.TaskEmployees
                                  .Where(k => k.IsActive == true && k.Task.IsDeleted == false)
                                  join o in _context.Employees
-                                 on c.UserName equals o.UserCode
+                                 on c.Employee.UserCode equals o.UserCode
                                  join tc in _context.TaskCapacities
                                  on c.TaskCapacity.Id equals tc.Id
                                  join dept in _context.Departments
@@ -123,12 +124,12 @@ namespace TaskManager.Controllers
                     )
                 {
                     if (task.StatusId != (int)TaskManager.Common.Common.TaskStatus.Completed
-                        && task.IsDeleted != true && task.Target >= DateTime.Now)
+                        && task.IsDeleted != true && task.Target.Date >= DateTime.Now.Date)
                     {
                         taskSummaryVM.PendingTasksCount += 1;
                     }
                     if (task.StatusId != (int)TaskManager.Common.Common.TaskStatus.Completed
-                       && task.IsDeleted != true && DateTime.Now > task.Target)
+                       && task.IsDeleted != true && DateTime.Now.Date > task.Target.Date)
                     {
                         taskSummaryVM.OverDueTasksCount += 1;
                     }
@@ -149,7 +150,7 @@ namespace TaskManager.Controllers
             bool isThisUserManager = false;
 
             string managerUserName = _context.Departments.Where(x => x.Id == thisDepartment.Id)
-                .Select(x => x.Manager).SingleOrDefault().UserName;
+                .Select(x => x.Manager).SingleOrDefault().UserCode;
 
             if (managerUserName == userName)
             {
@@ -161,7 +162,7 @@ namespace TaskManager.Controllers
                 thisDepartment = parentDepartment;
                 while (thisDepartment != null)
                 {
-                    managerUserName = _context.Departments.Where(x => x.Id == thisDepartment.Id).Select(x => x.Manager).SingleOrDefault().UserName;
+                    managerUserName = _context.Departments.Where(x => x.Id == thisDepartment.Id).Select(x => x.Manager).SingleOrDefault().UserCode;
                     if (managerUserName == userName)
                     {
                         isThisUserManager = true;
@@ -172,7 +173,7 @@ namespace TaskManager.Controllers
             }
             else
             {
-                managerUserName = _context.Departments.Where(x => x.Id == thisDepartment.Id).Select(x => x.Manager).SingleOrDefault().UserName;
+                managerUserName = _context.Departments.Where(x => x.Id == thisDepartment.Id).Select(x => x.Manager).SingleOrDefault().UserCode;
                 isThisUserManager = managerUserName == userName;
             }
             return isThisUserManager;

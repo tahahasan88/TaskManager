@@ -420,13 +420,20 @@ function setFormState() {
                 taskEditPlaceHolder.find('.modal').modal('show');
 
                 var month = $("#TargetVal").val().split("/")[0];
+                month = month - 1;
                 var date = $("#TargetVal").val().split("/")[1];
                 var remaining = $("#TargetVal").val().split("/")[2];
-                month = month.length == 1 ? ("0" + month) : month;
-                date = date.length == 1 ? ("0" + date) : date;
+                //month = month.length == 1 ? ("0" + month) : month;
+                //date = date.length == 1 ? ("0" + date) : date;
                 var year = remaining.split(" ")[0];
 
-                $("#Target").val(year + "-" + month + "-" + date);
+                //$("#Target").val(year + "-" + month  + "-" + date);
+
+                $('#reservationdate').datetimepicker({
+                    format: 'DD-MMM-yyyy',
+                    date: new Date(year, month, date, 0, 0, 0, 0)
+                });
+
             },
             error: function () {
                 alert("Dynamic content load failed.");
@@ -442,7 +449,22 @@ function setFormState() {
         $(this).parents('.modal').find('#AssigneeCode').val($("#assigneeDrpDown").val());
         
         $("#Id").val(taskId);
-        $("#TargetVal").val($("#Target").val());
+        //$("#TargetVal").val($("#Target").val());
+        var dateInstance = $("#Target").val().split("-");
+        var date = dateInstance[0];
+        var month = dateInstance[1];
+        var year = dateInstance[2];
+
+        var monthDict = {
+            "Jan": 1, "Feb": 2, "Mar": 3, "Apr": 4, "May": 5, "Jun": 6,
+            "Jul": 7, "Aug": 8, "Sep": 9, "Oct": 10, "Nov": 11, "Dec": 12
+        };
+
+        $("#Target").html(monthDict[month] + "/" + date + "/" + year);
+        $("#Target").val(monthDict[month] + "/" + date + "/" + year);
+        $("#TargetVal").val(monthDict[month] + "/" + date + "/" + year);
+
+
         var dataToSend = form.serialize();
         var buttonClickedId = $(this).attr('id');
         $("#spinnerCreate").show();
@@ -455,11 +477,9 @@ function setFormState() {
             $("#spinnerCreate").hide();
             if (isValid) {
                 alert("Task updated");
-                var month = $("#TargetVal").val().split("-")[1];
-                var date = $("#TargetVal").val().split("-")[2];
-                var year = $("#TargetVal").val().split("-")[0];
-                splitDate = date.split("T");
-                date = date.split("T")[0];
+                var month = $("#TargetVal").val().split("/")[0];
+                var date = $("#TargetVal").val().split("/")[1];
+                var year = $("#TargetVal").val().split("/")[2];
 
                 const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
                     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
@@ -475,6 +495,16 @@ function setFormState() {
                 taskEditPlaceHolder.find('.modal').modal('hide');
                 appendEmployeeList();
                 getHistoryList();
+            }
+            else {
+                dateInstance = $("#TargetVal").val().split('/');
+                year = dateInstance[2];
+                month = dateInstance[0];
+                date = dateInstance[1];
+                $('#reservationdate').datetimepicker({
+                    format: 'DD-MMM-yyyy',
+                    date: new Date(year, month - 1, date, 0, 0, 0, 0)
+                });
             }
         });
     });

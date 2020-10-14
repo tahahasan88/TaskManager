@@ -7,6 +7,6 @@ namespace TaskManager.Data.Repositories.Audit
 {
     public interface IAuditRepository
     {
-        Task<bool> AddAudit(DateTime actionDate, string actionBy, string description, Task task, int progressType, string currentUserName);
+        Task<bool> AddAudit(DateTime actionDate, string actionBy, string description, Task task, int progressType, Employee currentUserName);
     }
 }

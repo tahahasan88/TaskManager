@@ -9,7 +9,7 @@ namespace TaskManager.Data
         public int Id { get; set; }
         public AuditType Type { get; set; }
         public string Description { get; set; }
-        public string ActionBy { get; set; }
+        public virtual Employee ActionBy { get; set; }
         public Task Task { get; set; }
         public DateTime ActionDate { get; set; }
     }

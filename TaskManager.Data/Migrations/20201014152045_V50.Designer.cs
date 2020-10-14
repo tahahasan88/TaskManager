@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TaskManager.Data;
 
 namespace TaskManager.Data.Migrations
 {
     [DbContext(typeof(TaskManagerContext))]
-    partial class TaskManagerContextModelSnapshot : ModelSnapshot
+    [Migration("20201014152045_V50")]
+    partial class V50
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -154,9 +156,6 @@ namespace TaskManager.Data.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("Employee")
-                        .HasColumnType("int");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -168,6 +167,9 @@ namespace TaskManager.Data.Migrations
 
                     b.Property<DateTime>("Target")
                         .HasColumnType("datetime2");
+
+                    b.Property<int?>("TaskManager.Data.LastUpdatedBy")
+                        .HasColumnType("int");
 
                     b.Property<int?>("TaskPriorityId")
                         .HasColumnType("int");
@@ -183,7 +185,7 @@ namespace TaskManager.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Employee");
+                    b.HasIndex("TaskManager.Data.LastUpdatedBy");
 
                     b.HasIndex("TaskPriorityId");
 
@@ -403,7 +405,7 @@ namespace TaskManager.Data.Migrations
                 {
                     b.HasOne("TaskManager.Data.Employee", "LastUpdatedBy")
                         .WithMany()
-                        .HasForeignKey("Employee");
+                        .HasForeignKey("TaskManager.Data.LastUpdatedBy");
 
                     b.HasOne("TaskManager.Data.TaskPriority", "TaskPriority")
                         .WithMany()

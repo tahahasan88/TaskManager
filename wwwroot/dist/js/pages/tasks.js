@@ -7,6 +7,22 @@
     var fromTargetDate = '';
     var toTargetDate = '';
 
+    //$(".datePicker").datepicker({ dateFormat: 'yyyy-MM-dd' }).focus();
+
+    //$(document).on('click', '.datePicker', function () {
+    //    var me = $(".datePicker");
+    //    me.datepicker({
+    //        showOn: 'focus',
+    //        altFormat: "mm/dd/yy",
+    //        dateFormat: "mm/dd/yy",
+    //        minDate: '12/12/2000',
+    //        maxDate: '12/12/2020'
+    //    }).focus();
+    //    me.mask('99/99/9999');
+    //}).on('select', '.datePicker', function () {
+    //    var me = $(".datePicker");
+    //    me.mask('99/99/9999');
+    //});
     
 
     //Initialize Select2 Elements
@@ -684,10 +700,13 @@
                 var month = $("#TargetVal").val().split("/")[0];
                 var date = $("#TargetVal").val().split("/")[1];
                 var remaining = $("#TargetVal").val().split("/")[2];
-                month = month.length == 1 ? ("0" + month) : month;
-                date = date.length == 1 ? ("0" + date) : date;
+                month = month - 1;
                 var year = remaining.split(" ")[0];
-                $("#Target").val(year + "-" + month + "-" + date);
+                //$("#Target").val(year + "-" + month + "-" + date);
+                $('#reservationdate').datetimepicker({
+                    format: 'DD-MMM-yyyy',
+                    date: new Date(year, month, date, 0, 0, 0, 0)
+                });
             },
             error: function () {
                 alert("Dynamic content load failed.");
@@ -765,7 +784,7 @@
                         {
                             "min": 0,
                             "max": tmpData.totalTasksCount,
-                            "fgColor": "#343a40",
+                            "fgColor": "#6c757d",
                             "cursor": false
                         }
                     );
@@ -787,7 +806,7 @@
                         {
                             "min": 0,
                             "max": tmpData.totalTasksCount,
-                            "fgColor": "#6f42c1",
+                            "fgColor": "#6c757d",
                             "cursor": false
                         }
                     );
@@ -922,6 +941,20 @@
         var form = $(this).parents('.modal').find('form');
         var actionUrl = form.attr('action');
         $(this).parents('.modal').find('#AssigneeCode').val($("#assigneeDrpDown").val());
+        var dateInstance = $("#Target").val().split("-");
+        var date = dateInstance[0];
+        var month = dateInstance[1];
+        var year = dateInstance[2];
+
+        var monthDict = {
+            "Jan": 1, "Feb": 2, "Mar": 3, "Apr": 4, "May": 5, "Jun": 6,
+            "Jul": 7, "Aug": 8, "Sep": 9, "Oct": 10, "Nov": 11, "Dec": 12
+        };
+
+        $("#Target").html(monthDict[month] + "/" + date + "/" + year);
+        $("#Target").val(monthDict[month] + "/" + date + "/" + year);
+        $("#TargetVal").val(monthDict[month] + "/" + date + "/" + year);
+
         var dataToSend = form.serialize();
         var buttonClickedId = $(this).attr('id');
         $("#spinnerCreate").show();
@@ -975,6 +1008,17 @@
                                 $(".knob").knob({});
                             }, 100);
                     });
+                }
+                else {
+                    dateInstance = $("#TargetVal").val().split('/');
+                    year = dateInstance[2];
+                    month = dateInstance[0];
+                    date = dateInstance[1];
+                    $('#reservationdate').datetimepicker({
+                        format: 'DD-MMM-yyyy',
+                        date: new Date(year, month - 1, date, 0, 0, 0, 0)
+                    });
+
                 }
             });
         }

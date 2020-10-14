@@ -24,7 +24,7 @@ namespace TaskManager.Data.Repositories
                 Data.Task task = new Data.Task();
                 task.IsDeleted = false;
                 task.LastUpdatedAt = DateTime.Now;
-                task.LastUpdatedBy = currentUserName;
+                task.LastUpdatedBy = _context.Employees.Where(x => x.UserCode == currentUserName).SingleOrDefault();
                 task.CreatedAt = DateTime.Now;
                 task.Target = targetDate;
                 task.Title = title;

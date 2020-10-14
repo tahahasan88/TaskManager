@@ -29,7 +29,7 @@ namespace TaskManager.Web.Controllers
             bool isThisUserManager = false;
 
             string managerUserName = _context.Departments.Where(x => x.Id == thisDepartment.Id)
-                .Select(x => x.Manager).SingleOrDefault().UserName;
+                .Select(x => x.Manager).SingleOrDefault().UserCode;
 
             if (managerUserName == userName)
             {
@@ -41,7 +41,7 @@ namespace TaskManager.Web.Controllers
                 thisDepartment = parentDepartment;
                 while (thisDepartment != null)
                 {
-                    managerUserName = _context.Departments.Where(x => x.Id == thisDepartment.Id).Select(x => x.Manager).SingleOrDefault().UserName;
+                    managerUserName = _context.Departments.Where(x => x.Id == thisDepartment.Id).Select(x => x.Manager).SingleOrDefault().UserCode;
                     if (managerUserName == userName)
                     {
                         isThisUserManager = true;
@@ -52,7 +52,7 @@ namespace TaskManager.Web.Controllers
             }
             else
             {
-                managerUserName = _context.Departments.Where(x => x.Id == thisDepartment.Id).Select(x => x.Manager).SingleOrDefault().UserName;
+                managerUserName = _context.Departments.Where(x => x.Id == thisDepartment.Id).Select(x => x.Manager).SingleOrDefault().UserCode;
                 isThisUserManager = managerUserName == userName;
             }
             return isThisUserManager;
@@ -96,18 +96,18 @@ namespace TaskManager.Web.Controllers
                 var taskEmployees = (from c in _context.TaskEmployees
                                      .Where(k => k.IsActive == true && k.Task.IsDeleted == false)
                                      join o in _context.Employees
-                                     on c.UserName equals o.UserName
+                                     on c.Employee.UserCode equals o.UserCode
                                      join tc in _context.TaskCapacities
                                      on c.TaskCapacity.Id equals tc.Id
                                      join dept in _context.Departments
                                      on o.Department.Id equals dept.Id
                                      select new
                                      {
-                                         UserName = o.UserName,
+                                         UserName = o.UserCode,
                                          EmployeeName = o.EmployeeName,
                                          TaskId = c.Task.Id,
                                          DeptId = o.Department.Id,
-                                         ManagerUserName = o.Department.Manager.UserName
+                                         ManagerUserName = o.Department.Manager.UserCode
                                      }).ToList();
 
                 List<Department> departments = _context.Departments.Include(x => x.ParentDepartment)

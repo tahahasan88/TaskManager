@@ -42,7 +42,14 @@
     </section>
 
     <style>
-        .user-panel, .user-panel .info { overflow:inherit; white-space:inherit;}
+        .user-panel, .user-panel .info {
+            overflow: inherit;
+            white-space: inherit;
+        }
+        .form-group.required .control-label:after {
+            content: "*";
+            color: red;
+        }
     </style>
 
 </head>
@@ -253,6 +260,7 @@
                                paging: false,
                                info: false,
                                searching: false,
+                               "scrollY": 300,
                                //scrollY:        300,
                                //scrollX:        true,
                                //scrollCollapse: true,
@@ -343,7 +351,7 @@
                                info: false,
                                searching: false,
                                //pageLength: 10,
-                               //"scrollY": 200,
+                               "scrollY": 300,
                                //"scrollX" : 200,
                                initComplete: function (settings, json) {
                                    if (this.api().data().length == 0) {

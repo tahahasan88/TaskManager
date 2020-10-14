@@ -10,7 +10,7 @@ namespace TaskManager.Data
         public int Id { get; set; }
         public string Remarks { get; set; }
         public virtual Task Task { get; set; }
-        public string FollowerUserName { get; set; }
+        public virtual Employee Follower { get; set; }
         public DateTime LastUpdatedAt { get; set; }
         public DateTime CreatedAt { get; set; }
     }

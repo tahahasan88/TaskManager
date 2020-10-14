@@ -24,7 +24,6 @@ namespace TaskManager.Data.Repositories
                 taskAssignee.Task = task;
                 int taskAssigneeCapacity = (int)TaskManager.Common.Common.TaskCapacity.Assignee;
                 taskAssignee.TaskCapacity = _context.TaskCapacities.Where(x => x.Id == taskAssigneeCapacity).SingleOrDefault();
-                taskAssignee.UserName = assigneeUserName;
                 taskAssignee.Employee = _context.Employees.Where(x => x.UserCode == assigneeUserName).SingleOrDefault();
                 await _context.AddAsync(taskAssignee);
                 isEmployeeAdded = true;

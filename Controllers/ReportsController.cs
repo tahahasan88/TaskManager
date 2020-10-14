@@ -23,7 +23,7 @@ namespace TaskManager.Web.Controllers
         {
             SetUserName();
             ViewData["UserName"] = currentUserName;
-            Employee employee = _context.Employees.Where(x => x.UserName == currentUserName).SingleOrDefault();
+            Employee employee = _context.Employees.Where(x => x.UserCode == currentUserName).SingleOrDefault();
             ViewData["EmployeeName"] = employee == null ? "" : employee.EmployeeName;
             return View();
         }
@@ -162,8 +162,9 @@ namespace TaskManager.Web.Controllers
                 {
                     string sqlQuery = "select distinct tasks.Id, tasks.Title, tasks.TaskStatusId  from tasks" +
                                     " inner join taskEmployees on taskEmployees.TaskId = tasks.Id" +
-                                    " and taskEmployees.IsActive = 1" +
-                                    " where taskEmployees.UserName = '" + userName + "'" +
+                                    " inner join Employees on Employees.Id = taskEmployees.EmployeeId" +
+                                    " where taskEmployees.IsActive = 1" +
+                                    " and Employees.UserCode = '" + userName + "'" +
                                     " and tasks.IsDeleted = 0";
 
                     sqlQuery = sqlQuery + ((statusId == 0) ? "" : (" and TaskStatusId = " + statusId + ""));

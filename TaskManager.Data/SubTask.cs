@@ -12,8 +12,8 @@ namespace TaskManager.Data
         public virtual TaskStatus TaskStatus { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime LastUpdatedAt { get; set; }
-        public string  LastUpdatedBy { get; set; }
-        public string SubTaskAssigneeUserName { get; set; }
+        public virtual Employee  LastUpdatedBy { get; set; }
+        public virtual Employee SubTaskAssignee { get; set; }
         public bool IsDeleted { get; set; }
     }
 }

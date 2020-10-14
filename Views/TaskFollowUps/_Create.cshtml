@@ -13,9 +13,9 @@
             <div class="modal-body">
                 <form asp-action="Create">
                     <input name="IsValid" type="hidden" value="@ViewData.ModelState.IsValid.ToString()" />
-                    <div class="form-group">
+                    <div class="form-group required">
                         <label asp-for="@Model.Remarks" class="control-label"></label>
-                        <textarea asp-for="@Model.Remarks" class="form-control" rows="3" cols="15" placeholder="Enter ..."></textarea>
+                        <textarea asp-for="@Model.Remarks" required="required" class="form-control" rows="3" cols="15" placeholder="Enter ..."></textarea>
                         <span asp-validation-for="@Model.Remarks" class="text-danger"></span>
                     </div>
                     <input asp-for="@Model.ListofTasks" type="hidden" value="hh" />

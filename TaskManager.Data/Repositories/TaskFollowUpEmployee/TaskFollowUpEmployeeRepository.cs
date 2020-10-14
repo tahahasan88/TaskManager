@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -24,7 +25,7 @@ namespace TaskManager.Data.Repositories.TaskFollowUpEmployee
             try
             {
                 TaskFollowUpResponse taskFollowUpResponse = new TaskFollowUpResponse();
-                taskFollowUpResponse.RespondedBy = currentUserName;
+                taskFollowUpResponse.RespondedBy = _context.Employees.Where(x => x.UserCode == currentUserName).SingleOrDefault();
                 taskFollowUpResponse.LastUpdatedAt = DateTime.Now;
                 taskFollowUpResponse.CreatedAt = DateTime.Now;
                 taskFollowUpResponse.TaskResponse = taskProgress;
