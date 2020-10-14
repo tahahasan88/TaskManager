@@ -127,7 +127,8 @@ namespace TaskManager.Web.Controllers
                                              c.Remarks,
                                              c.Task.Title,
                                              c.Task.TaskStatus.Status,
-                                             c.Task.Id
+                                             c.Task.Id,
+                                             o.Employee.AvatarImage
                                          })
                                  .Where(x => x.UserCode != currentUserName)
                                  .OrderByDescending(m => m.LastUpdatedAt);
@@ -148,8 +149,9 @@ namespace TaskManager.Web.Controllers
                             FollowUpFrom = inbox.UserCode,
                             FollowUpEmployeeName = employees.Where(x => x.UserCode == inbox.UserCode).SingleOrDefault().EmployeeName,
                             Status = inbox.Status,
-                            TaskId = inbox.Id
-                        }); ;
+                            TaskId = inbox.Id,
+                            AvatarImage = inbox.AvatarImage
+                        });
                 }
 
                 //Returning Json Data

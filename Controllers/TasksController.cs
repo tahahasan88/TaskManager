@@ -145,7 +145,8 @@ namespace TaskManager.Web.Controllers
                                          TaskId = c.Task.Id,
                                          CapacityId = tc.Id,
                                          DeptId = o.Department.Id,
-                                         ManagerUserName = o.Department.Manager.UserCode
+                                         ManagerUserName = o.Department.Manager.UserCode,
+                                         AvatarImage = o.AvatarImage
                                      }).ToList();
 
                 List<Department> departments = _context.Departments
@@ -191,6 +192,8 @@ namespace TaskManager.Web.Controllers
                         taskGridVM.CreatedBy = creatorUserName;
                         taskGridVM.AssignedTo = assignee.UserName;
                         taskGridVM.AssignedToEmployeeName = assignee.EmployeeName;
+                        taskGridVM.AvatarImage = assignee.AvatarImage;
+
                         tasksGridVMList.Add(taskGridVM);
                     }
                 }
@@ -253,7 +256,7 @@ namespace TaskManager.Web.Controllers
                         TaskAudit assigneeAudit = new TaskAudit();
                         assigneeAudit.ActionDate = DateTime.Now;
                         assigneeAudit.ActionBy = currentEmployee;
-                        assigneeAudit.Description = "Task " + thisTask.Title + " assignment updated. Assigned to " + selectedAssignee.EmployeeName;
+                        assigneeAudit.Description = "Task with title : " + thisTask.Title + " updated. Assigned to " + selectedAssignee.EmployeeName;
                         assigneeAudit.Task = thisTask;
                         assigneeAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.Assignment).SingleOrDefault();
                         _context.Add(assigneeAudit);
@@ -433,7 +436,7 @@ namespace TaskManager.Web.Controllers
                     description += " , Target Date : " + taskCreateVM.Target.ToString("dd-MMM-yyyy");
                     description += " , Priority : " + task.TaskPriority.Priority;
                     progressAudit.ActionBy = _context.Employees.Where(x =>x.UserCode == currentUserName).SingleOrDefault();
-                    progressAudit.Description = "Task with title " + task.Title + " created. Details are : " + description;
+                    progressAudit.Description = "Task with title " + task.Title + " created. Details :- " + description;
                     progressAudit.Task = task;
                     progressAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.Progress).SingleOrDefault();
                     _context.Add(progressAudit);
@@ -501,7 +504,7 @@ namespace TaskManager.Web.Controllers
                         TaskAudit targetAudit = new TaskAudit();
                         targetAudit.ActionDate = DateTime.Now;
                         targetAudit.ActionBy = currentEmploye;
-                        targetAudit.Description = "Task with title " + task.Title +" Updated. Target changed from " + previousTarget.Date.ToString("dd-MMM-yyyy") + " to " + taskCreateVM.Target.Date.ToString("dd-MMM-yyyy");
+                        targetAudit.Description = "Task with title " + task.Title +" updated. Target changed from " + previousTarget.Date.ToString("dd-MMM-yyyy") + " to " + taskCreateVM.Target.Date.ToString("dd-MMM-yyyy");
                         targetAudit.Task = task;
                         targetAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.Update).SingleOrDefault();
                         _context.Add(targetAudit);
@@ -513,7 +516,7 @@ namespace TaskManager.Web.Controllers
                         TaskAudit descriptionAudit = new TaskAudit();
                         descriptionAudit.ActionDate = DateTime.Now;
                         descriptionAudit.ActionBy = currentEmploye;
-                        descriptionAudit.Description = "Task with title " + task.Title + " Updated. Description changed from " + previousDescription + " to " + taskCreateVM.Description;
+                        descriptionAudit.Description = "Task with title " + task.Title + " updated. Description changed from " + previousDescription + " to " + taskCreateVM.Description;
                         descriptionAudit.Task = task;
                         descriptionAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.Update).SingleOrDefault();
                         _context.Add(descriptionAudit);
@@ -525,7 +528,7 @@ namespace TaskManager.Web.Controllers
                         TaskAudit descriptionAudit = new TaskAudit();
                         descriptionAudit.ActionDate = DateTime.Now;
                         descriptionAudit.ActionBy = currentEmploye;
-                        descriptionAudit.Description = "Task with title " + task.Title + " Updated. Priority changed from " + task.TaskPriority.Priority + " to " + modifiedPriority.Priority;
+                        descriptionAudit.Description = "Task with title " + task.Title + " updated. Priority changed from " + task.TaskPriority.Priority + " to " + modifiedPriority.Priority;
                         task.TaskPriority = modifiedPriority;
                         descriptionAudit.Task = task;
                         descriptionAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.Update).SingleOrDefault();
@@ -553,7 +556,7 @@ namespace TaskManager.Web.Controllers
                             assigneeAudit.ActionDate = DateTime.Now;
                             assigneeAudit.ActionBy = currentEmploye;
                             string modifiedEmployeeName = assignedEmployee.EmployeeName;
-                            assigneeAudit.Description = "Task with title " + task.Title + " Updated. Assignment changed from " + previousEmployeeName + " to " + modifiedEmployeeName;
+                            assigneeAudit.Description = "Task with title " + task.Title + " updated. Assignment changed from " + previousEmployeeName + " to " + modifiedEmployeeName;
                             assigneeAudit.Task = task;
                             assigneeAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.Assignment).SingleOrDefault();
                             _context.Add(assigneeAudit);
@@ -765,7 +768,7 @@ namespace TaskManager.Web.Controllers
                         TaskAudit progressAudit = new TaskAudit();
                         progressAudit.ActionDate = DateTime.Now;
                         progressAudit.ActionBy = currentEmployeeObj;
-                        progressAudit.Description = "Task with title " + thisTask.Title + " progress updated from " + previousProgress + "% to " + taskProgress + "%";
+                        progressAudit.Description = "Task with title " + thisTask.Title + " updated. Progress updated from " + previousProgress + "% to " + taskProgress + "%";
                         progressAudit.Task = thisTask;
                         progressAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.Progress).SingleOrDefault();
                         _context.Add(progressAudit);

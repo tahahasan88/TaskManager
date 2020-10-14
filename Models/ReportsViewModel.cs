@@ -20,5 +20,6 @@ namespace TaskManager.Web.Models
         public int DepartmentLevel { get; set; }
         public bool IsBaseDepartment { get; set; }
         public bool IsNonBaseDepartment { get; set; }
+        public string AvatarImage { get; set; }
     }
 }

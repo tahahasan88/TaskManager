@@ -18,5 +18,6 @@ namespace TaskManager.Web.Models
         public string TargetDate { get; set; }
         public int SortId { get; set; }
         public bool IsEditable { get; set; }
+        public string AvatarImage { get; set; }
     }
 }

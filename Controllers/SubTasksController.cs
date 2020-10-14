@@ -281,7 +281,7 @@ namespace TaskManager.Web.Controllers
                         string modifiedStatusDescription = subTask.TaskStatus.Id == 1 ? "Not Completed" : "Completed";
 
                         progressAudit.ActionBy = currentEmployee;
-                        progressAudit.Description = "Sub task with description " + subTask.Description + "  status updated from " +
+                        progressAudit.Description = "Sub task with description " + subTask.Description + " updated. Status updated from " +
                              previousStatusDescription  + " to " + modifiedStatusDescription;
                         progressAudit.Task = subTask.Task;
                         progressAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.SubTasks).SingleOrDefault();

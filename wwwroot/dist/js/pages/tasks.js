@@ -203,7 +203,7 @@
                             },
                             {
                                 "render": function (data, type, full, meta) {
-                                    return '<img name="employeeAvatar" src="../dist/img/user2-160x160.jpg" width="40px" height="40px" class="img-circle elevation-2" alt="User Image"></img>'
+                                    return '<img name="employeeAvatar" src="' + full.avatarImage + '" width="40px" height="40px" class="img-circle elevation-2" alt="User Image"></img>'
                                         + '&nbsp;&nbsp;<span>' + full.followUpEmployeeName + '</span>';
                                 }
                             },
@@ -663,7 +663,7 @@
                 },
                 {
                     "render": function (data, type, full, meta) {
-                        return '<img name="employeeAvatar" src="../dist/img/user2-160x160.jpg" width="40px" height="40px" class="img-circle elevation-2" alt="User Image"></img>'
+                        return '<img name="employeeAvatar" src="' + full.avatarImage +'" width="40px" height="40px" class="img-circle elevation-2" alt="User Image"></img>'
                             + '&nbsp;&nbsp;<a href="javascript:void(null);" data-usercode=' + full.assignedTo + ' name="employeeDetailLink">' + full.assignedToEmployeeName + '</a>';
                     }
                 },

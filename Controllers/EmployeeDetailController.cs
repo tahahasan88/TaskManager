@@ -139,6 +139,7 @@ namespace TaskManager.Web.Controllers
                                              c.Remarks,
                                              c.Task.Title,
                                              c.Task.TaskStatus.Status,
+                                             o.Employee.AvatarImage,
                                              c.Task.Id,
                                              SortId = GetSortOrderOfStatus(c.Task.TaskStatus.Id)
                                          })
@@ -160,7 +161,8 @@ namespace TaskManager.Web.Controllers
                             FollowUpEmployeeName = employees.Where(x => x.UserCode == inbox.UserCode).SingleOrDefault().EmployeeName,
                             Status = inbox.Status,
                             TaskId = inbox.Id,
-                            SortId = inbox.SortId
+                            SortId = inbox.SortId,
+                            AvatarImage = inbox.AvatarImage
                         });
                 }
 

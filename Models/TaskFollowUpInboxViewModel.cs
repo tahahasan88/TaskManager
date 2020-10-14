@@ -15,5 +15,6 @@ namespace TaskManager.Web.Models
         public string FollowUpEmployeeName { get; set; }
         public int TaskId { get; set; }
         public int SortId { get; set; }
+        public string AvatarImage { get; set; }
     }
 }

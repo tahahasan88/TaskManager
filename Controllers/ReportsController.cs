@@ -141,7 +141,8 @@ namespace TaskManager.Web.Controllers
                 newRow.NotStartedTasksCount = 0;
                 newRow.OnHoldTasksCount = 0;
             }
-           
+
+            newRow.AvatarImage = employee.AvatarImage;
             newRow.TagUserName = employee.UserCode;
             reportsVM.Add(newRow);
         }
