@@ -32,7 +32,7 @@ namespace TaskManager.Web
             {
                 isAllowed = true;
             }
-            else if (taskAction == TaskAction.SubTaskEdit && ((capacity == TaskCapacity.Assignee) || (capacity == TaskCapacity.SubTaskAssignee) || (capacity == TaskCapacity.Creator) || (capacity == TaskCapacity.Follower)))
+            else if (taskAction == TaskAction.SubTaskEdit && ((capacity == TaskCapacity.Assignee)))
             {
                 isAllowed = true;
             }

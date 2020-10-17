@@ -1,4 +1,6 @@
-﻿<div class="modal fade" id="modal-task">
+﻿@model TaskManager.Web.Models.ReportUserDetailViewModel
+
+<div class="modal fade" id="modal-task">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -35,3 +37,4 @@
     </div>
     <!-- /.modal-dialog -->
 </div>
+@Html.HiddenFor(x => x.EmployeeName, new { id = "reportEmployeeName" })

@@ -128,11 +128,12 @@ $(document).ready(function () {
                         //pageLength: 10,
                         //"scrollY": 200,
                         initComplete: function (settings, json) {
-                            if (this.api().data().length == 0) {
+                            
+                            var response = settings.json;
+                            if (response.pendingFollowUps == 0) {
                                 $("#followupCount").hide();
                             }
-                            $("#followupCount").html(this.api().data().length);
-                            var response = settings.json;
+                            $("#followupCount").html(response.pendingFollowUps);
                             var followupsDonutData = {
                                 labels: [
                                     'Pending',
@@ -193,23 +194,12 @@ $(document).ready(function () {
                             },
                             {
                                 "render": function (data, type, full, meta) {
-                                    if (full.status == "Not Started") {
-                                        return '<span class="badge badge-secondary">Not Started</span>';
+                                    if (full.status == "Open") {
+                                        return '<span class="badge badge-warning text-white">Open</span>';
                                     }
-                                    else
-                                        if (full.status == "In Progress") {
-                                            return '<span class="badge badge-warning text-white"> In Progress</span > ';
-                                        }
-                                        else
-                                            if (full.status == "On Hold") {
-                                                return '<span class="badge badge-secondary">On Hold</span>';
-                                            }
-                                            else
-                                                if (full.status == "Cancelled") {
-                                                    return '<span class="badge badge-secondary">Cancelled</span>';
-                                                }
-                                                else
-                                                    return '<span class="badge badge-success">Completed</span>';
+                                    else if (full.status == "Close") {
+                                        return '<span class="badge badge-success">Closed</span>';
+                                    }
                                 }
                             },
                             { "data": "sortId", "name": "SortId", "autoWidth": true, "visible": false, "searchable": false }
@@ -679,7 +669,7 @@ function getSubTasksList() {
         "<div class=\"col-6 d-flex align-items-center\">" +
         //"<i class=\"far fa-user-circle mr-1\" style=\"font-size:24px\" aria-hidden=\"true\">" +
         //"</i>" +
-        "<img name=\"subTaskEmployeeAvatar\" src=\"../dist/img/user2-160x160.jpg\" width=\"40px\" height=\"40px\" class=\"img-circle elevation-2\" alt=\"User Image\" />" +
+        "<img name=\"subTaskEmployeeAvatar\" src=\"avatarImage\" width=\"40px\" height=\"40px\" class=\"img-circle elevation-2\" alt=\"User Image\" />" +
         "<a " + disableThis + " href=\"javascript:void(null);\" class=\"text-underline\" name=\"employeeLink\" rel=\"nofollow noreferrer\">linkUserName</a>" +
         "<div class=\"form-group mb-0 w-100\" name=\"employeeDrpDwndiv\" style=\"display:none;\">" +
         "employeeOptions" +
@@ -722,13 +712,14 @@ function getSubTasksList() {
                     if (tmpData.subTaskVMList[i].isCompleted == true) {
                         isSubTaskCompleted = "checked";
                     }
-                    console.log(isSubTaskCompleted);
                     newBody = newBody.replace("checkboxtaskid", tmpData.subTaskVMList[i].subTaskId);
                     newBody = newBody.replace("inputtaskid", tmpData.subTaskVMList[i].subTaskId);
                     newBody = newBody.replace("deletetaskid", tmpData.subTaskVMList[i].subTaskId);
                     newBody = newBody.replace("tasktitle", tmpData.subTaskVMList[i].description);
                     newBody = newBody.replace("linkUserName", tmpData.subTaskVMList[i].subTaskEmployeeName);
                     newBody = newBody.replace("ischecked", isSubTaskCompleted);
+                    newBody = newBody.replace("avatarImage", tmpData.subTaskVMList[i].avatarImage);
+
                     var dropdown = "";
                     for (var k = 0; k < allEmployees.length; k++) {
 
@@ -811,13 +802,14 @@ function getSubTasksList() {
                 }
             }
             else {
-                newBody += addSubTaskButtonHtml;
-                subTaskPlaceHolder.html(newBody);
-                if (isReadOnlyMode == "True") {
+
+                subTaskPlaceHolder.html(addSubTaskButtonHtml);
+                if (disabled == true) {
                     $("#noSubTaskSpan").show();
                 }
             }
-            if (isReadOnlyMode == "True") {
+
+            if ((isReadOnlyMode == "True") || (disabled == true)) {
                 $("#subTaskAddDiv").hide();
             }
 

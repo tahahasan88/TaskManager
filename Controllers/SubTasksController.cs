@@ -79,7 +79,8 @@ namespace TaskManager.Web.Controllers
                     Description = subTask.Description,
                     SubTaskUserName = subTask.SubTaskAssignee.UserCode,
                     SubTaskEmployeeName = subTask.SubTaskAssignee.EmployeeName,
-                    IsCompleted = IsSubTaskCompleted(subTask.TaskStatus.Id)
+                    IsCompleted = IsSubTaskCompleted(subTask.TaskStatus.Id),
+                    AvatarImage = employees.Where(x => x.UserCode == subTask.SubTaskAssignee.UserCode).SingleOrDefault().AvatarImage
                 });
             }
 

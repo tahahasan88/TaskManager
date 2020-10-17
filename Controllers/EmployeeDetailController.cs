@@ -29,26 +29,20 @@ namespace TaskManager.Web.Controllers
         private static int GetSortOrderOfStatus(int statusId)
         {
             
-            if ((Common.Common.TaskStatus)(statusId) == Common.Common.TaskStatus.Completed){
-                return 5;
+            if ((Common.Common.TaskFollowUpStatus)(statusId) == Common.Common.TaskFollowUpStatus.Open){
+                return 1;
             }
-            if ((Common.Common.TaskStatus)(statusId) == Common.Common.TaskStatus.OnHold)
-            {
-                return 4;
-            }
-            if ((Common.Common.TaskStatus)(statusId) == Common.Common.TaskStatus.Cancelled)
-            {
-                return 3;
-            }
-            if ((Common.Common.TaskStatus)(statusId) == Common.Common.TaskStatus.NotStarted)
-            {
-                return 2;
-            }
-            if ((Common.Common.TaskStatus)(statusId) == Common.Common.TaskStatus.InProgress)
+            return 2;
+        }
+
+        private static int GetSortOrderOfStatus(string statusName)
+        {
+
+            if (statusName == "Open")
             {
                 return 1;
             }
-            return 1;
+            return 2;
         }
 
         public IActionResult LoadEmployeeTasksData(string userName)
@@ -126,55 +120,77 @@ namespace TaskManager.Web.Controllers
         {
             try
             {
-                userName = userName == null ? currentUserName : userName;
-                var filteredTaskInbox = (from c in _context.TaskFollowUps
-                                         join o in _context.TaskEmployees
-                                        .Where(x => x.Employee.UserCode == userName &&
-                                          x.IsActive == true && x.Task.IsDeleted == false)
-                                         on c.Task.Id equals o.Task.Id
-                                         select new
-                                         {
-                                             c.Follower.UserCode,
-                                             c.LastUpdatedAt,
-                                             c.Remarks,
-                                             c.Task.Title,
-                                             c.Task.TaskStatus.Status,
-                                             o.Employee.AvatarImage,
-                                             c.Task.Id,
-                                             SortId = GetSortOrderOfStatus(c.Task.TaskStatus.Id)
-                                         })
-                                .Where(x => x.UserCode != userName)
-                                .OrderByDescending(m => m.LastUpdatedAt);
-                var employees = _context.Employees.ToList();
-
+                if (!String.IsNullOrEmpty(userName))
+                {
+                    currentUserName = userName;
+                }
                 TaskFollowUpMailBoxViewModel taskFollowUpMailBoxVM = new TaskFollowUpMailBoxViewModel();
                 taskFollowUpMailBoxVM.InBoxFollowUpList = new List<TaskFollowUpInboxViewModel>();
-                foreach (var inbox in filteredTaskInbox)
+                var connectionString = _iconfiguration.GetConnectionString("DefaultConnection");
+                using (SqlConnection conn = new SqlConnection(connectionString))
                 {
-                    taskFollowUpMailBoxVM.InBoxFollowUpList.Add(
-                        new TaskFollowUpInboxViewModel()
-                        {
-                            Remarks = inbox.Remarks,
-                            UpdatedDate = inbox.LastUpdatedAt.ToString("dd-MMM-yyyy"),
-                            TaskInfo = inbox.Title,
-                            FollowUpFrom = inbox.UserCode,
-                            FollowUpEmployeeName = employees.Where(x => x.UserCode == inbox.UserCode).SingleOrDefault().EmployeeName,
-                            Status = inbox.Status,
-                            TaskId = inbox.Id,
-                            SortId = inbox.SortId,
-                            AvatarImage = inbox.AvatarImage
-                        });
+                    string sqlQuery = 
+                        "select TaskFollowUps.LastUpdatedAt," +
+                        "Tasks.Title, " +
+                        "(select Employees.UserCode from Employees where Id = TaskFollowUps.FollowerId) as FollowUpFrom," +
+                        "(select Employees.EmployeeName from Employees where Id = TaskFollowUps.FollowerId) as FollowUpEmployeeName," +
+                        "(select Employees.AvatarImage from Employees where Id = TaskFollowUps.FollowerId) as AvatarImage," +
+                        "(select [Status] from TaskfollowUpStatus where TaskfollowUpStatus.Id = TaskFollowUps.StatusId) as [Status]," +
+                        "Tasks.Id  from TaskFollowUps" +
+                        " inner join TaskEmployees on TaskEmployees.TaskId = TaskFollowUps.TaskId" +
+                        " inner join Employees on Employees.Id = TaskEmployees.EmployeeId" +
+                        " inner join Tasks on Tasks.Id = TaskEmployees.TaskId" +
+                        " and TaskFollowUps.StatusId = " + ((int)Common.Common.TaskFollowUpStatus.Open).ToString() +
+                        " and Tasks.IsDeleted = 0" +
+                        " and TaskEmployees.IsActive = 1" +
+                        " and Employees.UserCode = '" + currentUserName + "'" +
+                        " and TaskEmployees.TaskCapacityId = " + ((int)Common.Common.TaskCapacity.Assignee).ToString() +
+                        " union" +
+                        " select TaskFollowUps.LastUpdatedAt," +
+                        "Tasks.Title, " +
+                        "(select Employees.UserCode from Employees where Id = TaskFollowUps.FollowerId) as FollowUpFrom," +
+                        "(select Employees.EmployeeName from Employees where Id = TaskFollowUps.FollowerId) as FollowUpEmployeeName," +
+                        "(select Employees.AvatarImage from Employees where Id = TaskFollowUps.FollowerId) as AvatarImage," +
+                        "(select [Status] from TaskfollowUpStatus where TaskfollowUpStatus.Id = TaskFollowUps.StatusId) as [Status]," +
+                        "Tasks.Id  from TaskFollowUps" +
+                        " inner join TaskFollowUpResponses on TaskFollowUpResponses.TaskFollowUpId = TaskFollowUps.Id" +
+                        " inner join Employees on Employees.Id = TaskFollowUpResponses.RespondedById" +
+                        " inner join Tasks on Tasks.Id = TaskFollowUps.TaskId" +
+                        " where TaskFollowUps.StatusId = " + ((int)Common.Common.TaskFollowUpStatus.Close).ToString() +
+                        " and Tasks.IsDeleted = 0" +
+                        " and Employees.UserCode = '" + currentUserName + "'";
+                    conn.Open();
+                    var filteredTaskInbox = conn.Query(sqlQuery);
+                    foreach (var inbox in filteredTaskInbox)
+                    {
+                        taskFollowUpMailBoxVM.InBoxFollowUpList.Add(
+                      new TaskFollowUpInboxViewModel()
+                      {
+                          UpdatedDate = inbox.LastUpdatedAt.ToString("dd-MMM-yyyy"),
+                          TaskInfo = inbox.Title,
+                          FollowUpEmployeeName = inbox.FollowUpEmployeeName,
+                          Status = inbox.Status,
+                          TaskId = inbox.Id,
+                          SortId = GetSortOrderOfStatus(inbox.Status),
+                          AvatarImage = inbox.AvatarImage
+                      });
+                    }
+
+                    int recordsTotal = filteredTaskInbox.Count();
+                    int pendingFollowUps = filteredTaskInbox.Where(x => x.Status != "Close").Count();
+                    int completedFollowUps = filteredTaskInbox.Where(x => x.Status == "Close").Count();
+
+                    return Json(new
+                    {
+                        draw = "1",
+                        pendingFollowUps = pendingFollowUps,
+                        completedFollowUps = completedFollowUps,
+                        recordsFiltered = recordsTotal,
+                        recordsTotal = recordsTotal,
+                        data = taskFollowUpMailBoxVM.InBoxFollowUpList
+                    });
+
                 }
-
-
-                int recordsTotal = filteredTaskInbox.Count();
-                int pendingFollowUps = filteredTaskInbox.Where(x => x.Status != "Completed").Count();
-                int completedFollowUps = filteredTaskInbox.Where(x => x.Status == "Completed").Count();
-                //Returning Json Data
-                return Json(new { draw = "1",
-                    pendingFollowUps = pendingFollowUps,
-                    completedFollowUps = completedFollowUps,
-                    recordsFiltered = recordsTotal, recordsTotal = recordsTotal, data = taskFollowUpMailBoxVM.InBoxFollowUpList });
             }
             catch (Exception ex)
             {

@@ -38,6 +38,7 @@ namespace TaskManager.Data
         public DbSet<AuditType> AuditType { get; set; }
         public DbSet<Department> Departments { get; set; }
         public DbSet<Employee> Employees { get; set; }
+        public DbSet<TaskFollowUpStatus> TaskFollowUpStatus { get; set; }
 
     }
 }

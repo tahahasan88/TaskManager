@@ -68,6 +68,17 @@ namespace TaskManager.Common
             AssigneeUpdate = 9
         }
 
+        public enum TaskFollowUpStatus
+        {
+            Open = 1,
+            Close = 2
+        }
+
+        public static string GetTaskFolllowUpStatusDescription(int followUpStatusId)
+        {
+            return (followUpStatusId == 1) ? "Open" : "Close";
+        }
+
         public enum AuditType
         {
             Progress = 1,

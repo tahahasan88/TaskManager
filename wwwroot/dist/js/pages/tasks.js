@@ -144,11 +144,11 @@
                         //pageLength: 10,
                         //"scrollY": 200,
                         initComplete: function (settings, json) {
-                            if (this.api().data().length == 0) {
+                            var response = settings.json;
+                            if (response.pendingFollowUps == 0) {
                                 $("#followupCount").hide();
                             }
-                            $("#followupCount").html(this.api().data().length);
-                            var response = settings.json;
+                            $("#followupCount").html(response.pendingFollowUps);
                             var followupsDonutData = {
                                 labels: [
                                     'Pending',
@@ -209,23 +209,12 @@
                             },
                             {
                                 "render": function (data, type, full, meta) {
-                                    if (full.status == "Not Started") {
-                                        return '<span class="badge badge-secondary">Not Started</span>';
+                                    if (full.status == "Open") {
+                                        return '<span class="badge badge-warning text-white">Open</span>';
                                     }
-                                    else
-                                        if (full.status == "In Progress") {
-                                            return '<span class="badge badge-warning text-white"> In Progress</span > ';
-                                        }
-                                        else
-                                            if (full.status == "On Hold") {
-                                                return '<span class="badge badge-secondary">On Hold</span>';
-                                            }
-                                            else
-                                                if (full.status == "Cancelled") {
-                                                    return '<span class="badge badge-secondary">Cancelled</span>';
-                                                }
-                                                else
-                                                    return '<span class="badge badge-success">Completed</span>';
+                                    else if (full.status == "Close") {
+                                        return '<span class="badge badge-success">Closed</span>';
+                                    }
                                 }
                             },
                             { "data": "sortId", "name": "SortId", "autoWidth": true, "visible": false, "searchable": false }
@@ -233,10 +222,10 @@
                         order: [[3, 'asc']]
                     });
 
-                $("#employee-closePopup-icon").click(function () {
-                    $('.modal-backdrop').removeClass("modal-backdrop");
-                    employeeDiv.hide();
-                });
+                //$("#employee-closePopup-icon").click(function () {
+                //    $('.modal-backdrop').removeClass("modal-backdrop");
+                //    employeeDiv.hide();
+                //});
             },
             error: function () {
                 alert("Dynamic content load failed.");

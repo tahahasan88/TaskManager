@@ -13,5 +13,6 @@ namespace TaskManager.Data
         public virtual Employee Follower { get; set; }
         public DateTime LastUpdatedAt { get; set; }
         public DateTime CreatedAt { get; set; }
+        public virtual TaskFollowUpStatus Status { get; set; }
     }
 }

@@ -133,8 +133,59 @@ namespace TaskManager.Web.Controllers
                     "(select distinct Tasks.id, Tasks.TaskStatusId, Employees.UserCode as UserCode from Tasks " +
                     "inner join TaskEmployees on TaskEmployees.TaskId = Tasks.Id " +
                     "inner join Employees on Employees.Id = TaskEmployees.EmployeeId " +
-                    "where TaskEmployees.IsActive = 1" + 
+                    "where TaskEmployees.IsActive = 1 " + 
                     "and Tasks.isdeleted = 0) " +
+                    "as taskdata " +
+                    "group by taskdata.TaskStatusId,taskdata.UserCode";
+
+                conn.Open();
+                var queryResult = conn.Query(sqlQuery);
+                foreach (var result in queryResult)
+                {
+                    if (userTaskDictionary.ContainsKey(result.UserCode))
+                    {
+                        userTaskDictionary[result.UserCode].Add(new TaskData()
+                        {
+                            TaskCount = result.taskCount,
+                            TaskStatusId = result.TaskStatusId
+                        });
+                    }
+                    else
+                    {
+                        userTaskDictionary.Add(result.UserCode, new List<TaskData>() { new TaskData()
+                        {   TaskStatusId = result.TaskStatusId,
+                            TaskCount = result.taskCount
+                        } });
+                    }
+                    List<TaskData> existingUserTaskList = userTaskDictionary[result.UserCode];
+                    if (existingUserTaskList.Any(x => x.TaskStatusId == (int)Common.Common.TaskStatus.AllTasks))
+                    {
+                        TaskData thisTaskData = existingUserTaskList.Where(x => x.TaskStatusId == 0).SingleOrDefault();
+                        thisTaskData.TaskCount += result.taskCount;
+                    }
+                    else
+                    {
+                        userTaskDictionary[result.UserCode].Add(new TaskData()
+                        {
+                            TaskStatusId = (int)Common.Common.TaskStatus.AllTasks,
+                            TaskCount = result.taskCount
+                        });
+                    }
+                }
+            }
+        }
+
+        protected virtual void GetUserReportsData(string connectionString, Dictionary<string, List<TaskData>> userTaskDictionary)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string sqlQuery = "select taskdata.UserCode, taskdata.TaskStatusId, count(taskdata.id) as taskCount from " +
+                    "(select distinct Tasks.id, Tasks.TaskStatusId, Employees.UserCode as UserCode from Tasks " +
+                    "inner join TaskEmployees on TaskEmployees.TaskId = Tasks.Id " +
+                    "inner join Employees on Employees.Id = TaskEmployees.EmployeeId " +
+                    "where TaskEmployees.IsActive = 1 " +
+                    "and Tasks.isdeleted = 0 " +
+                    "and TaskEmployees.TaskCapacityId = " + ((int)Common.Common.TaskCapacity.Assignee).ToString() + ")" +
                     "as taskdata " +
                     "group by taskdata.TaskStatusId,taskdata.UserCode";
 

@@ -742,16 +742,23 @@ namespace TaskManager.Web.Controllers
                     thisTask.TaskStatus = _context.TaskStatus.Where(x => x.Id == Convert.ToInt32(updateVM.Status)).SingleOrDefault();
                     _context.Update(thisTask);
 
-                    TaskFollowUp followUp = _context.TaskFollowUps.Where(x => x.Task.Id == id).FirstOrDefault();
-                    if (followUp != null)
+                    List<TaskFollowUp> followUps = _context.TaskFollowUps.Where(x => x.Task.Id == id && x.Status.Id == ((int)Common.Common.TaskFollowUpStatus.Open)).ToList();
+                    if (followUps.Count > 0)
                     {
-                        TaskFollowUpResponse taskFollowUpResponse = new TaskFollowUpResponse();
-                        taskFollowUpResponse.RespondedBy = currentEmployeeObj;
-                        taskFollowUpResponse.LastUpdatedAt = DateTime.Now;
-                        taskFollowUpResponse.CreatedAt = DateTime.Now;
-                        taskFollowUpResponse.TaskResponse = taskProgress;
-                        taskFollowUpResponse.Task = thisTask;
-                        _context.Add(taskFollowUpResponse);
+                        TaskFollowUpStatus closeFollowUpStatus = _context.TaskFollowUpStatus.Where(x => x.Id == (int)Common.Common.TaskFollowUpStatus.Close).SingleOrDefault();
+                        foreach (TaskFollowUp thisFollowUp in followUps)
+                        {
+                            TaskFollowUpResponse taskFollowUpResponse = new TaskFollowUpResponse();
+                            taskFollowUpResponse.RespondedBy = currentEmployeeObj;
+                            taskFollowUpResponse.LastUpdatedAt = DateTime.Now;
+                            taskFollowUpResponse.CreatedAt = DateTime.Now;
+                            taskFollowUpResponse.TaskResponse = taskProgress;
+                            taskFollowUpResponse.TaskFollowUp = thisFollowUp;
+                            _context.Add(taskFollowUpResponse);
+
+                            thisFollowUp.Status = closeFollowUpStatus;
+                            _context.Update(thisFollowUp);
+                        }
 
                         TaskAudit followUpResponseAudit = new TaskAudit();
                         followUpResponseAudit.ActionDate = DateTime.Now;

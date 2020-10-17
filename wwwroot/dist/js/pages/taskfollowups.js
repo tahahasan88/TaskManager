@@ -111,11 +111,11 @@ function showEmployeeDetails(userName) {
                     //pageLength: 10,
                     //"scrollY": 200,
                     initComplete: function (settings, json) {
-                        if (this.api().data().length == 0) {
+                        var response = settings.json;
+                        if (response.pendingFollowUps == 0) {
                             $("#followupCount").hide();
                         }
-                        $("#followupCount").html(this.api().data().length);
-                        var response = settings.json;
+                        $("#followupCount").html(response.pendingFollowUps);
                         var followupsDonutData = {
                             labels: [
                                 'Pending',
@@ -176,23 +176,12 @@ function showEmployeeDetails(userName) {
                         },
                         {
                             "render": function (data, type, full, meta) {
-                                if (full.status == "Not Started") {
-                                    return '<span class="badge badge-secondary">Not Started</span>';
+                                if (full.status == "Open") {
+                                    return '<span class="badge badge-warning text-white">Open</span>';
                                 }
-                                else
-                                    if (full.status == "In Progress") {
-                                        return '<span class="badge badge-warning text-white"> In Progress</span > ';
-                                    }
-                                    else
-                                        if (full.status == "On Hold") {
-                                            return '<span class="badge badge-secondary">On Hold</span>';
-                                        }
-                                        else
-                                            if (full.status == "Cancelled") {
-                                                return '<span class="badge badge-secondary">Cancelled</span>';
-                                            }
-                                            else
-                                                return '<span class="badge badge-success">Completed</span>';
+                                else if (full.status == "Close") {
+                                    return '<span class="badge badge-success">Closed</span>';
+                                }
                             }
                         },
                         { "data": "sortId", "name": "SortId", "autoWidth": true, "visible": false, "searchable": false }
@@ -249,23 +238,13 @@ var inboxTable = $('#inboxTable').DataTable({
         { "data": "remarks", "name": "Remarks", "autoWidth": true },
         {
             "render": function (data, type, full, meta) {
-                if (full.status == "Not Started") {
-                    return '<span class="badge badge-secondary">Not Started</span>';
+                if (full.status == "Open") {
+                    return '<span class="badge badge-warning text-white">Open</span>';
                 }
                 else
-                if (full.status == "In Progress") {
-                    return '<span class="badge badge-warning text-white"> In Progress</span > ';
+                if (full.status == "Close") {
+                    return '<span class="badge badge-success">Closed</span>';
                 }
-                else
-                if (full.status == "On Hold") {
-                    return '<span class="badge badge-secondary">On Hold</span>';
-                }
-                else
-                if (full.status == "Cancelled") {
-                    return '<span class="badge badge-secondary">Cancelled</span>';
-                }
-                else
-                    return '<span class="badge badge-success">Completed</span>';
             }
         },
         { "data": "updatedDate", "name": "Date", "autoWidth": true }
@@ -284,6 +263,11 @@ var outboxTable = $('#outboxTable').DataTable({
     //fixedColumns:   {
     //    leftColumns: 2
     //},
+    initComplete: function (settings, json) {
+        $("a[name='employeeDetailLink']").click(function () {
+            showEmployeeDetails($(this).attr("data-usercode"));
+        });
+    },
     select: {
         //style:    'os',
         style: 'multiple',
@@ -303,23 +287,19 @@ var outboxTable = $('#outboxTable').DataTable({
         { "data": "remarks", "name": "Remarks", "autoWidth": true },
         {
             "render": function (data, type, full, meta) {
-                if (full.status == "Not Started") {
-                    return '<span class="badge badge-secondary">Not Started</span>';
+                if (full.status == "Open") {
+                    return '<span class="badge badge-warning text-white">Open</span > ';
                 }
                 else
-                if (full.status == "In Progress") {
-                    return '<span class="badge badge-warning text-white"> In Progress</span > ';
+                if (full.status == "Close") {
+                    return '<span class="badge badge-success">Closed</span>';
                 }
-                else
-                if (full.status == "On Hold") {
-                    return '<span class="badge badge-secondary">On Hold</span>';
-                }
-                else
-                if (full.status == "Cancelled") {
-                    return '<span class="badge badge-secondary">Cancelled</span>';
-                }
-                else
-                    return '<span class="badge badge-success">Completed</span>';
+            }
+        },
+        {
+            "render": function (data, type, full, meta) {
+                return '<img name="employeeAvatar" src="' + full.avatarImage + '" width="40px" height="40px" class="img-circle elevation-2" alt="User Image"></img>'
+                    + '&nbsp;&nbsp;<a href="javascript:void(null);" data-usercode=' + full.assigneeUserCode + ' name="employeeDetailLink">' + full.assignee + '</a>';
             }
         },
         { "data": "followUpDate", "name": "Date", "autoWidth": true, "visible": true }

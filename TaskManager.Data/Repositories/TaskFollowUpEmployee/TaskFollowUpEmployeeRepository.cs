@@ -29,7 +29,7 @@ namespace TaskManager.Data.Repositories.TaskFollowUpEmployee
                 taskFollowUpResponse.LastUpdatedAt = DateTime.Now;
                 taskFollowUpResponse.CreatedAt = DateTime.Now;
                 taskFollowUpResponse.TaskResponse = taskProgress;
-                taskFollowUpResponse.Task = thisTask;
+                //taskFollowUpResponse.Task = thisTask;
                 await _context.AddAsync(taskFollowUpResponse);
                 isFollowUpAdded = true;
             }

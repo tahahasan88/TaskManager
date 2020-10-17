@@ -58,18 +58,26 @@ namespace TaskManager.Controllers
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
 
-                sqlQuery = "select distinct TaskFollowUps.TaskId, Remarks,TaskFollowUps.LastUpdatedAt from TaskFollowUps" +
+                sqlQuery = "select count(distinct(TaskFollowUps.Id)) as followupCount from TaskFollowUps" +
                    " inner join TaskEmployees on TaskEmployees.TaskId = TaskFollowUps.TaskId" +
-                   " inner join Employees on TaskEmployees.EmployeeId = Employees.Id" +
-                   " inner join Tasks on Tasks.Id = TaskFollowUps.TaskId" +
-                   " where TaskFollowUps.FollowerId != ( select Id from Employees where userCode = '"+ userName + "')" +
-                   " and TaskEmployees.EmployeeId = ( select Id from Employees where userCode = '" + userName + "')";
+                   " inner join Employees on Employees.Id = TaskEmployees.EmployeeId" + 
+                   " inner join Tasks on Tasks.Id = TaskEmployees.TaskId" +
+                   " and TaskFollowUps.StatusId = " + ((int)Common.Common.TaskFollowUpStatus.Open).ToString() +
+                   " and Tasks.IsDeleted = 0" +
+                   " and TaskEmployees.IsActive = 1" +
+                   " and Employees.UserCode = '" + userName + "'" +
+                   " and TaskEmployees.TaskCapacityId = " + ((int)Common.Common.TaskCapacity.Assignee).ToString();
                 conn.Open();
 
                 var queryResult = conn.Query(sqlQuery);
                 foreach (var result in queryResult)
                 {
-                    ++followUpCount;
+                    if (result.followupCount == null)
+                    {
+                        followUpCount = 0;
+                    }
+                    else
+                        followUpCount = result.followupCount;
                 }
             }
             return followUpCount;
@@ -93,7 +101,8 @@ namespace TaskManager.Controllers
             taskSummaryVM.FollowUpsCount = GetTaskFollowUpsCount(username);
 
             var taskEmployees = (from c in _context.TaskEmployees
-                                 .Where(k => k.IsActive == true && k.Task.IsDeleted == false)
+                                 .Where(k => k.IsActive == true && k.Task.IsDeleted == false
+                                 && k.TaskCapacity.Id == (int)(Common.Common.TaskCapacity.Assignee))
                                  join o in _context.Employees
                                  on c.Employee.UserCode equals o.UserCode
                                  join tc in _context.TaskCapacities
@@ -115,13 +124,7 @@ namespace TaskManager.Controllers
 
             foreach (var task in tasks)
             {
-                if (taskEmployees.Where(x => x.TaskId == task.Id && x.UserName == currentUserName).Any()
-                    || taskEmployees.Where(x => x.TaskId == task.Id
-                    && IsThisUserManagingThisDepartment(
-                        departments,
-                        taskEmployees.Where(x => x.TaskId == task.Id).Select(x => x.DeptId).ToList(),
-                       currentUserName)).Any()
-                    )
+                if (taskEmployees.Where(x => x.TaskId == task.Id && x.UserName == currentUserName).Any())
                 {
                     if (task.StatusId != (int)TaskManager.Common.Common.TaskStatus.Completed
                         && task.IsDeleted != true && task.Target.Date >= DateTime.Now.Date)

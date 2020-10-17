@@ -12,5 +12,8 @@ namespace TaskManager.Web.Models
         public string TaskInfo { get; set; }
         public string Status { get; set; }
         public int TaskId { get; set; }
+        public string Assignee { get; set; }
+        public string AssigneeUserCode { get; set; }
+        public string AvatarImage { get; set; }
     }
 }

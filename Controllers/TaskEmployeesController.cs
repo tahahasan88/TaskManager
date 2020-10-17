@@ -50,7 +50,7 @@ namespace TaskManager.Web.Controllers
             {
                 emmployeeVMList.Add(new TaskEmployeeListViewModel()
                 {
-                    UserName = employee.Employee.EmployeeName,
+                    UserName = employee.Employee.UserCode,
                     CapacityId = employee.TaskCapacity.Id,
                     IsActive = employee.IsActive,
                     EmployeeName = allEmployees.Where(x => x.UserCode == employee.Employee.UserCode).SingleOrDefault().EmployeeName

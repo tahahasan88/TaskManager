@@ -38,7 +38,7 @@ namespace TaskManager.Web.Controllers
             Dictionary<string, List<TaskData>> userTaskDictionary = new Dictionary<string, List<TaskData>>();
             int tagCounter = 0;
 
-            GetUserData(connectionString, userTaskDictionary);
+            GetUserReportsData(connectionString, userTaskDictionary);
             List<Employee> employees = _context.Employees.Include(x => x.Department).ToList();
             List<Department> departments = _context.Departments
                 .Include(x => x.ParentDepartment)
@@ -148,9 +148,12 @@ namespace TaskManager.Web.Controllers
         }
 
 
-        public IActionResult GetReportDetail()
+        public IActionResult GetReportDetail(string userName)
         {
-            return PartialView("_ReportUserDetail");
+            ReportUserDetailViewModel reporDetailVM = new ReportUserDetailViewModel();
+            string employeeName = _context.Employees.Where(x => x.UserCode == userName).SingleOrDefault().EmployeeName;
+            reporDetailVM.EmployeeName = employeeName;
+            return PartialView("_ReportUserDetail", reporDetailVM);
         }
 
         public IActionResult GetTaskList(string userName, int statusId)

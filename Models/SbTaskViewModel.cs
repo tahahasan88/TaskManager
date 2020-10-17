@@ -13,5 +13,6 @@ namespace TaskManager.Web.Models
         public string SubTaskUserName { get; set; }
         public string SubTaskEmployeeName { get; set; }
         public bool IsCompleted { get; set; }
+        public string AvatarImage { get; set; }
     }
 }
