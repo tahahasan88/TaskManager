@@ -95,6 +95,20 @@
                                 options: pieOptions
                             });
 
+                            if (this.api().data().length == 0) {
+                                $('#pieChart').hide();
+                                $('#tasksPiDiv').hide();
+                                $("#followUpPiDiv").removeClass("col-md-6 d-flex justify-content-center");
+                                $("#followUpPiDiv").addClass("col-md-12 d-flex justify-content-center");
+                                $("#piecharttaskId").removeClass("col-md-6 d-flex justify-content-center");
+                                $("#followUpTextDiv").removeClass("col-md-6 d-flex justify-content-center");
+                                $("#followUpTextDiv").addClass("col-md-12 d-flex justify-content-center");
+                                $("#textset1").show();
+                                $("#textset2").hide();
+                                $("#testset1detail").hide();
+                                $("#testset2detail").html("There are no tasks nor follow ups");
+                            }
+
                         },
                         search: { regex: true, caseInsensitive: true },
                         ajax: {
@@ -664,8 +678,9 @@
                 { "data": "createdBy", "name": "Created By", "autoWidth": true, "visible": false, "searchable": true },
                 { "data": "targetDate", "name": "Target Date", "autoWidth": true, "visible": false, "searchable": true },
                 { "data": "progress", "name": "ProgressVal", "autoWidth": true, "visible": false, "searchable": true },
+                { "data": "lastUpdated", "name": "LastUpdatedVal", "autoWidth": true, "visible": false, "searchable": false },
             ],
-            order: [[5, 'desc']]
+            order: [[10, 'desc']]
         });
 
     var taskCreationPlaceHolder = $('#modal-default');

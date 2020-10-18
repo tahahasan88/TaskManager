@@ -62,6 +62,20 @@ function showEmployeeDetails(userName) {
                             options: pieOptions
                         });
 
+                        if (this.api().data().length == 0) {
+                            $('#pieChart').hide();
+                            $('#tasksPiDiv').hide();
+                            $("#followUpPiDiv").removeClass("col-md-6 d-flex justify-content-center");
+                            $("#followUpPiDiv").addClass("col-md-12 d-flex justify-content-center");
+                            $("#piecharttaskId").removeClass("col-md-6 d-flex justify-content-center");
+                            $("#followUpTextDiv").removeClass("col-md-6 d-flex justify-content-center");
+                            $("#followUpTextDiv").addClass("col-md-12 d-flex justify-content-center");
+                            $("#textset1").show();
+                            $("#textset2").hide();
+                            $("#testset1detail").hide();
+                            $("#testset2detail").html("There are no tasks nor follow ups");
+                        }
+
                     },
                     search: { regex: true, caseInsensitive: true },
                     ajax: {
@@ -189,17 +203,16 @@ function showEmployeeDetails(userName) {
                     order: [[3, 'asc']]
                 });
 
-            $("#employee-closePopup-icon").click(function () {
-                $('.modal-backdrop').removeClass("modal-backdrop");
-                employeeDiv.hide();
-            });
+            //$("#employee-closePopup-icon").click(function () {
+            //    $('.modal-backdrop').removeClass("modal-backdrop");
+            //    employeeDiv.hide();
+            //});
         },
         error: function () {
             alert("Dynamic content load failed.");
         }
     });
 }
-
 
 var inboxTable = $('#inboxTable').DataTable({
     //scrollY:        300,
@@ -210,7 +223,7 @@ var inboxTable = $('#inboxTable').DataTable({
     //    leftColumns: 2
     //},
     initComplete: function (settings, json) {
-        $("a[name='employeeDetailLink']").click(function () {
+        $("a[name='employeeInBoxDetailLink']").click(function () {
             showEmployeeDetails($(this).attr("data-usercode"));
         });
     },
@@ -227,7 +240,7 @@ var inboxTable = $('#inboxTable').DataTable({
         {
             "render": function (data, type, full, meta) {
                 return '<img name="employeeAvatar" src="' + full.avatarImage + '" width="40px" height="40px" class="img-circle elevation-2" alt="User Image"></img>'
-                    + '&nbsp;&nbsp;<a href="javascript:void(null);" data-usercode=' + full.followUpFrom + ' name="employeeDetailLink">' + full.followUpEmployeeName + '</a>';
+                    + '&nbsp;&nbsp;<a href="javascript:void(null);" data-usercode=' + full.followUpFrom + ' name="employeeInBoxDetailLink">' + full.followUpEmployeeName + '</a>';
             }
         },
         {
@@ -252,8 +265,6 @@ var inboxTable = $('#inboxTable').DataTable({
     ],
     order: [[4, 'desc']]
 });
-
-
 
 var outboxTable = $('#outboxTable').DataTable({
     //scrollY:        300,

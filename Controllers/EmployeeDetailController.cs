@@ -70,6 +70,7 @@ namespace TaskManager.Web.Controllers
                     " inner join TaskStatus on TaskStatus.Id = Tasks.TaskStatusId" +
                     " where Employees.UserCode = '" + userName + "'" +
                     " and TaskEmployees.IsActive = 1" +
+                    " and TaskEmployees.TaskCapacityId = " + ((int)Common.Common.TaskCapacity.Assignee).ToString() + 
                     " and Tasks.IsDeleted = 0" +
                     " order by LastUpdatedAt desc";
 

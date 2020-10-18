@@ -316,7 +316,7 @@ namespace TaskManager.Web.Controllers
                     TaskAudit followUpAudit = new TaskAudit();
                     followUpAudit.ActionDate = DateTime.Now;
                     followUpAudit.ActionBy = currentEmployee;
-                    followUpAudit.Description = "Follow up requested for Task with title " + Thistask.Title + " and remarks are " + followUp.Remarks;
+                    followUpAudit.Description = "Follow up requested for Task (" + Thistask.Title + ") and remarks are " + followUp.Remarks;
                     followUpAudit.Task = Thistask;
                     followUpAudit.Type = _context.AuditType.Where(x => x.Id == (int)Common.Common.AuditType.FollowUp).SingleOrDefault();
                     _context.Add(followUpAudit);
