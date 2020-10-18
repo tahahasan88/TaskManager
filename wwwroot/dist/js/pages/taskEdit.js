@@ -4,7 +4,7 @@ $(document).ready(function () {
 
     var disabled = false;
     $(".knob").knob({});
-    //alert(taskId);
+    var taskFollowUpPlaceHolder = $('#modal-followup');
     var assigneePlaceHolder = $("#assignee-placeholder");
     var employeeDiv = $('#employeeDetailDiv');
     var taskEditPlaceHolder = $('#modal-default');
@@ -13,7 +13,60 @@ $(document).ready(function () {
         $("#deleteBtnDiv").hide();
         $("#updateTaskBtnDiv").hide();
         disabled = true;
+        $("#followupBtnDiv").hide();
     }
+    else {
+        $("#followupBtnDiv").show();
+    }
+
+    
+
+    $("#followUpBtnId").click(function () {
+        var options = { "backdrop": "static", keyboard: true };
+        $.ajax({
+            type: "GET",
+            url: thisBaseUrl + "/taskfollowups/Create",
+            contentType: "application/json; charset=utf-8",
+            data: null,
+            datatype: "json",
+            success: function (data) {
+                taskFollowUpPlaceHolder.html(data);
+                taskFollowUpPlaceHolder.find('.modal').modal(options);
+                taskFollowUpPlaceHolder.find('.modal').modal('show');
+            },
+            error: function () {
+                alert("Dynamic content load failed.");
+            }
+        });
+    });
+
+    taskFollowUpPlaceHolder.on('click', '[data-save="modal"]', function (event) {
+        event.preventDefault();
+       
+        var listOfTaskIds = taskId;
+        $("#ListofTasks").val(listOfTaskIds);
+
+        var form = $(this).parents('.modal').find('form');
+        var actionUrl = form.attr('action');
+        var dataToSend = form.serialize();
+        $("#spinnerFollowUpCreate").show();
+
+        $.post(actionUrl + "?username=" + currentUserName, dataToSend).done(function (data) {
+            var newBody = $('.modal-body', data);
+            $("#spinnerFollowUpCreate").hide();
+            taskFollowUpPlaceHolder.find('.modal-body').replaceWith(newBody);
+            var isValid = newBody.find('[name="IsValid"]').val() == 'True';
+            if (isValid) {
+                taskFollowUpPlaceHolder.find('.modal').modal('hide');
+                tasksTable.ajax.reload(function () {
+                    setTimeout(
+                        function () {
+                            $(".knob").knob({});
+                        }, 100);
+                });
+            }
+        });
+    });
 
     $('#Quality').slider('disable');
 

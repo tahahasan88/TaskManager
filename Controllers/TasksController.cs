@@ -182,10 +182,7 @@ namespace TaskManager.Web.Controllers
                         string creatorUserName = taskEmployees.Where(x => x.CapacityId == (int)Common.Common.TaskCapacity.Creator
                             && x.TaskId == task.Id).FirstOrDefault().UserName;
 
-                        taskGridVM.IsEditable = taskEmployees.Where(x => x.TaskId == task.Id && x.UserName == currentUserName
-                        && (x.CapacityId == (int)Common.Common.TaskCapacity.Creator
-                         || x.CapacityId == (int)Common.Common.TaskCapacity.Assignee)
-                        ).Any();
+                        taskGridVM.IsEditable = true;
                         taskGridVM.CreatedBy = creatorUserName;
                         taskGridVM.AssignedTo = assignee.UserName;
                         taskGridVM.AssignedToEmployeeName = assignee.EmployeeName;

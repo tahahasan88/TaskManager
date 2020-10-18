@@ -225,16 +225,16 @@ namespace TaskManager.Web.Controllers
                                        where c.UserCode == userName
                                        select new
                                        {
-                                           UserName = o.ParentDepartment == null ? "" :
-                                           c.Department.Manager.Id == c.Id ? o.ParentDepartment.Manager.UserCode
-                                           : c.Department.Manager.UserCode
+                                           EmployeeName = o.ParentDepartment == null ? "" :
+                                           c.Department.Manager.Id == c.Id ? o.ParentDepartment.Manager.EmployeeName
+                                           : c.Department.Manager.EmployeeName
                                        }
                                         );
 
 
                 if (employeeManager != null && employeeManager.Any())
                 {
-                    employeeVM.ReportsTo = employeeManager.FirstOrDefault().UserName;
+                    employeeVM.ReportsTo = employeeManager.FirstOrDefault().EmployeeName;
                 }
             }
             else
@@ -273,16 +273,16 @@ namespace TaskManager.Web.Controllers
                                     where c.UserCode == userName
                                     select new
                                     {
-                                        UserName = o.ParentDepartment == null ? "" :
-                                        c.Department.Manager.Id == c.Id ? o.ParentDepartment.Manager.UserCode
-                                        : c.Department.Manager.UserCode
+                                        EmployeeName = o.ParentDepartment == null ? "" :
+                                        c.Department.Manager.Id == c.Id ? o.ParentDepartment.Manager.EmployeeName
+                                        : c.Department.Manager.EmployeeName
                                     }
                                     );
 
 
             if (employeeManager != null && employeeManager.Any())
             {
-                employeeVM.ReportsTo = employeeManager.FirstOrDefault().UserName;
+                employeeVM.ReportsTo = employeeManager.FirstOrDefault().EmployeeName;
             }
 
             ViewData["UserName"] = userName;
