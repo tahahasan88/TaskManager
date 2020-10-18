@@ -1,0 +1,12 @@
+﻿@section BodyScripts {
+    <script>
+        @if (ViewData["IdentityUser"] != null)
+        {
+            <text>
+                $("#testSpanId").html("@ViewData["IdentityUser"].ToString()");
+            </text>
+        }
+    </script>
+}
+
+<span id="testSpanId"></span>
